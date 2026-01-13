@@ -21,3 +21,5 @@ El usuario es responsable del uso que haga del sistema.
 
 ## 📌 Modificaciones
 Los términos pueden cambiar para adaptarse a mejoras o ajustes del servicio.
+<hr>
+<p>© Kisaki Manager — Dog Geek Labs</p>
