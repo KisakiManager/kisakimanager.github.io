@@ -19,7 +19,7 @@
     </div>
 
     <footer>
-      © Kisaki Manager · Dog Geek Labs
+      © Kisaki Manager • Dog Geek Labs
     </footer>
   </div>
 </body>
