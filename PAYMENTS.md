@@ -42,3 +42,5 @@ Kisaki Manager no se responsabiliza por fallos externos de Telegram, wallets o l
 
 ## 📌 Aceptación
 Al realizar un pago, el usuario acepta esta política de forma voluntaria.
+<hr>
+<p>© Kisaki Manager — Dog Geek Labs</p>
