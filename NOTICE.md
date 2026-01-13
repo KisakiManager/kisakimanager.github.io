@@ -1,4 +1,4 @@
-© Kisaki Manager
+<p>© Kisaki Manager — Dog Geek Labs</p>
 
 All rights reserved.
 
