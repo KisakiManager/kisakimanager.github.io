@@ -3,24 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <title>Kisaki Manager</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
 
+<body>
   <div class="container">
-    <h1>🤖 Kisaki Manager</h1>
-    <p>Centro informativo oficial del sistema</p>
+    <h1>Kisaki Manager</h1>
+    <p>Centro de información y políticas oficiales del bot.</p>
 
     <div class="buttons">
-      <a href="payments.html" class="btn">💳 Pagos</a>
-      <a href="terms.html" class="btn">📜 Términos</a>
-      <a href="privacy.html" class="btn">🔐 Privacidad</a>
+      <a class="btn" href="payments.html">💳 Política de Pagos</a>
+      <a class="btn" href="privacy.html">🔐 Política de Privacidad</a>
+      <a class="btn" href="terms.html">📜 Términos de Uso</a>
     </div>
 
     <footer>
-      <p>©Kisaki Manager – Dog Geek Labs</p>
+      © Kisaki Manager · Dog Geek Labs
     </footer>
   </div>
-
 </body>
 </html>
