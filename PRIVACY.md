@@ -24,3 +24,5 @@ No se venden ni comparten datos con terceros.
 
 ## 🔄 Cambios
 Esta política puede actualizarse para reflejar mejoras del sistema.
+<hr>
+<p>© Kisaki Manager — Dog Geek Labs</p>
