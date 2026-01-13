@@ -1,7 +1,7 @@
 # Kisaki Manager
 
-Documentación oficial y políticas del bot.
-#
+Documentación oficial sobre las políticas y servicios del bot.
+
 - [Política de Pagos](PAYMENTS.md)
 - [Política de Privacidad](PRIVACY.md)
 - [Términos de Uso](TERMS.md)
