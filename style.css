@@ -72,3 +72,18 @@ footer {
   color: #7b8fa6;
   text-align: center; /* Footer siempre al centro */
 }
+
+/* --- ESTILO DEL LOGO (NUEVO) --- */
+.footer-logo {
+  width: 24px;          /* Tamaño pequeño estilo GitHub (icon) */
+  height: auto;         /* Mantiene la proporción */
+  display: block;       /* Permite centrarlo con margin */
+  margin: 15px auto 0;  /* 15px de espacio arriba y centrado horizontal */
+  
+  opacity: 0.6;         /* Un poco transparente para que no distraiga */
+  transition: opacity 0.3s ease;
+}
+
+.footer-logo:hover {
+  opacity: 1;           /* Se ilumina al pasar el mouse */
+}
