@@ -17,24 +17,65 @@ body {
   margin-bottom: 30px;
 }
 
+/* CONTENEDOR DE BOTONES */
 .buttons {
   display: flex;
   flex-direction: column;
   gap: 15px;
+
+  /* clave para móviles */
+  pointer-events: none;
 }
 
+/* BOTONES */
 .btn {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   background: #2563eb;
-  color: white;
-  padding: 14px;
+  color: #ffffff;
+
+  padding: 16px;
   border-radius: 12px;
+
   text-decoration: none;
   font-weight: 600;
+
+  cursor: pointer;
+
+  /* clave */
+  pointer-events: auto;
+  position: relative;
+  z-index: 1;
 }
 
 .btn:hover {
   background: #1d4ed8;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.back {
+  margin-top: 30px;
+}
+
+.text {
+  text-align: left;
+}
+
+.text h1,
+.text h2 {
+  text-align: center;
+}
+
+footer {
+  margin-top: 40px;
+  font-size: 0.85em;
+  color: #7b8fa6;
+}  background: #1d4ed8;
 }
 
 .back {
