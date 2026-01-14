@@ -1,143 +1,43 @@
 body {
+  background: #0b0f1a;
+  color: #e6e6e6;
+  font-family: system-ui, -apple-system, sans-serif;
   margin: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  background: radial-gradient(circle at top, #0d1b2a, #02040a);
-  color: #ffffff;
 }
 
 .container {
-  max-width: 480px;
+  max-width: 600px;
   margin: auto;
   padding: 40px 20px;
   text-align: center;
 }
 
-.subtitle {
-  color: #9fb3c8;
-  margin-bottom: 30px;
+h1 {
+  margin-bottom: 10px;
 }
 
-/* CONTENEDOR DE BOTONES */
 .buttons {
+  margin-top: 30px;
   display: flex;
   flex-direction: column;
-  gap: 15px; /* Esto asegura el espacio entre botones */
-  width: 100%; /* Asegura que ocupe el ancho disponible */
-  
-  /* Eliminé 'pointer-events: none'. No es necesario a menos que tengas
-     una animación de fondo compleja que necesites tocar detrás de los botones.
-     Al quitarlo, mejoras la compatibilidad móvil. */
+  gap: 14px;
 }
 
-/* BOTONES */
 .btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  background: #2563eb;
-  color: #ffffff;
-
-  padding: 16px;
-  border-radius: 12px;
-  
-  /* IMPORTANTE: Esto evita que el padding deforme el tamaño del botón */
-  box-sizing: border-box; 
-  width: 100%; /* Esto estandariza el ancho de todos los botones */
-
+  background: #1f6feb;
+  color: white;
   text-decoration: none;
+  padding: 14px;
+  border-radius: 10px;
   font-weight: 600;
-  cursor: pointer;
-  
-  position: relative;
-  transition: transform 0.1s ease, background 0.2s ease; /* Suaviza la animación */
 }
 
 .btn:hover {
-  background: #1d4ed8;
-}
-
-.btn:active {
-  transform: scale(0.97);
-}
-
-.back {
-  margin-top: 30px;
-}
-
-.text {
-  text-align: left;
-}
-
-.text h1,
-.text h2 {
-  text-align: center;
+  background: #388bfd;
 }
 
 footer {
   margin-top: 40px;
-  font-size: 0.85em;
-  color: #7b8fa6;
-}
-  color: #ffffff;
-
-  padding: 16px;
-  border-radius: 12px;
-
-  text-decoration: none;
-  font-weight: 600;
-
-  cursor: pointer;
-
-  /* clave */
-  pointer-events: auto;
-  position: relative;
-  z-index: 1;
-}
-
-.btn:hover {
-  background: #1d4ed8;
-}
-
-.btn:active {
-  transform: scale(0.97);
-}
-
-.back {
-  margin-top: 30px;
-}
-
-.text {
-  text-align: left;
-}
-
-.text h1,
-.text h2 {
-  text-align: center;
-}
-
-footer {
-  margin-top: 40px;
-  font-size: 0.85em;
-  color: #7b8fa6;
-}  background: #1d4ed8;
-}
-
-.back {
-  margin-top: 30px;
-}
-
-.text {
-  text-align: left;
-}
-
-.text h1,
-.text h2 {
-  text-align: center;
-}
-
-footer {
-  margin-top: 40px;
-  font-size: 0.85em;
-  color: #7b8fa6;
+  font-size: 13px;
+  opacity: 0.6;
 }
