@@ -12,12 +12,11 @@ body {
   text-align: center; /* Por defecto centra todo */
 }
 
-/* CLASE PARA ALINEAR A LA IZQUIERDA */
+/* CLASE PARA ALINEAR A LA IZQUIERDA (Páginas de texto) */
 .text {
-  text-align: left; /* Todo el texto adentro se va a la izquierda */
+  text-align: left;
 }
 
-/* Forzamos que los títulos dentro de .text también sean izquierda */
 .text h1,
 .text h2 {
   text-align: left;
@@ -28,7 +27,7 @@ body {
   margin-bottom: 30px;
 }
 
-/* BOTONES */
+/* --- SECCIÓN DE BOTONES (ESTILO TARJETA / CARD UI) --- */
 .buttons {
   display: flex;
   flex-direction: column;
@@ -38,52 +37,93 @@ body {
 
 .btn {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: center; /* Centra verticalmente imagen y texto */
+  justify-content: flex-start; /* ALINEA TODO A LA IZQUIERDA */
+  
   background: #2563eb;
   color: #ffffff;
-  padding: 16px;
-  border-radius: 12px;
+  
+  padding: 16px 20px; /* Un poco más de espacio a los lados */
+  border-radius: 16px; /* Bordes más redondeados */
   width: 100%;
   box-sizing: border-box;
+  
   text-decoration: none;
-  font-weight: 600;
   cursor: pointer;
-  transition: transform 0.1s ease, background 0.2s;
+  
+  /* Transiciones suaves */
+  transition: transform 0.2s ease, background 0.2s;
+  position: relative;
+  overflow: hidden;
 }
 
 .btn:hover {
   background: #1d4ed8;
+  transform: translateY(-2px); /* Pequeño efecto de elevación */
 }
 
 .btn:active {
-  transform: scale(0.97);
+  transform: scale(0.98);
 }
 
+/* ESTILOS PARA LA IMAGEN DENTRO DEL BOTÓN */
+.btn-icon {
+  width: 42px;        /* Tamaño del icono */
+  height: 42px;
+  margin-right: 15px; /* Espacio entre imagen y texto */
+  object-fit: contain; /* Asegura que el icono se vea completo */
+  flex-shrink: 0;      /* Evita que la imagen se aplaste si el texto es largo */
+}
+
+/* CONTENEDOR DE TEXTO DEL BOTÓN */
+.btn-text {
+  display: flex;
+  flex-direction: column; /* Título arriba, descripción abajo */
+  text-align: left;       /* Fuerza el texto a la izquierda */
+}
+
+.btn-title {
+  font-size: 1.05em;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.btn-desc {
+  font-size: 0.85em;
+  font-weight: 400;
+  opacity: 0.8; /* Un poco transparente para diferenciarlo del título */
+  margin-top: 2px;
+}
+
+/* BOTÓN DE VOLVER (Simple, sin iconos grandes) */
 .back {
   margin-top: 30px;
-  /* Si quieres el botón "Volver" centrado, descomenta la línea de abajo: */
-  /* margin-left: auto; margin-right: auto; width: fit-content; */
+  justify-content: center; /* El botón volver se ve mejor centrado */
+  background: transparent;
+  border: 1px solid #2563eb; /* Borde en lugar de fondo relleno */
+}
+.back:hover {
+  background: #2563eb;
 }
 
+/* --- FOOTER Y LOGO --- */
 footer {
   margin-top: 40px;
   font-size: 0.85em;
   color: #7b8fa6;
-  text-align: center; /* Footer siempre al centro */
+  text-align: center;
 }
 
-/* --- ESTILO DEL LOGO (NUEVO) --- */
 .footer-logo {
-  width: 24px;          /* Tamaño pequeño estilo GitHub (icon) */
-  height: auto;         /* Mantiene la proporción */
-  display: block;       /* Permite centrarlo con margin */
-  margin: 15px auto 0;  /* 15px de espacio arriba y centrado horizontal */
-  
-  opacity: 0.6;         /* Un poco transparente para que no distraiga */
+  width: 24px;          /* Tamaño pequeño estilo GitHub */
+  height: auto;
+  display: block;
+  margin: 15px auto 0;  /* Centrado */
+
+  opacity: 0.6;
   transition: opacity 0.3s ease;
 }
 
 .footer-logo:hover {
-  opacity: 1;           /* Se ilumina al pasar el mouse */
+  opacity: 1;
 }
