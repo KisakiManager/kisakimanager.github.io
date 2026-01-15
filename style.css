@@ -68,8 +68,8 @@ body {
 
 /* ESTILOS PARA LA IMAGEN DENTRO DEL BOTÓN */
 .btn-icon {
-  width: 42px;        /* Tamaño del icono */
-  height: 42px;
+  width: 55px;        /* Tamaño del icono */
+  height: 55px;
   margin-right: 15px; /* Espacio entre imagen y texto */
   object-fit: contain; /* Asegura que el icono se vea completo */
   flex-shrink: 0;      /* Evita que la imagen se aplaste si el texto es largo */
@@ -115,7 +115,7 @@ footer {
 }
 
 .footer-logo {
-  width: 24px;          /* Tamaño pequeño estilo GitHub */
+  width: 28px;          /* Tamaño pequeño estilo GitHub */
   height: auto;
   display: block;
   margin: 15px auto 0;  /* Centrado */
