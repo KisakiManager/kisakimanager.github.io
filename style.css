@@ -67,8 +67,8 @@ body {
 
 /* IMAGEN DENTRO DEL BOTÓN (INDEX) */
 .btn-icon {
-  width: 60px;
-  height: 60px;
+  width: 90px;
+  height: 90px;
   margin-right: 15px;
   object-fit: contain;
   flex-shrink: 0;
@@ -188,8 +188,8 @@ footer {
 
 /* --- SOLUCIÓN DEFINITIVA PARA EL ICONO --- */
 .page-icon {
-  width: 64px;
-  height: 64px;
+  width: 70px;
+  height: 70px;
   
   /* IMPORTANTE: Esto evita cortes y muestra la imagen entera */
   object-fit: contain;
