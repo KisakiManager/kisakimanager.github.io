@@ -39,18 +39,18 @@ body {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  
+
   background: #2563eb;
   color: #ffffff;
-  
+
   padding: 16px 20px;
   border-radius: 16px;
   width: 100%;
   box-sizing: border-box;
-  
+
   text-decoration: none;
   cursor: pointer;
-  
+
   transition: transform 0.2s ease, background 0.2s;
   position: relative;
   overflow: hidden;
@@ -190,13 +190,13 @@ footer {
 .page-icon {
   width: 70px;
   height: 70px;
-  
+
   /* IMPORTANTE: Esto evita cortes y muestra la imagen entera */
   object-fit: contain;
-  
+
   margin-right: 18px;
   flex-shrink: 0;
-  
+
   /* IMPORTANTE: Esto fuerza a borrar cualquier cuadro, fondo o borde */
   background: transparent !important;
   border: none !important;
@@ -240,4 +240,10 @@ footer {
 
 .card-body li {
   margin-bottom: 10px;
+}
+
+/* NUEVA ACTUALIZACIÓN: Centrado óptico de la flecha SVG */
+.back-floating svg {
+  display: block;
+  margin-right: 2px; /* Ajuste para que la flecha se vea en el centro visual exacto */
 }
