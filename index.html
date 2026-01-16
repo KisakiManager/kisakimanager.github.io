@@ -5,78 +5,195 @@
   <title>Kisaki Manager - Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
   <div class="flux-dashboard">
 
-    <aside class="sidebar-left">
+    <button class="mobile-menu-btn" onclick="toggleSidebar()">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.5" stroke-linecap="round">
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+    </button>
+
+    <aside class="sidebar" id="sidebar">
       
-      <div class="logo-area">
-        <img src="logo.svg" alt="Kisaki Logo" class="brand-logo">
+      <div class="sidebar-header">
+        <div class="brand">
+          <img src="logo.svg" alt="Logo" class="sidebar-logo">
+          <span>Kisaki</span>
         </div>
+        
+        <button class="close-btn" onclick="toggleSidebar()">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
 
       <nav class="nav-menu">
+        <p class="nav-label">General</p>
         
-        <div class="nav-section-label">Legal</div>
-        
-        <a href="payments.html" class="nav-link">
+        <button class="nav-btn active" onclick="showSection('home', this)">
+          <span class="icon">🏠</span> Inicio
+        </button>
+
+        <p class="nav-label spacer">Legal & Info</p>
+
+        <button class="nav-btn" onclick="showSection('payments', this)">
           <span class="icon">💳</span> Pagos
-        </a>
-        <a href="privacy.html" class="nav-link">
+        </button>
+
+        <button class="nav-btn" onclick="showSection('privacy', this)">
           <span class="icon">🔐</span> Privacidad
-        </a>
-        <a href="terms.html" class="nav-link">
+        </button>
+
+        <button class="nav-btn" onclick="showSection('terms', this)">
           <span class="icon">📜</span> Términos
-        </a>
-        <a href="minors.html" class="nav-link">
-          <span class="icon">🚸</span> Política Menores
-        </a>
+        </button>
+        
+        <button class="nav-btn" onclick="showSection('minors', this)">
+          <span class="icon">🚸</span> Menores
+        </button>
 
-        <div class="nav-section-label spacer">Info</div>
-
-        <a href="about.html" class="nav-link">
+        <button class="nav-btn" onclick="showSection('about', this)">
           <span class="icon">ℹ️</span> Sobre Kisaki
-        </a>
+        </button>
       </nav>
 
-      <div class="sidebar-footer-info">
-        <p>v2.0 Stable</p>
+      <div class="sidebar-footer">
+        <div class="status-box">
+          <span class="dot"></span> Online v2.0
+        </div>
       </div>
-
     </aside>
 
-    <main class="main-panel-right">
 
-      <header class="panel-header">
-        <h1>Kisaki Manager</h1>
-        <p>Dashboard Oficial</p>
-      </header>
+    <main class="main-content">
 
-      <div class="welcome-container">
-        <h2>Bienvenido al futuro<br>de la gestión.</h2>
-        <p>
-          Administra tus canales de Telegram con herramientas avanzadas de moderación, 
-          pagos y estadísticas. Únete hoy mismo y potencia tu comunidad.
-        </p>
+      <section id="home" class="content-section active-section">
+        <header class="section-header">
+          <h1>Kisaki Manager</h1>
+          <p>Dashboard Oficial</p>
+        </header>
 
-        <a href="https://t.me/TuBotUser" class="btn-flux-action">
-          Unirme en Telegram ✈️
-        </a>
-      </div>
+        <div class="welcome-container">
+          <h2>Bienvenido al futuro<br>de la gestión.</h2>
+          <p>
+            Administra tus canales de Telegram con herramientas avanzadas de moderación, 
+            pagos y estadísticas. Todo en un solo lugar.
+          </p>
+          <a href="https://t.me/TuBotUser" class="btn-flux">
+            Unirme en Telegram ✈️
+          </a>
+        </div>
 
-      <div class="flux-image-overlay">
-        <img src="hero-flux.png" alt="Personaje Kisaki" class="half-image">
-      </div>
+        <div class="hero-image">
+          <img src="hero-flux.png" alt="Hero">
+        </div>
+      </section>
 
-      <footer class="panel-footer">
-        © Kisaki Manager • Dog Geek Labs
-      </footer>
+
+      <section id="payments" class="content-section">
+        <header class="section-header">
+          <h1>Política de Pagos</h1>
+          <p>Información financiera</p>
+        </header>
+        <div class="text-content">
+          <h3>💰 Modelo de pago</h3>
+          <p>Kisaki Manager utiliza un modelo de pago único. No existen suscripciones ocultas.</p>
+          <h3>🪙 Métodos aceptados</h3>
+          <ul>
+            <li>Telegram Stars</li>
+            <li>Criptomoneda TON (The Open Network)</li>
+          </ul>
+        </div>
+      </section>
+
+
+      <section id="privacy" class="content-section">
+        <header class="section-header">
+          <h1>Privacidad</h1>
+          <p>Protección de datos</p>
+        </header>
+        <div class="text-content">
+          <p>Procesamos únicamente la información necesaria para el funcionamiento técnico.</p>
+          <h3>🛡️ Datos no almacenados</h3>
+          <p>No guardamos contraseñas, claves privadas ni datos bancarios.</p>
+        </div>
+      </section>
+
+
+      <section id="terms" class="content-section">
+        <header class="section-header">
+          <h1>Términos de Uso</h1>
+          <p>Reglas del servicio</p>
+        </header>
+        <div class="text-content">
+          <h3>⚙️ Uso permitido</h3>
+          <p>Queda prohibido el uso de userbots o spam masivo.</p>
+          <h3>🚫 Responsabilidad</h3>
+          <p>El bot es una herramienta de gestión, no garantiza crecimiento de seguidores.</p>
+        </div>
+      </section>
+
+      <section id="minors" class="content-section">
+        <header class="section-header">
+          <h1>Política de Menores</h1>
+          <p>Restricciones de edad</p>
+        </header>
+        <div class="text-content">
+          <h3>🔞 Restricción</h3>
+          <p>El uso de Kisaki Manager está estrictamente prohibido para menores de 13 años.</p>
+        </div>
+      </section>
+
+      <section id="about" class="content-section">
+        <header class="section-header">
+          <h1>Sobre Kisaki</h1>
+          <p>Misión y Visión</p>
+        </header>
+        <div class="text-content">
+          <p>Kisaki Manager nace con la misión de simplificar la administración de comunidades en Telegram mediante automatización segura.</p>
+          <p>Developed by <strong>Dog Geek Labs</strong>.</p>
+        </div>
+      </section>
 
     </main>
-
   </div>
+
+  <script>
+    // Función para cambiar de sección
+    function showSection(sectionId, btnElement) {
+      // 1. Ocultar todas las secciones
+      document.querySelectorAll('.content-section').forEach(sec => {
+        sec.classList.remove('active-section');
+      });
+      // 2. Mostrar la elegida
+      document.getElementById(sectionId).classList.add('active-section');
+
+      // 3. Actualizar botón activo en el menú
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      if(btnElement) btnElement.classList.add('active');
+
+      // 4. En móvil, cerrar el menú automáticamente al elegir
+      if (window.innerWidth <= 850) {
+        toggleSidebar();
+      }
+    }
+
+    // Función para abrir/cerrar sidebar en móvil
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('open');
+    }
+  </script>
 
 </body>
 </html>
