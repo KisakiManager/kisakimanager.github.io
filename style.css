@@ -1,11 +1,8 @@
-/* =========================================
-   1. CONFIGURACIÓN GENERAL (SOLO PARA EL DASHBOARD/INDEX)
-   ========================================= */
+/* RESET */
 body {
   margin: 0;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  /* Esto centra la tarjeta del Dashboard en el medio de la pantalla */
-  background-color: #e0e7ff; 
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: #cbd5e1; /* Fondo gris externo */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -15,202 +12,240 @@ body {
   color: #1f2937;
 }
 
-/* =========================================
-   2. EL DASHBOARD "FLUX" (ESTRUCTURA PRINCIPAL)
-   ========================================= */
+/* --- CONTENEDOR PRINCIPAL FLUX --- */
 .flux-dashboard {
   display: flex;
   width: 100%;
-  max-width: 1000px;
-  height: 600px;
-  border-radius: 40px;
-  overflow: hidden;
-  box-shadow: 0 30px 60px rgba(0,0,0,0.2);
+  max-width: 1100px;
+  height: 650px; /* Altura fija en escritorio */
   background: #ffffff;
+  border-radius: 35px; /* ¡Esquinas redondeadas globales! */
+  overflow: hidden;    /* Importante para mantener la forma */
+  box-shadow: 0 30px 60px rgba(0,0,0,0.15);
+  position: relative;
 }
 
-/* --- SIDEBAR IZQUIERDO (NEGRO) --- */
-.sidebar-left {
-  width: 280px;
-  background-color: #111111;
-  color: #ffffff;
-  padding: 40px 30px;
+/* BOTÓN HAMBURGUESA (Móvil) */
+.mobile-menu-btn {
+  display: none; /* Oculto en PC */
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 100;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+}
+
+/* --- SIDEBAR IZQUIERDA (Negra) --- */
+.sidebar {
+  width: 260px;
+  background: #111111;
+  color: #fff;
+  padding: 30px;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  transition: transform 0.3s ease; /* Animación para móvil */
 }
 
-.logo-area { margin-bottom: 50px; }
-.brand-logo { width: 45px; height: auto; }
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
 
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 1.1em;
+}
+.sidebar-logo { width: 30px; height: auto; }
+
+/* Botón X cerrar (oculto en PC) */
+.close-btn {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* MENU NAV */
 .nav-menu {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
-.nav-section-label {
+.nav-label {
   font-size: 0.75em;
   text-transform: uppercase;
   color: #6b7280;
   font-weight: 700;
-  letter-spacing: 1px;
   margin-bottom: 5px;
+  padding-left: 10px;
 }
+.spacer { margin-top: 20px; }
 
-.spacer { margin-top: 25px; }
-
-.nav-link {
-  display: flex;
-  align-items: center;
-  text-decoration: none;
+/* Botones del Menú */
+.nav-btn {
+  background: transparent;
+  border: none;
   color: #d1d5db;
+  width: 100%;
+  text-align: left;
   padding: 12px 15px;
   border-radius: 14px;
   font-size: 0.95em;
+  font-family: inherit;
   font-weight: 500;
-  transition: all 0.2s ease;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s;
 }
 
-.nav-link:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
-  transform: translateX(5px);
+.nav-btn .icon { margin-right: 12px; }
+
+.nav-btn:hover {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
 }
 
-.nav-link .icon { margin-right: 12px; width: 20px; text-align: center; }
+/* ESTADO ACTIVO (El botón resaltado) */
+.nav-btn.active {
+  background: #ffffff; /* Fondo blanco */
+  color: #000;         /* Texto negro */
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
 
-/* --- PANEL DERECHO (CLARO) --- */
-.main-panel-right {
+/* Footer Sidebar */
+.sidebar-footer { margin-top: auto; }
+.status-box {
+  background: #1f1f1f;
+  padding: 10px 15px;
+  border-radius: 12px;
+  font-size: 0.8em;
+  color: #aaa;
+  display: flex; align-items: center; gap: 8px;
+}
+.dot {
+  width: 8px; height: 8px; background: #ccf381; border-radius: 50%;
+}
+
+/* --- PANEL DERECHO (Contenido) --- */
+.main-content {
   flex-grow: 1;
-  background-color: #f2f4f6;
+  background: #f4f4f5; /* Gris claro */
   padding: 50px;
   position: relative;
-  display: flex;
+  overflow-y: auto; /* Scroll si el texto es largo */
+}
+
+/* SECCIONES (Lógica de pestañas) */
+.content-section {
+  display: none; /* Ocultas por defecto */
+  animation: fadeIn 0.3s ease;
+  height: 100%;
+}
+.content-section.active-section {
+  display: flex; /* Visible solo la activa */
   flex-direction: column;
 }
 
-.panel-header { margin-bottom: 40px; z-index: 2; }
-.panel-header h1 { font-size: 2.2em; font-weight: 800; margin: 0; color: #000; letter-spacing: -1px; }
-.panel-header p { margin: 5px 0 0; color: #6b7280; font-weight: 500; }
+/* Estilos de Texto dentro del panel */
+.section-header h1 {
+  font-size: 2.2em; font-weight: 800; margin: 0; color: #111; letter-spacing: -1px;
+}
+.section-header p {
+  color: #6b7280; margin: 5px 0 30px 0; font-weight: 500;
+}
 
-.welcome-container { max-width: 450px; z-index: 2; }
-.welcome-container h2 { font-size: 2.5em; line-height: 1.1; color: #111; margin-bottom: 20px; }
-.welcome-container p { line-height: 1.6; color: #555; font-size: 1.05em; margin-bottom: 35px; }
+.text-content h3 {
+  margin-top: 25px; margin-bottom: 10px; color: #111;
+  border-left: 4px solid #ccf381; padding-left: 10px;
+}
+.text-content p, .text-content li {
+  line-height: 1.6; color: #4b5563;
+}
+.text-content ul { padding-left: 20px; }
 
-.btn-flux-action {
+/* Bienvenida Home */
+.welcome-container { max-width: 450px; z-index: 2; position: relative; }
+.welcome-container h2 { font-size: 2.5em; line-height: 1.1; margin-bottom: 20px; color: #111; }
+.welcome-container p { margin-bottom: 30px; color: #555; font-size: 1.1em; }
+
+.btn-flux {
   display: inline-block;
-  background-color: #ccf381;
-  color: #000000;
-  padding: 16px 32px;
+  background: #ccf381; /* Verde Lima */
+  color: #000;
+  padding: 15px 30px;
   border-radius: 50px;
   text-decoration: none;
   font-weight: 700;
   box-shadow: 0 10px 20px rgba(204, 243, 129, 0.4);
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.2s;
+}
+.btn-flux:hover { transform: translateY(-3px); }
+
+/* Imagen Home */
+.hero-image {
+  position: absolute; top: 0; right: 0; bottom: 0; width: 50%;
+  pointer-events: none; overflow: hidden;
+}
+.hero-image img {
+  width: 100%; height: 100%; object-fit: cover; object-position: center left;
+  mask-image: linear-gradient(to right, transparent, black 20%);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 20%);
 }
 
-.flux-image-overlay {
-  position: absolute;
-  top: 0; right: 0; bottom: 0;
-  width: 50%;
-  z-index: 1;
-  overflow: hidden;
-  pointer-events: none;
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
-.half-image {
-  width: 100%; height: 100%;
-  object-fit: cover; object-position: center left;
-  mask-image: linear-gradient(to right, transparent, black 15%);
-  -webkit-mask-image: linear-gradient(to right, transparent, black 15%);
-  opacity: 0.9;
-}
-.panel-footer { margin-top: auto; font-size: 0.85em; color: #9ca3af; z-index: 2; }
 
 /* =========================================
-   3. RESPONSIVE MÓVIL (INDEX)
+   RESPONSIVE (MÓVIL iOS STYLE)
    ========================================= */
 @media (max-width: 850px) {
-  .flux-dashboard { flex-direction: column; height: auto; border-radius: 0; overflow: visible; }
-  .sidebar-left { width: 100%; padding: 20px; gap: 15px; }
-  .logo-area { margin-bottom: 0; width: 100%; }
-  
-  .nav-menu {
-    display: flex; flex-direction: row; gap: 10px;
-    overflow-x: auto; padding-bottom: 5px;
-    -ms-overflow-style: none; scrollbar-width: none;
+  .flux-dashboard {
+    height: 100vh; /* Pantalla completa en móvil */
+    border-radius: 0; /* Sin bordes en móvil */
+    flex-direction: column;
   }
-  .nav-menu::-webkit-scrollbar { display: none; }
-  .nav-section-label, .spacer { display: none; }
-  .nav-link { background-color: rgba(255, 255, 255, 0.15); padding: 8px 15px; border-radius: 20px; font-size: 0.85em; flex-shrink: 0; }
+
+  .mobile-menu-btn { display: block; } /* Mostrar hamburguesa */
   
-  .main-panel-right { padding: 30px 20px; border-radius: 30px 30px 0 0; margin-top: -20px; background: #f2f4f6; z-index: 10; }
-  .flux-image-overlay { position: relative; width: 100%; height: 250px; margin-top: 30px; opacity: 0.8; mask-image: linear-gradient(to top, black, transparent); -webkit-mask-image: linear-gradient(to top, black, transparent); }
+  /* Sidebar Off-Canvas (Oculto a la izquierda) */
+  .sidebar {
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    width: 80%; /* Ocupa 80% de la pantalla */
+    z-index: 1000;
+    transform: translateX(-100%); /* Oculto */
+    box-shadow: 5px 0 20px rgba(0,0,0,0.5);
+  }
+  
+  /* Clase para abrir sidebar */
+  .sidebar.open {
+    transform: translateX(0); /* Visible */
+  }
+
+  .close-btn { display: block; } /* Mostrar la X en móvil */
+
+  .main-content {
+    padding: 70px 20px 30px 20px; /* Espacio arriba para el botón hamburguesa */
+  }
+  
+  .hero-image {
+    position: relative; width: 100%; height: 200px; margin-top: 30px;
+    mask-image: linear-gradient(to top, black, transparent);
+    -webkit-mask-image: linear-gradient(to top, black, transparent);
+  }
 }
-
-/* ==========================================================================
-   4. CLASE MAESTRA PARA PÁGINAS INTERNAS (ESTO ARREGLA EL PROBLEMA)
-   ========================================================================== */
-
-/* Esta clase se encarga de "romper" el diseño del dashboard y restaurar el modo oscuro */
-body.internal-page {
-  display: block !important;       /* Quita el Flexbox centrado */
-  padding: 0 !important;           /* Quita los márgenes blancos */
-  background: radial-gradient(circle at top, #0d1b2a, #02040a) !important; /* Fondo negro */
-  color: #ffffff !important;
-  height: auto !important;
-  overflow-y: auto !important;
-}
-
-/* Header con imagen para las páginas internas */
-.page-header {
-  height: 240px;
-  width: 100%;
-  background-size: cover;
-  background-position: center;
-  position: relative;
-  z-index: 0;
-}
-
-/* Botón flotante SVG (Flecha) */
-.back-floating {
-  position: absolute;
-  top: 25px; left: 20px;
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  width: 44px; height: 44px;
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  z-index: 20;
-}
-.back-floating svg { display: block; margin-right: 2px; stroke: #ffffff; }
-
-/* Tarjeta Modal Oscura */
-.content-card {
-  background: #02040a;
-  color: #ffffff;
-  border-top: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 30px 30px 0 0;
-  padding: 35px 25px;
-  margin-top: -50px;
-  position: relative;
-  z-index: 10;
-  min-height: 100vh; /* Ocupa al menos toda la pantalla */
-  box-shadow: 0 -10px 30px rgba(0,0,0,0.6);
-}
-
-.card-header-inner { display: flex; align-items: center; margin-bottom: 30px; }
-.page-icon { 
-  width: 70px; height: 70px; object-fit: contain; margin-right: 18px; flex-shrink: 0; 
-  background: transparent !important; border: none !important; border-radius: 0 !important; box-shadow: none !important; 
-}
-.page-title h1 { margin: 0; font-size: 1.6em; color: white; text-align: left; }
-.page-title span { display: block; color: #94a3b8; font-size: 0.9em; text-align: left; margin-top: 5px; }
-
-/* Textos internos */
-.card-body p, .card-body li { color: #cbd5e1; line-height: 1.6; text-align: left; }
-.card-body h2 { color: white; margin-top: 35px; margin-bottom: 15px; border-left: 4px solid #2563eb; padding-left: 12px; text-align: left; }
-.card-body ul { padding-left: 20px; color: #cbd5e1; text-align: left; }
-.card-body li { margin-bottom: 10px; }
