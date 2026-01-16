@@ -1,50 +1,99 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Kisaki Manager</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>Kisaki Manager</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-<div class="container">
-<h1>Kisaki Manager</h1>
-<p>Centro de políticas, pagos y documentación oficial.</p>
+  <div class="container">
+    
+    <header class="main-header">
+      <h1>Kisaki Manager</h1>
+      <p class="subtitle">Centro de políticas, pagos y documentación oficial.</p>
+    </header>
 
-<div class="buttons">
+    <div class="buttons-list">
 
-      <a class="btn card-btn" href="payments.html">
-        <img src="icono-pagos.png" alt="Pagos" class="btn-icon">
-        
-        <div class="btn-text">
-          <span class="btn-title">Política de Pagos</span>
-          <span class="btn-desc">Métodos, Stars y Cripto</span>
+      <a class="btn-card" href="payments.html">
+        <div class="icon-wrapper">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+            <line x1="1" y1="10" x2="23" y2="10"></line>
+          </svg>
         </div>
-</a>
-
-      <a class="btn card-btn" href="privacy.html">
-        <img src="icono-privacidad.png" alt="Privacidad" class="btn-icon">
-        
-        <div class="btn-text">
-          <span class="btn-title">Privacidad</span>
-          <span class="btn-desc">Cómo protegemos tus datos</span>
+        <div class="card-text">
+          <span class="card-title">Política de Pagos</span>
+          <span class="card-desc">Métodos, Stars y Cripto</span>
         </div>
-</a>
+      </a>
 
-      <a class="btn card-btn" href="terms.html">
-        <img src="icono-terminos.png" alt="Términos" class="btn-icon">
-        
-        <div class="btn-text">
-          <span class="btn-title">Términos</span>
-          <span class="btn-desc">Reglas de uso del servicio</span>
+      <a class="btn-card" href="privacy.html">
+        <div class="icon-wrapper">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
         </div>
-</a>
+        <div class="card-text">
+          <span class="card-title">Privacidad</span>
+          <span class="card-desc">Cómo protegemos tus datos</span>
+        </div>
+      </a>
 
-</div>
+      <a class="btn-card" href="terms.html">
+        <div class="icon-wrapper">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+        </div>
+        <div class="card-text">
+          <span class="card-title">Términos</span>
+          <span class="card-desc">Reglas de uso del servicio</span>
+        </div>
+      </a>
 
-<footer>
-<p>© Kisaki Manager · Dog Geek Labs</p>
-      
-<img src="logo.svg" alt="Kisaki Manager Logo" class="footer-logo">
-</footer>
+      <a class="btn-card" href="minors.html">
+        <div class="icon-wrapper">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="7" r="4"></circle>
+            <path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"></path>
+            <line x1="18" y1="8" x2="23" y2="13"></line>
+            <line x1="23" y1="8" x2="18" y2="13"></line>
+          </svg>
+        </div>
+        <div class="card-text">
+          <span class="card-title">Política de Menores</span>
+          <span class="card-desc">Restricciones de edad</span>
+        </div>
+      </a>
+
+      <a class="btn-card" href="about.html">
+        <div class="icon-wrapper">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+        </div>
+        <div class="card-text">
+          <span class="card-title">Sobre Kisaki</span>
+          <span class="card-desc">Misión y Visión</span>
+        </div>
+      </a>
+
+    </div>
+
+    <footer>
+      <p>© Kisaki Manager · Dog Geek Labs</p>
+      <img src="logo.svg" alt="Kisaki Manager Logo" class="footer-logo">
+    </footer>
+
+  </div>
+</body>
+</html>
