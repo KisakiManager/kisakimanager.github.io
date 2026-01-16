@@ -1,95 +1,78 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kisaki Manager App</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>Kisaki Manager</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
+  
+  <div class="mobile-frame">
+    
+    <header class="top-bar">
+      <div class="brand">
+        <img src="logo.svg" alt="Logo" class="mini-logo">
+        <span>Kisaki Manager</span>
+      </div>
+      <div class="menu-icon">
+        <div class="bar"></div>
+        <div class="bar"></div>
+      </div>
+    </header>
 
-    <div class="app-container">
-        
-        <aside class="sidebar" id="sidebar">
-            <div class="logo-area">
-                <div class="logo-placeholder">🧙‍♂️</div> 
-                <h3>Kisaki</h3>
-            </div>
+    <main class="content">
+      
+      <h1 class="hero-title">
+        Centro de <br>
+        <span class="highlight">Políticas</span>
+      </h1>
 
-            <nav class="menu">
-                <button class="menu-item active" data-target="dashboard">
-                    Dashboard
-                </button>
-                <button class="menu-item" data-target="nutrition">
-                    Estadísticas
-                </button>
-                <button class="menu-item" data-target="reports">
-                    Usuarios
-                </button>
-                <button class="menu-item" data-target="settings">
-                    Ajustes
-                </button>
-            </nav>
+      <p class="subtitle">
+        Documentación oficial, pagos y reglas del servicio.
+      </p>
 
-            <button class="toggle-btn" id="toggleBtn">
-                <svg id="icon-panel" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
-                
-                <svg id="icon-close" class="hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-            </button>
-        </aside>
+      <div class="cards-container">
 
-        <main class="main-content">
-            
-            <section id="dashboard" class="content-section active">
-                <header>
-                    <p class="user-email">vicente@kisaki.bot</p>
-                    <h1>Resumen General</h1>
-                    <p class="subtitle">¡Toma el control de tu comunidad hoy!</p>
-                </header>
+        <a class="card" href="payments.html">
+          <div class="card-icon-box">
+             <img src="icono-pagos.png" alt="Pagos">
+          </div>
+          <div class="card-text">
+            <h3>Pagos</h3>
+            <p>Métodos y Cripto</p>
+          </div>
+        </a>
 
-                <div class="card card-big">
-                    <h3>Actividad del Bot</h3>
-                    <div class="chart-circle">
-                        <span>4.3k</span>
-                        <small>Interacciones</small>
-                    </div>
-                </div>
+        <a class="card" href="privacy.html">
+          <div class="card-icon-box">
+            <img src="icono-privacidad.png" alt="Privacidad">
+          </div>
+          <div class="card-text">
+            <h3>Privacidad</h3>
+            <p>Protección de datos</p>
+          </div>
+        </a>
 
-                <div class="card upgrade-card">
-                    <h3>Upgrade to Pro</h3>
-                    <p>Desbloquea funciones de moderación avanzadas.</p>
-                    <button class="btn-primary">Mejorar Ahora</button>
-                </div>
-                
-                <footer class="legal-footer">
-                    <p>© Kisaki Manager • Dog Geek Labs</p>
-                </footer>
-            </section>
+        <a class="card" href="terms.html">
+          <div class="card-icon-box">
+            <img src="icono-terminos.png" alt="Términos">
+          </div>
+          <div class="card-text">
+            <h3>Términos</h3>
+            <p>Reglas de uso</p>
+          </div>
+        </a>
 
-            <section id="nutrition" class="content-section">
-                <h1>Estadísticas</h1>
-                <p>Aquí verás los gráficos de crecimiento.</p>
-                <div class="card"><p>Gráfico 1...</p></div>
-                <div class="card"><p>Gráfico 2...</p></div>
-                <div class="card"><p>Gráfico 3...</p></div>
-                <footer class="legal-footer"><p>© Kisaki Manager • Dog Geek Labs</p></footer>
-            </section>
+      </div>
+    </main>
 
-            <section id="reports" class="content-section">
-                <h1>Usuarios</h1>
-                <p>Lista de usuarios baneados y VIPs.</p>
-                <footer class="legal-footer"><p>© Kisaki Manager • Dog Geek Labs</p></footer>
-            </section>
+    <footer>
+      <p>© Kisaki Manager</p>
+    </footer>
 
-             <section id="settings" class="content-section">
-                <h1>Ajustes</h1>
-                <p>Configuración del bot.</p>
-                <footer class="legal-footer"><p>© Kisaki Manager • Dog Geek Labs</p></footer>
-            </section>
+  </div>
 
-        </main>
-    </div>
-
-    <script src="script.js"></script>
 </body>
 </html>
