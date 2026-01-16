@@ -1,213 +1,325 @@
-/* RESET */
+/* =========================================
+   VARIABLES Y RESET
+   ========================================= */
+:root {
+    --bg-dark: #0f0f0f;       /* Fondo súper oscuro (Casi negro) */
+    --bg-sidebar: #141414;    /* Fondo barra lateral */
+    --bg-light: #f4f4f9;      /* Fondo panel derecho (Estilo Flux) */
+    --accent: #ccff33;        /* Verde Kisaki */
+    --text-main: #1c1c1e;     /* Texto oscuro para panel derecho */
+    --text-muted: #8e8e93;    /* Texto gris para detalles */
+    --white: #ffffff;
+    
+    --sidebar-width: 260px;   /* Ancho del menú */
+    --border-radius-card: 24px; /* Redondeado estilo iOS/Flux */
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-tap-highlight-color: transparent; /* Elimina flash azul en móviles */
+}
+
 body {
-  margin: 0;
-  font-family: 'Inter', system-ui, sans-serif;
-  background-color: #cbd5e1; /* Fondo escritorio */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  box-sizing: border-box;
-  color: #1f2937;
-}
-
-/* CONTENEDOR PRINCIPAL (ESCRITORIO) */
-.flux-dashboard {
-  display: flex;
-  width: 100%;
-  max-width: 1100px;
-  height: 650px;
-  background: #ffffff;
-  border-radius: 35px;
-  overflow: hidden;
-  box-shadow: 0 30px 60px rgba(0,0,0,0.15);
-  position: relative;
-}
-
-/* BOTÓN HAMBURGUESA (MÓVIL) */
-.menu-toggle {
-  display: none; /* Oculto en PC */
-  position: absolute;
-  top: 25px;
-  left: 20px;
-  z-index: 200; /* Encima de todo */
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 5px;
-}
-
-/* --- SIDEBAR IZQUIERDA (NEGRA) --- */
-.sidebar {
-  width: 260px;
-  background: #111111;
-  color: #fff;
-  padding: 30px;
-  display: flex;
-  flex-direction: column;
-  flex-shrink: 0;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 300;
-}
-
-.sidebar-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 40px;
-}
-
-.brand {
-  display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.1em;
-}
-.sidebar-logo { width: 30px; height: auto; }
-
-/* Botón X cerrar */
-.close-btn {
-  display: none; /* Solo móvil */
-  background: none; border: none; cursor: pointer;
-}
-
-/* MENÚ NAVEGACIÓN */
-.nav-menu {
-  flex-grow: 1; display: flex; flex-direction: column; gap: 5px; overflow-y: auto;
-}
-
-.nav-label {
-  font-size: 0.75em; text-transform: uppercase; color: #6b7280; font-weight: 700;
-  margin-top: 15px; margin-bottom: 5px; padding-left: 10px;
-}
-.spacer { margin-top: 20px; }
-
-.nav-btn {
-  background: transparent; border: none; color: #9ca3af;
-  width: 100%; text-align: left; padding: 12px 15px;
-  border-radius: 14px; font-size: 0.95em; font-family: inherit; font-weight: 500;
-  cursor: pointer; display: flex; align-items: center; gap: 12px;
-  transition: all 0.2s;
-}
-
-.nav-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
-
-/* ACTIVO */
-.nav-btn.active {
-  background: #fff; color: #000; font-weight: 700;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-}
-
-.sidebar-footer { margin-top: auto; padding-top: 20px; }
-.status-badge {
-  background: #1f1f1f; color: #ccf381; padding: 8px 12px;
-  border-radius: 10px; font-size: 0.8em; text-align: center;
-}
-
-/* --- PANEL DERECHO (CONTENIDO) --- */
-.main-content {
-  flex-grow: 1;
-  background: #f4f4f5; /* Gris claro */
-  padding: 50px;
-  position: relative;
-  overflow-y: auto; /* Scroll vertical */
-  display: flex; flex-direction: column;
-}
-
-/* SECCIONES */
-.content-section {
-  display: none; /* Oculto */
-  flex-direction: column;
-  animation: fadeIn 0.4s ease;
-  min-height: 100%;
-}
-.active-section { display: flex; }
-
-/* TIPOGRAFÍA PANEL */
-.section-header h1 {
-  font-size: 2.2em; font-weight: 800; margin: 0; color: #111; letter-spacing: -1px;
-}
-.section-header p {
-  color: #6b7280; margin: 5px 0 30px 0; font-weight: 500;
-}
-
-/* ESTILOS DE TEXTO INTERNO */
-.text-block h3 {
-  color: #111; margin-top: 25px; margin-bottom: 10px; font-size: 1.2em;
-  border-left: 4px solid #ccf381; padding-left: 12px;
-}
-.text-block p, .text-block li {
-  line-height: 1.6; color: #4b5563; margin-bottom: 15px;
-}
-.text-block ul { padding-left: 20px; margin-bottom: 20px; }
-
-/* Bienvenida */
-.welcome-box h2 {
-  font-size: 2.8em; line-height: 1.1; margin-bottom: 20px; color: #111;
-}
-.welcome-box p {
-  font-size: 1.1em; color: #555; margin-bottom: 30px; max-width: 500px;
-}
-
-.btn-flux {
-  display: inline-block;
-  background: #ccf381; color: #000;
-  padding: 16px 32px; border-radius: 50px;
-  text-decoration: none; font-weight: 700;
-  box-shadow: 0 10px 20px rgba(204, 243, 129, 0.4);
-}
-
-footer {
-  margin-top: auto; color: #9ca3af; font-size: 0.85em; padding-top: 40px;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+    background-color: var(--bg-dark);
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden; /* IMPORTANTE: El body no hace scroll, lo hacen los paneles */
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 /* =========================================
-   RESPONSIVE (MÓVIL TOTAL)
+   CONTENEDOR PRINCIPAL (APP SHELL)
    ========================================= */
-@media (max-width: 850px) {
-  
-  /* 1. Resetear el body para pantalla completa */
-  body {
-    padding: 0;
-    align-items: flex-start; /* Alinear arriba */
-    background: #f4f4f5; /* Mismo color que el panel */
-  }
+.app-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    background-color: var(--bg-light);
+    overflow: hidden;
+}
 
-  /* 2. Dashboard ocupa 100% */
-  .flux-dashboard {
-    max-width: 100%;
-    height: 100vh; /* Altura completa */
-    border-radius: 0; /* Sin bordes */
+/* En pantallas grandes (PC/Tablet), le damos forma de "App flotante" */
+@media (min-width: 768px) {
+    .app-container {
+        width: 95vw;
+        height: 92vh;
+        border-radius: 40px; /* Bordes redondeados externos extremos */
+        box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+}
+
+/* =========================================
+   BARRA LATERAL (SIDEBAR)
+   ========================================= */
+.sidebar {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: var(--sidebar-width);
+    background-color: var(--bg-sidebar);
+    color: var(--white);
+    display: flex;
     flex-direction: column;
-    box-shadow: none;
-  }
+    padding: 30px 20px;
+    z-index: 1000;
+    border-right: 1px solid #333; /* La línea divisoria sutil */
+    
+    /* Lógica de ocultamiento */
+    transform: translateX(-100%); /* Oculto a la izquierda por defecto */
+    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); /* Animación suave */
+}
 
-  /* 3. Botón Hamburguesa Visible */
-  .menu-toggle { display: block; }
+/* Clase activa para mostrar el menú */
+.sidebar.open {
+    transform: translateX(0);
+    box-shadow: 10px 0 30px rgba(0,0,0,0.3); /* Sombra cuando se abre */
+}
 
-  /* 4. Sidebar Oculta (Off-Canvas) */
-  .sidebar {
-    position: fixed; /* Flotante */
-    top: 0; left: 0; bottom: 0;
-    width: 85%; /* Ancho cómodo */
-    max-width: 300px;
-    transform: translateX(-100%); /* Escondido a la izquierda */
-    box-shadow: 10px 0 30px rgba(0,0,0,0.5);
-  }
+/* LOGO KISAKI */
+.logo-area {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 40px;
+    padding-left: 10px;
+}
 
-  /* Clase para abrir */
-  .sidebar.open { transform: translateX(0); }
+.logo-area h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
 
-  .close-btn { display: block; } /* X visible */
+.logo-icon {
+    font-size: 24px;
+    /* Si usas una imagen real, reemplaza esto por img styles */
+}
 
-  /* 5. Contenido Principal */
-  .main-content {
-    padding: 80px 25px 30px 25px; /* Espacio superior para el botón */
-  }
+/* MENÚ DE NAVEGACIÓN */
+.menu {
+    flex: 1; /* Ocupa el espacio disponible */
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
 
-  /* Ajuste de textos en móvil */
-  .section-header h1 { font-size: 1.8em; }
-  .welcome-box h2 { font-size: 2.2em; }
+.menu-item {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    width: 100%;
+    padding: 16px 20px;
+    text-align: left;
+    font-size: 1rem;
+    font-weight: 500;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.menu-item:hover {
+    color: var(--white);
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Estado activo (sección seleccionada) */
+.menu-item.active {
+    background-color: var(--accent);
+    color: var(--bg-dark); /* Texto oscuro sobre fondo verde */
+    font-weight: 700;
+    box-shadow: 0 4px 15px rgba(204, 255, 51, 0.2);
+}
+
+/* =========================================
+   BOTÓN FLOTANTE (TOGGLE) EN LA LÍNEA
+   ========================================= */
+.toggle-btn {
+    position: absolute;
+    top: 40px; /* Ajusta la altura a tu gusto */
+    right: -24px; /* (Ancho 48px / 2) = -24px para centrarlo en la línea */
+    
+    width: 48px;
+    height: 48px;
+    background-color: var(--accent); /* Verde Kisaki */
+    border: 4px solid var(--bg-sidebar); /* Borde del color del sidebar para "recortar" */
+    border-radius: 50%;
+    
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--bg-dark);
+    z-index: 1001;
+    box-shadow: 4px 0 15px rgba(0,0,0,0.2);
+    transition: transform 0.3s ease, background-color 0.3s;
+    outline: none;
+}
+
+/* Efecto al presionar */
+.toggle-btn:active {
+    transform: scale(0.9);
+}
+
+/* Cuando el sidebar está cerrado, el botón debe verse pegado al borde izquierdo de la pantalla */
+/* NOTA: Como el sidebar tiene transform -100%, el 'right: -24px' hace que el botón 
+   se vea asomando en la pantalla exactamente como un tirador */
+
+.icon-svg {
+    width: 20px;
+    height: 20px;
+    stroke-width: 2.5;
+}
+
+/* Clases utilitarias para ocultar/mostrar iconos */
+.hidden {
+    display: none;
+}
+
+/* =========================================
+   PANEL DERECHO (CONTENIDO PRINCIPAL)
+   ========================================= */
+.main-content {
+    flex: 1;
+    height: 100%;
+    width: 100%;
+    background-color: var(--bg-light);
+    position: relative;
+    overflow-y: auto; /* IMPORTANTE: Scroll vertical aquí */
+    scroll-behavior: smooth;
+    padding: 0; 
+}
+
+/* Wrapper interno para dar márgenes consistentes */
+.content-wrapper {
+    padding: 30px 20px;
+    max-width: 800px; /* Para que no se estire infinito en PC */
+    margin: 0 auto;
+    min-height: 100%; /* Asegura que cubra al menos la pantalla para el scroll */
+    display: flex;
+    flex-direction: column;
+}
+
+/* SECCIONES (TABS) */
+.content-section {
+    display: none; /* Ocultas por defecto */
+    animation: fadeSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.content-section.active {
+    display: block;
+}
+
+@keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* TIPOGRAFÍA Y TARJETAS */
+.user-info {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 5px;
+}
+
+h1 {
+    font-size: 2.2rem;
+    color: var(--text-main);
+    margin-bottom: 10px;
+    line-height: 1.1;
+}
+
+.subtitle {
+    color: var(--text-muted);
+    margin-bottom: 30px;
+    font-size: 1.1rem;
+}
+
+/* Tarjetas estilo Flux/iOS */
+.card {
+    background: var(--white);
+    border-radius: var(--border-radius-card);
+    padding: 25px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+    border: 1px solid rgba(0,0,0,0.02);
+}
+
+.card h3 {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    color: var(--text-main);
+}
+
+/* Tarjeta especial de Upgrade */
+.card-upgrade {
+    background-color: var(--accent);
+    color: var(--bg-dark);
+}
+
+.btn-primary {
+    background-color: var(--bg-dark);
+    color: var(--white);
+    border: none;
+    padding: 14px 24px;
+    border-radius: 30px;
+    font-weight: 600;
+    margin-top: 15px;
+    cursor: pointer;
+    width: 100%;
+}
+
+/* Chart placeholder (círculo ejemplo) */
+.chart-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 0;
+}
+.circle-mockup {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 15px solid #e1e1e1;
+    border-top-color: var(--bg-dark);
+    border-right-color: #a8a8a8;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.circle-mockup span { font-size: 1.5rem; font-weight: bold; }
+
+/* =========================================
+   FOOTER (AL FINAL DEL SCROLL)
+   ========================================= */
+.legal-footer {
+    margin-top: auto; /* Empuja el footer al final si hay poco contenido */
+    padding-top: 40px;
+    padding-bottom: 20px;
+    text-align: center;
+    opacity: 0.6;
+}
+
+.legal-footer p {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+/* =========================================
+   MEDIA QUERIES (ADAPTACIÓN DE ESCRITORIO)
+   ========================================= */
+@media (min-width: 1024px) {
+    /* En PC muy grande, podemos dejar el menú fijo si quisieras, 
+       pero para mantener tu diseño "Móvil en PC", lo dejamos igual */
 }
