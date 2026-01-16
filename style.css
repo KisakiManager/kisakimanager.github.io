@@ -12,7 +12,7 @@ body {
   text-align: center;
 }
 
-/* CLASE PARA ALINEAR A LA IZQUIERDA */
+/* ALINEACIÓN DE TEXTO */
 .text {
   text-align: left;
 }
@@ -27,7 +27,7 @@ body {
   margin-bottom: 30px;
 }
 
-/* --- SECCIÓN DE BOTONES (ESTILO TARJETA / CARD UI) --- */
+/* --- SECCIÓN DE BOTONES (INDEX) --- */
 .buttons {
   display: flex;
   flex-direction: column;
@@ -38,7 +38,7 @@ body {
 .btn {
   display: flex;
   align-items: center;
-  justify-content: flex-start; /* Alinea a la izquierda */
+  justify-content: flex-start;
   
   background: #2563eb;
   color: #ffffff;
@@ -94,7 +94,7 @@ body {
   margin-top: 2px;
 }
 
-/* BOTÓN DE VOLVER (Versión simple) */
+/* BOTÓN DE VOLVER */
 .back {
   margin-top: 30px;
   justify-content: center;
@@ -127,10 +127,10 @@ footer {
 }
 
 /* =========================================================
-   NUEVAS FUNCIONES: PÁGINAS DE DETALLE (ESTILO MODAL)
+   PÁGINAS DE DETALLE (ESTILO MODAL)
    ========================================================= */
 
-/* 1. Fondo superior */
+/* Fondo superior */
 .page-header {
   height: 240px;
   background: linear-gradient(135deg, #1e3a8a, #2563eb);
@@ -140,7 +140,7 @@ footer {
   z-index: 0;
 }
 
-/* 2. Botón flotante para volver */
+/* Botón flotante para volver */
 .back-floating {
   position: absolute;
   top: 25px;
@@ -166,7 +166,7 @@ footer {
   transform: scale(1.1);
 }
 
-/* 3. La Tarjeta de Contenido */
+/* Tarjeta de Contenido */
 .content-card {
   background: #02040a;
   border-top: 1px solid rgba(255, 255, 255, 0.15);
@@ -186,18 +186,22 @@ footer {
   margin-bottom: 30px;
 }
 
-/* --- AQUÍ ESTÁ EL CAMBIO PARA LOS ICONOS PNG --- */
+/* --- SOLUCIÓN DEFINITIVA PARA EL ICONO --- */
 .page-icon {
   width: 64px;
   height: 64px;
   
-  /* Se muestra la imagen entera sin recortar */
-  object-fit: contain; 
+  /* IMPORTANTE: Esto evita cortes y muestra la imagen entera */
+  object-fit: contain;
   
   margin-right: 18px;
   flex-shrink: 0;
   
-  /* Eliminados border-radius y background para que no se vea el cuadro */
+  /* IMPORTANTE: Esto fuerza a borrar cualquier cuadro, fondo o borde */
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
 }
 
 .page-title h1 {
@@ -213,7 +217,7 @@ footer {
   margin-top: 5px;
 }
 
-/* Estilos del texto */
+/* Texto del cuerpo */
 .card-body p {
   line-height: 1.6;
   color: #cbd5e1;
