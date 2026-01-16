@@ -1,3 +1,6 @@
+/* =========================================
+   1. CONFIGURACIÓN GENERAL
+   ========================================= */
 body {
   margin: 0;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
@@ -27,7 +30,89 @@ body {
   margin-bottom: 30px;
 }
 
-/* --- SECCIÓN DE BOTONES (INDEX) --- */
+/* =========================================
+   2. ESTILOS DE BOTONES (NUEVOS - iOS SVG)
+   Estos son los que usa el nuevo index.html
+   ========================================= */
+
+.buttons-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.btn-card {
+  display: flex;
+  align-items: center;
+  text-align: left;
+  
+  background-color: #2563eb; 
+  color: #ffffff;
+  
+  padding: 15px 20px; 
+  border-radius: 20px;
+  text-decoration: none;
+  
+  transition: transform 0.2s ease, background-color 0.2s;
+  box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2);
+}
+
+.btn-card:hover {
+  background-color: #1d4ed8;
+  transform: translateY(-2px);
+}
+
+.btn-card:active {
+  transform: scale(0.98);
+}
+
+/* CONTENEDOR DEL ICONO SVG (Estilo iOS) */
+.icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  width: 48px;
+  height: 48px;
+  
+  /* Fondo semitransparente detrás del icono */
+  background: rgba(255, 255, 255, 0.2); 
+  border-radius: 12px;
+  
+  margin-right: 18px;
+  flex-shrink: 0;
+}
+
+/* Estilo del SVG dentro del contenedor */
+.icon-wrapper svg {
+  width: 26px;
+  height: 26px;
+  stroke: #ffffff; /* Color de las líneas */
+}
+
+/* Textos dentro del botón nuevo */
+.card-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.card-title {
+  font-size: 1.1em;
+  font-weight: 700;
+  margin-bottom: 3px;
+}
+
+.card-desc {
+  font-size: 0.85em;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 400;
+}
+
+/* =========================================
+   3. ESTILOS DE BOTONES (ANTIGUOS)
+   Conservados por seguridad
+   ========================================= */
 .buttons {
   display: flex;
   flex-direction: column;
@@ -39,18 +124,14 @@ body {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-
   background: #2563eb;
   color: #ffffff;
-
   padding: 16px 20px;
   border-radius: 16px;
   width: 100%;
   box-sizing: border-box;
-
   text-decoration: none;
   cursor: pointer;
-
   transition: transform 0.2s ease, background 0.2s;
   position: relative;
   overflow: hidden;
@@ -65,7 +146,6 @@ body {
   transform: scale(0.98);
 }
 
-/* IMAGEN DENTRO DEL BOTÓN (INDEX) */
 .btn-icon {
   width: 30px;
   height: 30px;
@@ -74,7 +154,6 @@ body {
   flex-shrink: 0;
 }
 
-/* TEXTO DEL BOTÓN */
 .btn-text {
   display: flex;
   flex-direction: column;
@@ -94,7 +173,7 @@ body {
   margin-top: 2px;
 }
 
-/* BOTÓN DE VOLVER */
+/* BOTÓN DE VOLVER (ANTIGUO) */
 .back {
   margin-top: 30px;
   justify-content: center;
@@ -105,7 +184,9 @@ body {
   background: #2563eb;
 }
 
-/* --- FOOTER Y LOGO --- */
+/* =========================================
+   4. FOOTER Y LOGO
+   ========================================= */
 footer {
   margin-top: 40px;
   font-size: 0.85em;
@@ -127,15 +208,19 @@ footer {
 }
 
 /* =========================================================
-   PÁGINAS DE DETALLE (ESTILO MODAL)
+   5. PÁGINAS DE DETALLE (ESTILO MODAL)
    ========================================================= */
 
 /* Fondo superior */
 .page-header {
   height: 240px;
   background: linear-gradient(135deg, #1e3a8a, #2563eb);
+  
+  /* Asegura que las imágenes de fondo se vean bien */
   background-size: cover;
   background-position: center;
+  background-repeat: no-repeat;
+  
   position: relative;
   z-index: 0;
 }
@@ -186,18 +271,13 @@ footer {
   margin-bottom: 30px;
 }
 
-/* --- SOLUCIÓN DEFINITIVA PARA EL ICONO --- */
+/* LIMPIEZA DEL ICONO INTERNO */
 .page-icon {
   width: 70px;
   height: 70px;
-
-  /* IMPORTANTE: Esto evita cortes y muestra la imagen entera */
   object-fit: contain;
-
   margin-right: 18px;
   flex-shrink: 0;
-
-  /* IMPORTANTE: Esto fuerza a borrar cualquier cuadro, fondo o borde */
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
@@ -242,8 +322,8 @@ footer {
   margin-bottom: 10px;
 }
 
-/* NUEVA ACTUALIZACIÓN: Centrado óptico de la flecha SVG */
+/* Ajuste del botón SVG de volver */
 .back-floating svg {
   display: block;
-  margin-right: 2px; /* Ajuste para que la flecha se vea en el centro visual exacto */
+  margin-right: 2px;
 }
