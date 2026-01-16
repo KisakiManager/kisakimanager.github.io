@@ -133,9 +133,15 @@ footer {
 /* Fondo superior */
 .page-header {
   height: 240px;
+  /* Fondo por defecto (si no hay imagen) */
   background: linear-gradient(135deg, #1e3a8a, #2563eb);
+  
+  /* IMPORTANTE: Estas líneas aseguran que tus imágenes de fondo 
+     se ajusten bien y no se repitan */
   background-size: cover;
   background-position: center;
+  background-repeat: no-repeat;
+  
   position: relative;
   z-index: 0;
 }
@@ -190,14 +196,11 @@ footer {
 .page-icon {
   width: 70px;
   height: 70px;
-
-  /* IMPORTANTE: Esto evita cortes y muestra la imagen entera */
-  object-fit: contain;
-
+  object-fit: contain; /* Evita cortes */
   margin-right: 18px;
   flex-shrink: 0;
-
-  /* IMPORTANTE: Esto fuerza a borrar cualquier cuadro, fondo o borde */
+  
+  /* Fuerza borrar estilos heredados no deseados */
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
@@ -245,5 +248,5 @@ footer {
 /* NUEVA ACTUALIZACIÓN: Centrado óptico de la flecha SVG */
 .back-floating svg {
   display: block;
-  margin-right: 2px; /* Ajuste para que la flecha se vea en el centro visual exacto */
+  margin-right: 2px; /* Ajuste visual para el centro */
 }
