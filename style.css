@@ -1,136 +1,264 @@
+/* =========================================
+   1. RESET Y ESTILOS GENERALES
+   ========================================= */
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  background: radial-gradient(circle at top, #0d1b2a, #02040a);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  /* Fondo general de la ventana (Gris azulado suave) */
+  background-color: #cbd5e1; 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px; /* Margen en móviles */
+  box-sizing: border-box;
+  color: #1f2937;
+}
+
+/* =========================================
+   2. ESTILOS DEL DASHBOARD (INDEX.HTML)
+   ========================================= */
+
+/* Marco Principal (La "App" flotante) */
+.dashboard-wrapper {
+  display: flex;
+  width: 100%;
+  max-width: 1100px;
+  height: 650px; /* Altura fija para parecer app de escritorio */
+  background: #ffffff;
+  border-radius: 30px;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* --- Panel Izquierdo (Sidebar Negro) --- */
+.sidebar {
+  width: 260px;
+  background: #111111; /* Negro mate estilo Flux */
   color: #ffffff;
-}
-
-.container {
-  max-width: 480px;
-  margin: auto;
-  padding: 40px 20px;
-  text-align: center;
-}
-
-/* ALINEACIÓN DE TEXTO */
-.text {
-  text-align: left;
-}
-
-.text h1,
-.text h2 {
-  text-align: left;
-}
-
-.subtitle {
-  color: #9fb3c8;
-  margin-bottom: 30px;
-}
-
-/* --- SECCIÓN DE BOTONES (INDEX) --- */
-.buttons {
+  padding: 30px;
   display: flex;
   flex-direction: column;
-  gap: 15px;
-  width: 100%;
-}
-
-.btn {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-
-  background: #2563eb;
-  color: #ffffff;
-
-  padding: 16px 20px;
-  border-radius: 16px;
-  width: 100%;
-  box-sizing: border-box;
-
-  text-decoration: none;
-  cursor: pointer;
-
-  transition: transform 0.2s ease, background 0.2s;
-  position: relative;
-  overflow: hidden;
-}
-
-.btn:hover {
-  background: #1d4ed8;
-  transform: translateY(-2px);
-}
-
-.btn:active {
-  transform: scale(0.98);
-}
-
-/* IMAGEN DENTRO DEL BOTÓN (INDEX) */
-.btn-icon {
-  width: 35px;
-  height: 35px;
-  margin-right: 15px;
-  object-fit: contain;
   flex-shrink: 0;
 }
 
-/* TEXTO DEL BOTÓN */
-.btn-text {
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 40px;
+}
+
+.sidebar-logo {
+  width: 32px;
+  height: auto;
+}
+
+.sidebar-header span {
+  font-weight: 700;
+  font-size: 1.2em;
+  letter-spacing: 0.5px;
+}
+
+/* Navegación */
+.nav-menu {
+  flex-grow: 1;
   display: flex;
   flex-direction: column;
-  text-align: left;
+  gap: 5px;
 }
 
-.btn-title {
-  font-size: 1.05em;
+.nav-label {
+  font-size: 0.75em;
+  text-transform: uppercase;
+  color: #6b7280;
+  margin-bottom: 8px;
   font-weight: 700;
-  line-height: 1.2;
+  letter-spacing: 0.5px;
 }
 
-.btn-desc {
-  font-size: 0.85em;
-  font-weight: 400;
-  opacity: 0.8;
-  margin-top: 2px;
+.spacer {
+  margin-top: 25px;
 }
 
-/* BOTÓN DE VOLVER */
-.back {
-  margin-top: 30px;
-  justify-content: center;
-  background: transparent;
-  border: 1px solid #2563eb;
-}
-.back:hover {
-  background: #2563eb;
+.nav-item {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: #d1d5db;
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 0.95em;
+  transition: all 0.2s;
 }
 
-/* --- FOOTER Y LOGO --- */
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  transform: translateX(5px);
+}
+
+.nav-item .icon {
+  margin-right: 12px;
+  font-size: 1.1em;
+}
+
+/* Estado del Bot (Abajo izquierda) */
+.sidebar-status {
+  background: #1f1f1f;
+  padding: 15px;
+  border-radius: 16px;
+  margin-top: 20px;
+}
+.sidebar-status p {
+  margin: 0 0 5px 0;
+  font-size: 0.8em;
+  color: #9ca3af;
+}
+.status-badge {
+  color: #ccf381; /* Verde Lima */
+  font-weight: 600;
+  font-size: 0.9em;
+}
+
+/* --- Panel Derecho (Contenido Claro) --- */
+.main-content {
+  flex-grow: 1;
+  background: #f4f4f5; /* Gris muy claro */
+  padding: 50px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Cabecera Derecha */
+.top-bar {
+  margin-bottom: 40px;
+  z-index: 2;
+}
+.top-bar h1 {
+  margin: 0;
+  font-size: 2em;
+  font-weight: 800;
+  color: #111;
+}
+.subtitle {
+  margin: 5px 0 0;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+/* Texto de Bienvenida */
+.welcome-text {
+  max-width: 450px;
+  z-index: 2;
+}
+.welcome-text h2 {
+  font-size: 2.8em;
+  line-height: 1.1;
+  color: #111;
+  margin-bottom: 20px;
+}
+.welcome-text p {
+  line-height: 1.6;
+  color: #4b5563;
+  margin-bottom: 30px;
+  font-size: 1.1em;
+}
+
+/* Botón Verde Lima (Flux Style) */
+.btn-primary {
+  display: inline-block;
+  background: #ccf381; /* Verde Lima */
+  color: #111; /* Texto oscuro */
+  padding: 15px 30px;
+  border-radius: 50px;
+  text-decoration: none;
+  font-weight: 700;
+  box-shadow: 0 10px 20px rgba(204, 243, 129, 0.4);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 25px rgba(204, 243, 129, 0.6);
+}
+
+/* Imagen de Fondo Lateral */
+.hero-image-wrapper {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 50%;
+  height: 100%;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  
+  /* Máscara de desvanecimiento hacia la izquierda */
+  mask-image: linear-gradient(to right, transparent 5%, black 40%);
+  -webkit-mask-image: linear-gradient(to right, transparent 5%, black 40%);
+  opacity: 0.9;
+}
+
+/* Footer del Dashboard */
 footer {
-  margin-top: 40px;
+  margin-top: auto;
   font-size: 0.85em;
-  color: #7b8fa6;
-  text-align: center;
+  color: #9ca3af;
+  z-index: 2;
+  text-align: right; /* Alineado a la derecha en el panel */
 }
 
-.footer-logo {
-  width: 28px;
-  height: auto;
-  display: block;
-  margin: 15px auto 0;
-  opacity: 0.6;
-  transition: opacity 0.3s ease;
+/* RESPONSIVE (MÓVIL) */
+@media (max-width: 850px) {
+  .dashboard-wrapper {
+    flex-direction: column;
+    height: auto;
+    border-radius: 20px;
+  }
+  .sidebar {
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+    align-items: center; 
+  }
+  .nav-menu {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+  .nav-label, .sidebar-status { display: none; } /* Simplificar en móvil */
+  
+  .main-content { padding: 30px 20px; }
+  .welcome-text h2 { font-size: 2em; }
+  
+  .hero-image-wrapper {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    margin-top: 20px;
+    mask-image: linear-gradient(to top, black, transparent);
+    -webkit-mask-image: linear-gradient(to top, black, transparent);
+  }
+  footer { text-align: center; }
 }
 
-.footer-logo:hover {
-  opacity: 1;
-}
 
 /* =========================================================
-   PÁGINAS DE DETALLE (ESTILO MODAL)
+   3. ESTILOS PARA LAS PÁGINAS INTERNAS (Payments, Terms...)
+   (Conservados para que no se rompan)
    ========================================================= */
 
-/* Fondo superior */
+/* Fondo superior de las páginas internas */
 .page-header {
   height: 240px;
   background: linear-gradient(135deg, #1e3a8a, #2563eb);
@@ -160,15 +288,19 @@ footer {
   transition: background 0.2s, transform 0.2s;
   z-index: 10;
 }
-
+.back-floating svg {
+  display: block;
+  margin-right: 2px;
+}
 .back-floating:hover {
   background: rgba(37, 99, 235, 0.8);
   transform: scale(1.1);
 }
 
-/* Tarjeta de Contenido */
+/* Tarjeta de Contenido Interna (Oscura) */
 .content-card {
-  background: #02040a;
+  background: #02040a; /* Fondo negro profundo */
+  color: #ffffff; /* Texto blanco */
   border-top: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 30px 30px 0 0;
   padding: 35px 25px;
@@ -177,27 +309,23 @@ footer {
   z-index: 1;
   min-height: 60vh;
   box-shadow: 0 -10px 30px rgba(0,0,0,0.6);
+  max-width: 600px; /* Centrado en pantallas grandes */
+  margin-left: auto;
+  margin-right: auto;
 }
 
-/* Encabezado interno */
 .card-header-inner {
   display: flex;
   align-items: center;
   margin-bottom: 30px;
 }
 
-/* --- SOLUCIÓN DEFINITIVA PARA EL ICONO --- */
 .page-icon {
   width: 70px;
   height: 70px;
-
-  /* IMPORTANTE: Esto evita cortes y muestra la imagen entera */
   object-fit: contain;
-
   margin-right: 18px;
   flex-shrink: 0;
-
-  /* IMPORTANTE: Esto fuerza a borrar cualquier cuadro, fondo o borde */
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
@@ -208,6 +336,7 @@ footer {
   margin: 0;
   font-size: 1.6em;
   color: #ffffff;
+  text-align: left;
 }
 
 .page-title span {
@@ -217,7 +346,6 @@ footer {
   margin-top: 5px;
 }
 
-/* Texto del cuerpo */
 .card-body p {
   line-height: 1.6;
   color: #cbd5e1;
@@ -231,6 +359,7 @@ footer {
   color: #ffffff;
   border-left: 4px solid #2563eb; 
   padding-left: 12px;
+  text-align: left;
 }
 
 .card-body ul {
@@ -240,10 +369,4 @@ footer {
 
 .card-body li {
   margin-bottom: 10px;
-}
-
-/* NUEVA ACTUALIZACIÓN: Centrado óptico de la flecha SVG */
-.back-floating svg {
-  display: block;
-  margin-right: 2px; /* Ajuste para que la flecha se vea en el centro visual exacto */
 }
