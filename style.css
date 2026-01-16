@@ -2,43 +2,42 @@
 body {
   margin: 0;
   font-family: 'Inter', system-ui, sans-serif;
-  background-color: #cbd5e1; /* Fondo gris externo */
+  background-color: #cbd5e1; /* Fondo escritorio */
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  padding: 20px;
   box-sizing: border-box;
   color: #1f2937;
 }
 
-/* --- CONTENEDOR PRINCIPAL FLUX --- */
+/* CONTENEDOR PRINCIPAL (ESCRITORIO) */
 .flux-dashboard {
   display: flex;
   width: 100%;
   max-width: 1100px;
-  height: 650px; /* Altura fija en escritorio */
+  height: 650px;
   background: #ffffff;
-  border-radius: 35px; /* ¡Esquinas redondeadas globales! */
-  overflow: hidden;    /* Importante para mantener la forma */
+  border-radius: 35px;
+  overflow: hidden;
   box-shadow: 0 30px 60px rgba(0,0,0,0.15);
   position: relative;
 }
 
-/* BOTÓN HAMBURGUESA (Móvil) */
-.mobile-menu-btn {
+/* BOTÓN HAMBURGUESA (MÓVIL) */
+.menu-toggle {
   display: none; /* Oculto en PC */
   position: absolute;
-  top: 20px;
+  top: 25px;
   left: 20px;
-  z-index: 100;
-  background: none;
+  z-index: 200; /* Encima de todo */
+  background: transparent;
   border: none;
   cursor: pointer;
   padding: 5px;
 }
 
-/* --- SIDEBAR IZQUIERDA (Negra) --- */
+/* --- SIDEBAR IZQUIERDA (NEGRA) --- */
 .sidebar {
   width: 260px;
   background: #111111;
@@ -47,7 +46,8 @@ body {
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  transition: transform 0.3s ease; /* Animación para móvil */
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 300;
 }
 
 .sidebar-header {
@@ -58,108 +58,69 @@ body {
 }
 
 .brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: 700;
-  font-size: 1.1em;
+  display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.1em;
 }
 .sidebar-logo { width: 30px; height: auto; }
 
-/* Botón X cerrar (oculto en PC) */
+/* Botón X cerrar */
 .close-btn {
-  display: none;
-  background: none;
-  border: none;
-  cursor: pointer;
+  display: none; /* Solo móvil */
+  background: none; border: none; cursor: pointer;
 }
 
-/* MENU NAV */
+/* MENÚ NAVEGACIÓN */
 .nav-menu {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  flex-grow: 1; display: flex; flex-direction: column; gap: 5px; overflow-y: auto;
 }
 
 .nav-label {
-  font-size: 0.75em;
-  text-transform: uppercase;
-  color: #6b7280;
-  font-weight: 700;
-  margin-bottom: 5px;
-  padding-left: 10px;
+  font-size: 0.75em; text-transform: uppercase; color: #6b7280; font-weight: 700;
+  margin-top: 15px; margin-bottom: 5px; padding-left: 10px;
 }
 .spacer { margin-top: 20px; }
 
-/* Botones del Menú */
 .nav-btn {
-  background: transparent;
-  border: none;
-  color: #d1d5db;
-  width: 100%;
-  text-align: left;
-  padding: 12px 15px;
-  border-radius: 14px;
-  font-size: 0.95em;
-  font-family: inherit;
-  font-weight: 500;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
+  background: transparent; border: none; color: #9ca3af;
+  width: 100%; text-align: left; padding: 12px 15px;
+  border-radius: 14px; font-size: 0.95em; font-family: inherit; font-weight: 500;
+  cursor: pointer; display: flex; align-items: center; gap: 12px;
   transition: all 0.2s;
 }
 
-.nav-btn .icon { margin-right: 12px; }
+.nav-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
 
-.nav-btn:hover {
-  background: rgba(255,255,255,0.1);
-  color: #fff;
-}
-
-/* ESTADO ACTIVO (El botón resaltado) */
+/* ACTIVO */
 .nav-btn.active {
-  background: #ffffff; /* Fondo blanco */
-  color: #000;         /* Texto negro */
-  font-weight: 700;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  background: #fff; color: #000; font-weight: 700;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
 
-/* Footer Sidebar */
-.sidebar-footer { margin-top: auto; }
-.status-box {
-  background: #1f1f1f;
-  padding: 10px 15px;
-  border-radius: 12px;
-  font-size: 0.8em;
-  color: #aaa;
-  display: flex; align-items: center; gap: 8px;
-}
-.dot {
-  width: 8px; height: 8px; background: #ccf381; border-radius: 50%;
+.sidebar-footer { margin-top: auto; padding-top: 20px; }
+.status-badge {
+  background: #1f1f1f; color: #ccf381; padding: 8px 12px;
+  border-radius: 10px; font-size: 0.8em; text-align: center;
 }
 
-/* --- PANEL DERECHO (Contenido) --- */
+/* --- PANEL DERECHO (CONTENIDO) --- */
 .main-content {
   flex-grow: 1;
   background: #f4f4f5; /* Gris claro */
   padding: 50px;
   position: relative;
-  overflow-y: auto; /* Scroll si el texto es largo */
+  overflow-y: auto; /* Scroll vertical */
+  display: flex; flex-direction: column;
 }
 
-/* SECCIONES (Lógica de pestañas) */
+/* SECCIONES */
 .content-section {
-  display: none; /* Ocultas por defecto */
-  animation: fadeIn 0.3s ease;
-  height: 100%;
-}
-.content-section.active-section {
-  display: flex; /* Visible solo la activa */
+  display: none; /* Oculto */
   flex-direction: column;
+  animation: fadeIn 0.4s ease;
+  min-height: 100%;
 }
+.active-section { display: flex; }
 
-/* Estilos de Texto dentro del panel */
+/* TIPOGRAFÍA PANEL */
 .section-header h1 {
   font-size: 2.2em; font-weight: 800; margin: 0; color: #111; letter-spacing: -1px;
 }
@@ -167,42 +128,34 @@ body {
   color: #6b7280; margin: 5px 0 30px 0; font-weight: 500;
 }
 
-.text-content h3 {
-  margin-top: 25px; margin-bottom: 10px; color: #111;
-  border-left: 4px solid #ccf381; padding-left: 10px;
+/* ESTILOS DE TEXTO INTERNO */
+.text-block h3 {
+  color: #111; margin-top: 25px; margin-bottom: 10px; font-size: 1.2em;
+  border-left: 4px solid #ccf381; padding-left: 12px;
 }
-.text-content p, .text-content li {
-  line-height: 1.6; color: #4b5563;
+.text-block p, .text-block li {
+  line-height: 1.6; color: #4b5563; margin-bottom: 15px;
 }
-.text-content ul { padding-left: 20px; }
+.text-block ul { padding-left: 20px; margin-bottom: 20px; }
 
-/* Bienvenida Home */
-.welcome-container { max-width: 450px; z-index: 2; position: relative; }
-.welcome-container h2 { font-size: 2.5em; line-height: 1.1; margin-bottom: 20px; color: #111; }
-.welcome-container p { margin-bottom: 30px; color: #555; font-size: 1.1em; }
+/* Bienvenida */
+.welcome-box h2 {
+  font-size: 2.8em; line-height: 1.1; margin-bottom: 20px; color: #111;
+}
+.welcome-box p {
+  font-size: 1.1em; color: #555; margin-bottom: 30px; max-width: 500px;
+}
 
 .btn-flux {
   display: inline-block;
-  background: #ccf381; /* Verde Lima */
-  color: #000;
-  padding: 15px 30px;
-  border-radius: 50px;
-  text-decoration: none;
-  font-weight: 700;
+  background: #ccf381; color: #000;
+  padding: 16px 32px; border-radius: 50px;
+  text-decoration: none; font-weight: 700;
   box-shadow: 0 10px 20px rgba(204, 243, 129, 0.4);
-  transition: transform 0.2s;
 }
-.btn-flux:hover { transform: translateY(-3px); }
 
-/* Imagen Home */
-.hero-image {
-  position: absolute; top: 0; right: 0; bottom: 0; width: 50%;
-  pointer-events: none; overflow: hidden;
-}
-.hero-image img {
-  width: 100%; height: 100%; object-fit: cover; object-position: center left;
-  mask-image: linear-gradient(to right, transparent, black 20%);
-  -webkit-mask-image: linear-gradient(to right, transparent, black 20%);
+footer {
+  margin-top: auto; color: #9ca3af; font-size: 0.85em; padding-top: 40px;
 }
 
 @keyframes fadeIn {
@@ -211,41 +164,50 @@ body {
 }
 
 /* =========================================
-   RESPONSIVE (MÓVIL iOS STYLE)
+   RESPONSIVE (MÓVIL TOTAL)
    ========================================= */
 @media (max-width: 850px) {
+  
+  /* 1. Resetear el body para pantalla completa */
+  body {
+    padding: 0;
+    align-items: flex-start; /* Alinear arriba */
+    background: #f4f4f5; /* Mismo color que el panel */
+  }
+
+  /* 2. Dashboard ocupa 100% */
   .flux-dashboard {
-    height: 100vh; /* Pantalla completa en móvil */
-    border-radius: 0; /* Sin bordes en móvil */
+    max-width: 100%;
+    height: 100vh; /* Altura completa */
+    border-radius: 0; /* Sin bordes */
     flex-direction: column;
+    box-shadow: none;
   }
 
-  .mobile-menu-btn { display: block; } /* Mostrar hamburguesa */
-  
-  /* Sidebar Off-Canvas (Oculto a la izquierda) */
+  /* 3. Botón Hamburguesa Visible */
+  .menu-toggle { display: block; }
+
+  /* 4. Sidebar Oculta (Off-Canvas) */
   .sidebar {
-    position: absolute;
+    position: fixed; /* Flotante */
     top: 0; left: 0; bottom: 0;
-    width: 80%; /* Ocupa 80% de la pantalla */
-    z-index: 1000;
-    transform: translateX(-100%); /* Oculto */
-    box-shadow: 5px 0 20px rgba(0,0,0,0.5);
-  }
-  
-  /* Clase para abrir sidebar */
-  .sidebar.open {
-    transform: translateX(0); /* Visible */
+    width: 85%; /* Ancho cómodo */
+    max-width: 300px;
+    transform: translateX(-100%); /* Escondido a la izquierda */
+    box-shadow: 10px 0 30px rgba(0,0,0,0.5);
   }
 
-  .close-btn { display: block; } /* Mostrar la X en móvil */
+  /* Clase para abrir */
+  .sidebar.open { transform: translateX(0); }
 
+  .close-btn { display: block; } /* X visible */
+
+  /* 5. Contenido Principal */
   .main-content {
-    padding: 70px 20px 30px 20px; /* Espacio arriba para el botón hamburguesa */
+    padding: 80px 25px 30px 25px; /* Espacio superior para el botón */
   }
-  
-  .hero-image {
-    position: relative; width: 100%; height: 200px; margin-top: 30px;
-    mask-image: linear-gradient(to top, black, transparent);
-    -webkit-mask-image: linear-gradient(to top, black, transparent);
-  }
+
+  /* Ajuste de textos en móvil */
+  .section-header h1 { font-size: 1.8em; }
+  .welcome-box h2 { font-size: 2.2em; }
 }
