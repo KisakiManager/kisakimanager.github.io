@@ -67,8 +67,8 @@ body {
 
 /* IMAGEN DENTRO DEL BOTÓN (INDEX) */
 .btn-icon {
-  width: 90px;
-  height: 90px;
+  width: 30px;
+  height: 30px;
   margin-right: 15px;
   object-fit: contain;
   flex-shrink: 0;
