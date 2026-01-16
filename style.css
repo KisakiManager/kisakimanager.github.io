@@ -1,22 +1,22 @@
 /* =========================================
-   1. CONFIGURACIÓN GENERAL (DASHBOARD)
+   1. CONFIGURACIÓN GENERAL (SOLO PARA EL DASHBOARD/INDEX)
    ========================================= */
 body {
   margin: 0;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  /* Configuración por defecto para el Dashboard (Claro y Centrado) */
+  /* Esto centra la tarjeta del Dashboard en el medio de la pantalla */
   background-color: #e0e7ff; 
-  color: #1f2937;
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
   padding: 20px;
   box-sizing: border-box;
+  color: #1f2937;
 }
 
 /* =========================================
-   2. EL CONTENEDOR "FLUX" (INDEX)
+   2. EL DASHBOARD "FLUX" (ESTRUCTURA PRINCIPAL)
    ========================================= */
 .flux-dashboard {
   display: flex;
@@ -29,7 +29,7 @@ body {
   background: #ffffff;
 }
 
-/* --- SIDEBAR IZQUIERDO --- */
+/* --- SIDEBAR IZQUIERDO (NEGRO) --- */
 .sidebar-left {
   width: 280px;
   background-color: #111111;
@@ -79,15 +79,9 @@ body {
   transform: translateX(5px);
 }
 
-.nav-link .icon {
-  margin-right: 12px;
-  width: 20px;
-  text-align: center;
-}
+.nav-link .icon { margin-right: 12px; width: 20px; text-align: center; }
 
-.sidebar-footer-info { font-size: 0.8em; color: #4b5563; }
-
-/* --- PANEL DERECHO --- */
+/* --- PANEL DERECHO (CLARO) --- */
 .main-panel-right {
   flex-grow: 1;
   background-color: #f2f4f6;
@@ -116,15 +110,11 @@ body {
   box-shadow: 0 10px 20px rgba(204, 243, 129, 0.4);
   transition: transform 0.2s, box-shadow 0.2s;
 }
-.btn-flux-action:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 15px 30px rgba(204, 243, 129, 0.6);
-}
 
 .flux-image-overlay {
   position: absolute;
   top: 0; right: 0; bottom: 0;
-  width: 45%;
+  width: 50%;
   z-index: 1;
   overflow: hidden;
   pointer-events: none;
@@ -136,20 +126,14 @@ body {
   -webkit-mask-image: linear-gradient(to right, transparent, black 15%);
   opacity: 0.9;
 }
-
 .panel-footer { margin-top: auto; font-size: 0.85em; color: #9ca3af; z-index: 2; }
 
 /* =========================================
-   3. RESPONSIVE (MÓVIL)
+   3. RESPONSIVE MÓVIL (INDEX)
    ========================================= */
 @media (max-width: 850px) {
-  .flux-dashboard {
-    flex-direction: column; height: auto; border-radius: 0; overflow: visible;
-  }
-  .sidebar-left {
-    width: 100%; height: auto; padding: 20px;
-    display: flex; flex-direction: column; gap: 15px;
-  }
+  .flux-dashboard { flex-direction: column; height: auto; border-radius: 0; overflow: visible; }
+  .sidebar-left { width: 100%; padding: 20px; gap: 15px; }
   .logo-area { margin-bottom: 0; width: 100%; }
   
   .nav-menu {
@@ -158,37 +142,28 @@ body {
     -ms-overflow-style: none; scrollbar-width: none;
   }
   .nav-menu::-webkit-scrollbar { display: none; }
-  
   .nav-section-label, .spacer { display: none; }
-  .nav-link {
-    background-color: rgba(255, 255, 255, 0.15);
-    padding: 8px 15px; border-radius: 20px; font-size: 0.85em; flex-shrink: 0;
-  }
-  .main-panel-right {
-    padding: 30px 20px; border-radius: 30px 30px 0 0;
-    margin-top: -20px; background: #f2f4f6; z-index: 10;
-  }
-  .flux-image-overlay {
-    position: relative; width: 100%; height: 250px; margin-top: 30px; opacity: 0.8;
-    mask-image: linear-gradient(to top, black, transparent);
-    -webkit-mask-image: linear-gradient(to top, black, transparent);
-  }
+  .nav-link { background-color: rgba(255, 255, 255, 0.15); padding: 8px 15px; border-radius: 20px; font-size: 0.85em; flex-shrink: 0; }
+  
+  .main-panel-right { padding: 30px 20px; border-radius: 30px 30px 0 0; margin-top: -20px; background: #f2f4f6; z-index: 10; }
+  .flux-image-overlay { position: relative; width: 100%; height: 250px; margin-top: 30px; opacity: 0.8; mask-image: linear-gradient(to top, black, transparent); -webkit-mask-image: linear-gradient(to top, black, transparent); }
 }
 
-/* =========================================================
-   4. MODO OSCURO (PÁGINAS INTERNAS) - LA SOLUCIÓN
-   ========================================================= */
+/* ==========================================================================
+   4. CLASE MAESTRA PARA PÁGINAS INTERNAS (ESTO ARREGLA EL PROBLEMA)
+   ========================================================================== */
 
-/* Esta clase se pone en el <body> de payments.html, terms.html, etc. */
-body.dark-mode {
-  display: block; /* IMPORTANTE: Quita el centrado flex del dashboard */
-  padding: 0;     /* Quita los márgenes del dashboard */
-  background: radial-gradient(circle at top, #0d1b2a, #02040a); /* Fondo Oscuro Original */
-  color: #ffffff;
-  min-height: 100vh;
+/* Esta clase se encarga de "romper" el diseño del dashboard y restaurar el modo oscuro */
+body.internal-page {
+  display: block !important;       /* Quita el Flexbox centrado */
+  padding: 0 !important;           /* Quita los márgenes blancos */
+  background: radial-gradient(circle at top, #0d1b2a, #02040a) !important; /* Fondo negro */
+  color: #ffffff !important;
+  height: auto !important;
+  overflow-y: auto !important;
 }
 
-/* Encabezado con imagen de fondo */
+/* Header con imagen para las páginas internas */
 .page-header {
   height: 240px;
   width: 100%;
@@ -198,30 +173,19 @@ body.dark-mode {
   z-index: 0;
 }
 
-/* Botón flotante SVG (Flecha iOS) */
+/* Botón flotante SVG (Flecha) */
 .back-floating {
   position: absolute;
   top: 25px; left: 20px;
-  background: rgba(0, 0, 0, 0.4); /* Fondo oscuro transparente */
+  background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   width: 44px; height: 44px;
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  z-index: 20; /* Capa superior para que se pueda tocar */
-  transition: transform 0.2s;
+  z-index: 20;
 }
-
-.back-floating svg {
-  display: block;
-  margin-right: 2px; /* Ajuste visual */
-  stroke: #ffffff; /* Asegura que la línea sea blanca */
-}
-
-.back-floating:hover {
-  background: rgba(37, 99, 235, 0.8);
-  transform: scale(1.1);
-}
+.back-floating svg { display: block; margin-right: 2px; stroke: #ffffff; }
 
 /* Tarjeta Modal Oscura */
 .content-card {
@@ -230,38 +194,23 @@ body.dark-mode {
   border-top: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 30px 30px 0 0;
   padding: 35px 25px;
-  margin-top: -50px; /* Sube sobre la imagen */
+  margin-top: -50px;
   position: relative;
   z-index: 10;
-  min-height: 60vh;
+  min-height: 100vh; /* Ocupa al menos toda la pantalla */
   box-shadow: 0 -10px 30px rgba(0,0,0,0.6);
 }
 
-/* Estilos internos de la tarjeta */
 .card-header-inner { display: flex; align-items: center; margin-bottom: 30px; }
-
-.page-icon {
-  width: 70px; height: 70px;
-  object-fit: contain;
-  margin-right: 18px;
-  flex-shrink: 0;
-  background: transparent !important;
-  border: none !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
+.page-icon { 
+  width: 70px; height: 70px; object-fit: contain; margin-right: 18px; flex-shrink: 0; 
+  background: transparent !important; border: none !important; border-radius: 0 !important; box-shadow: none !important; 
 }
-
 .page-title h1 { margin: 0; font-size: 1.6em; color: white; text-align: left; }
-.page-title span { display: block; color: #94a3b8; font-size: 0.9em; text-align: left; margin-top: 5px;}
+.page-title span { display: block; color: #94a3b8; font-size: 0.9em; text-align: left; margin-top: 5px; }
 
+/* Textos internos */
 .card-body p, .card-body li { color: #cbd5e1; line-height: 1.6; text-align: left; }
-.card-body h2 { 
-  color: white; 
-  margin-top: 35px; 
-  margin-bottom: 15px;
-  border-left: 4px solid #2563eb; 
-  padding-left: 12px; 
-  text-align: left;
-}
+.card-body h2 { color: white; margin-top: 35px; margin-bottom: 15px; border-left: 4px solid #2563eb; padding-left: 12px; text-align: left; }
 .card-body ul { padding-left: 20px; color: #cbd5e1; text-align: left; }
 .card-body li { margin-bottom: 10px; }
