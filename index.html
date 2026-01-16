@@ -2,76 +2,75 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Kisaki Manager - Inicio</title>
+  <title>Kisaki Manager - Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-  <div class="dashboard-wrapper">
+  <div class="flux-dashboard">
 
-    <aside class="sidebar">
+    <aside class="sidebar-left">
       
-      <div class="sidebar-header">
-        <img src="logo.svg" alt="Kisaki Logo" class="sidebar-logo">
-      </div>
+      <div class="logo-area">
+        <img src="logo.svg" alt="Kisaki Logo" class="brand-logo">
+        </div>
 
       <nav class="nav-menu">
-        <p class="nav-label">Legal</p>
         
-        <a href="payments.html" class="nav-item">
-          <span class="icon">💳</span> Política de Pagos
+        <div class="nav-section-label">Legal</div>
+        
+        <a href="payments.html" class="nav-link">
+          <span class="icon">💳</span> Pagos
         </a>
-        <a href="privacy.html" class="nav-item">
+        <a href="privacy.html" class="nav-link">
           <span class="icon">🔐</span> Privacidad
         </a>
-        <a href="terms.html" class="nav-item">
+        <a href="terms.html" class="nav-link">
           <span class="icon">📜</span> Términos
         </a>
-        <a href="minors.html" class="nav-item">
-          <span class="icon">🚸</span> Política de Menores
+        <a href="minors.html" class="nav-link">
+          <span class="icon">🚸</span> Política Menores
         </a>
 
-        <p class="nav-label spacer">Información</p>
-        
-        <a href="about.html" class="nav-item">
-          <span class="icon">ℹ️</span> Sobre Kisaki (About)
+        <div class="nav-section-label spacer">Info</div>
+
+        <a href="about.html" class="nav-link">
+          <span class="icon">ℹ️</span> Sobre Kisaki
         </a>
       </nav>
 
-      <div class="sidebar-status">
-        <p>Estado del Bot</p>
-        <span class="status-badge">🟢 Online v2.0</span>
+      <div class="sidebar-footer-info">
+        <p>v2.0 Stable</p>
       </div>
 
     </aside>
 
+    <main class="main-panel-right">
 
-    <main class="main-content">
-      
-      <header class="top-bar">
+      <header class="panel-header">
         <h1>Kisaki Manager</h1>
-        <p class="subtitle">Gestión de canales inteligente</p>
+        <p>Dashboard Oficial</p>
       </header>
 
-      <div class="welcome-text">
-        <h2>Lleva tu comunidad<br>al siguiente nivel.</h2>
+      <div class="welcome-container">
+        <h2>Bienvenido al futuro<br>de la gestión.</h2>
         <p>
-          Bienvenido al panel oficial. Kisaki Manager es la herramienta definitiva 
-          para administrar, moderar y escalar tus canales de Telegram con seguridad.
+          Administra tus canales de Telegram con herramientas avanzadas de moderación, 
+          pagos y estadísticas. Únete hoy mismo y potencia tu comunidad.
         </p>
-        
-        <a href="https://t.me/TuBotUser" class="btn-primary">
+
+        <a href="https://t.me/TuBotUser" class="btn-flux-action">
           Unirme en Telegram ✈️
         </a>
       </div>
 
-      <div class="hero-image-wrapper">
-        <img src="hero-bg.jpg" alt="Fondo Decorativo" class="hero-img">
+      <div class="flux-image-overlay">
+        <img src="hero-flux.png" alt="Personaje Kisaki" class="half-image">
       </div>
 
-      <footer>
+      <footer class="panel-footer">
         © Kisaki Manager • Dog Geek Labs
       </footer>
 
