@@ -1,63 +1,52 @@
 /* =========================================
-   1. RESET Y ESTILOS GENERALES
+   1. CONFIGURACIÓN GENERAL
    ========================================= */
 body {
   margin: 0;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  /* Fondo general de la ventana (Gris azulado suave) */
-  background-color: #cbd5e1; 
+  /* Fondo general de la página (fuera del cuadro) */
+  background-color: #e0e7ff; 
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  padding: 20px; /* Margen en móviles */
+  padding: 20px;
   box-sizing: border-box;
   color: #1f2937;
 }
 
-/* =========================================
-   2. ESTILOS DEL DASHBOARD (INDEX.HTML)
-   ========================================= */
-
-/* Marco Principal (La "App" flotante) */
-.dashboard-wrapper {
-  display: flex;
+/* EL CONTENEDOR "FLUX" (La tarjeta flotante principal) */
+.flux-dashboard {
+  display: flex; /* Divide en izquierda y derecha */
   width: 100%;
-  max-width: 1100px;
-  height: 650px; /* Altura fija para parecer app de escritorio */
+  max-width: 1000px;
+  height: 600px; /* Altura fija para parecer una App */
+  border-radius: 40px; /* Bordes muy redondeados estilo Flux */
+  overflow: hidden;    /* Corta todo lo que salga del borde */
+  box-shadow: 0 30px 60px rgba(0,0,0,0.2); /* Sombra elegante */
   background: #ffffff;
-  border-radius: 30px;
-  overflow: hidden;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
 
-/* --- Panel Izquierdo (Sidebar Negro) --- */
-.sidebar {
-  width: 260px;
-  background: #111111; /* Negro mate estilo Flux */
+/* =========================================
+   2. PANEL IZQUIERDO (SIDEBAR NEGRO)
+   ========================================= */
+.sidebar-left {
+  width: 280px; /* Ancho fijo */
+  background-color: #111111; /* Negro mate de la imagen */
   color: #ffffff;
-  padding: 30px;
+  padding: 40px 30px;
   display: flex;
   flex-direction: column;
-  flex-shrink: 0;
+  flex-shrink: 0; /* No se encoge */
 }
 
-.sidebar-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 40px;
+/* Logo Superior Izquierdo */
+.logo-area {
+  margin-bottom: 50px;
 }
-
-.sidebar-logo {
-  width: 32px;
+.brand-logo {
+  width: 45px; /* Tamaño del logo */
   height: auto;
-}
-
-.sidebar-header span {
-  font-weight: 700;
-  font-size: 1.2em;
-  letter-spacing: 0.5px;
 }
 
 /* Navegación */
@@ -65,308 +54,226 @@ body {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 10px;
 }
 
-.nav-label {
+.nav-section-label {
   font-size: 0.75em;
   text-transform: uppercase;
-  color: #6b7280;
-  margin-bottom: 8px;
+  color: #6b7280; /* Gris texto */
   font-weight: 700;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
+  margin-bottom: 5px;
 }
 
 .spacer {
   margin-top: 25px;
 }
 
-.nav-item {
+.nav-link {
   display: flex;
   align-items: center;
   text-decoration: none;
-  color: #d1d5db;
-  padding: 12px;
-  border-radius: 12px;
+  color: #d1d5db; /* Blanco grisáceo */
+  padding: 12px 15px;
+  border-radius: 14px;
   font-size: 0.95em;
-  transition: all 0.2s;
+  font-weight: 500;
+  transition: all 0.2s ease;
 }
 
-.nav-item:hover {
-  background: rgba(255, 255, 255, 0.1);
+/* Efecto Hover en el menú */
+.nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
   color: #ffffff;
   transform: translateX(5px);
 }
 
-.nav-item .icon {
+.nav-link .icon {
   margin-right: 12px;
-  font-size: 1.1em;
+  width: 20px;
+  text-align: center;
 }
 
-/* Estado del Bot (Abajo izquierda) */
-.sidebar-status {
-  background: #1f1f1f;
-  padding: 15px;
-  border-radius: 16px;
-  margin-top: 20px;
-}
-.sidebar-status p {
-  margin: 0 0 5px 0;
+.sidebar-footer-info {
   font-size: 0.8em;
-  color: #9ca3af;
-}
-.status-badge {
-  color: #ccf381; /* Verde Lima */
-  font-weight: 600;
-  font-size: 0.9em;
+  color: #4b5563;
 }
 
-/* --- Panel Derecho (Contenido Claro) --- */
-.main-content {
-  flex-grow: 1;
-  background: #f4f4f5; /* Gris muy claro */
+/* =========================================
+   3. PANEL DERECHO (CONTENIDO CLARO)
+   ========================================= */
+.main-panel-right {
+  flex-grow: 1; /* Ocupa el resto del espacio */
+  background-color: #f2f4f6; /* Gris muy claro estilo Flux */
   padding: 50px;
-  position: relative;
+  position: relative; /* Clave para posicionar la imagen */
   display: flex;
   flex-direction: column;
 }
 
-/* Cabecera Derecha */
-.top-bar {
+/* Header (Nombre Kisaki Manager arriba izquierda) */
+.panel-header {
   margin-bottom: 40px;
-  z-index: 2;
+  z-index: 2; /* Encima de la imagen */
 }
-.top-bar h1 {
-  margin: 0;
-  font-size: 2em;
+.panel-header h1 {
+  font-size: 2.2em;
   font-weight: 800;
-  color: #111;
+  margin: 0;
+  color: #000000;
+  letter-spacing: -1px;
 }
-.subtitle {
+.panel-header p {
   margin: 5px 0 0;
   color: #6b7280;
   font-weight: 500;
 }
 
-/* Texto de Bienvenida */
-.welcome-text {
-  max-width: 450px;
-  z-index: 2;
+/* Contenedor del Texto de Bienvenida */
+.welcome-container {
+  max-width: 450px; /* Limita el ancho para que no tape la imagen */
+  z-index: 2; /* Encima de la imagen */
 }
-.welcome-text h2 {
-  font-size: 2.8em;
+
+.welcome-container h2 {
+  font-size: 2.5em;
   line-height: 1.1;
   color: #111;
   margin-bottom: 20px;
 }
-.welcome-text p {
+
+.welcome-container p {
   line-height: 1.6;
-  color: #4b5563;
-  margin-bottom: 30px;
-  font-size: 1.1em;
+  color: #555;
+  font-size: 1.05em;
+  margin-bottom: 35px;
 }
 
-/* Botón Verde Lima (Flux Style) */
-.btn-primary {
+/* BOTÓN VERDE LIMA (Estilo Flux) */
+.btn-flux-action {
   display: inline-block;
-  background: #ccf381; /* Verde Lima */
-  color: #111; /* Texto oscuro */
-  padding: 15px 30px;
+  background-color: #ccf381; /* COLOR EXACTO DE LA IMAGEN */
+  color: #000000;
+  padding: 16px 32px;
   border-radius: 50px;
   text-decoration: none;
   font-weight: 700;
+  font-size: 1em;
   box-shadow: 0 10px 20px rgba(204, 243, 129, 0.4);
   transition: transform 0.2s, box-shadow 0.2s;
 }
-.btn-primary:hover {
+
+.btn-flux-action:hover {
   transform: translateY(-3px);
-  box-shadow: 0 15px 25px rgba(204, 243, 129, 0.6);
+  box-shadow: 0 15px 30px rgba(204, 243, 129, 0.6);
 }
 
-/* Imagen de Fondo Lateral */
-.hero-image-wrapper {
+/* =========================================
+   4. LA IMAGEN DE FONDO (POSICIONAMIENTO)
+   ========================================= */
+.flux-image-overlay {
   position: absolute;
   top: 0;
   right: 0;
-  width: 50%;
-  height: 100%;
-  z-index: 1;
-  overflow: hidden;
-  pointer-events: none;
+  bottom: 0;
+  width: 45%; /* Ocupa un poco menos de la mitad derecha */
+  z-index: 1; /* Detrás del texto */
+  overflow: hidden; /* Corta la imagen si es muy grande */
+  pointer-events: none; /* Click traspasa la imagen */
 }
 
-.hero-img {
+.half-image {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: center;
+  object-fit: cover; /* Cubre el área */
+  object-position: center left; /* Muestra el lado izquierdo de la imagen */
   
-  /* Máscara de desvanecimiento hacia la izquierda */
-  mask-image: linear-gradient(to right, transparent 5%, black 40%);
-  -webkit-mask-image: linear-gradient(to right, transparent 5%, black 40%);
+  /* MÁSCARA DE DESVANECIMIENTO (Fade-out) */
+  /* Hace que la imagen se desvanezca suavemente hacia la izquierda */
+  mask-image: linear-gradient(to right, transparent, black 15%);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 15%);
   opacity: 0.9;
 }
 
-/* Footer del Dashboard */
-footer {
-  margin-top: auto;
+/* FOOTER */
+.panel-footer {
+  margin-top: auto; /* Empuja el footer al fondo */
   font-size: 0.85em;
   color: #9ca3af;
   z-index: 2;
-  text-align: right; /* Alineado a la derecha en el panel */
 }
 
-/* RESPONSIVE (MÓVIL) */
+/* =========================================
+   5. RESPONSIVE (MÓVIL)
+   ========================================= */
 @media (max-width: 850px) {
-  .dashboard-wrapper {
-    flex-direction: column;
+  .flux-dashboard {
+    flex-direction: column; /* Uno encima de otro */
     height: auto;
-    border-radius: 20px;
+    border-radius: 25px;
   }
-  .sidebar {
+
+  .sidebar-left {
     width: 100%;
-    padding: 20px;
+    padding: 25px;
     box-sizing: border-box;
-    align-items: center; 
+    flex-direction: row; /* Menú horizontal en móvil */
+    align-items: center;
+    justify-content: space-between;
   }
-  .nav-menu {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
+  
+  .nav-menu { display: none; } /* Ocultar menú en móvil o cambiar a icono hamburguesa */
+  
+  .main-panel-right {
+    padding: 30px 25px;
   }
-  .nav-label, .sidebar-status { display: none; } /* Simplificar en móvil */
   
-  .main-content { padding: 30px 20px; }
-  .welcome-text h2 { font-size: 2em; }
-  
-  .hero-image-wrapper {
+  .flux-image-overlay {
     position: relative;
     width: 100%;
-    height: 200px;
-    margin-top: 20px;
+    height: 250px;
+    margin-top: 30px;
     mask-image: linear-gradient(to top, black, transparent);
     -webkit-mask-image: linear-gradient(to top, black, transparent);
   }
-  footer { text-align: center; }
 }
 
-
 /* =========================================================
-   3. ESTILOS PARA LAS PÁGINAS INTERNAS (Payments, Terms...)
-   (Conservados para que no se rompan)
+   ESTILOS NECESARIOS PARA TUS PÁGINAS INTERNAS
+   (Payments, Privacy, Terms...) - NO BORRAR
    ========================================================= */
-
-/* Fondo superior de las páginas internas */
+/* Pega aquí abajo las clases .page-header, .content-card, etc. 
+   que hicimos antes para que las otras páginas sigan funcionando. */
 .page-header {
   height: 240px;
-  background: linear-gradient(135deg, #1e3a8a, #2563eb);
   background-size: cover;
   background-position: center;
   position: relative;
-  z-index: 0;
 }
-
-/* Botón flotante para volver */
 .back-floating {
   position: absolute;
-  top: 25px;
-  left: 20px;
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: white;
-  width: 44px;
-  height: 44px;
+  top: 25px; left: 20px;
+  background: rgba(0,0,0,0.4);
+  width: 44px; height: 44px;
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none;
-  font-size: 1.3em;
-  transition: background 0.2s, transform 0.2s;
+  display: flex; align-items: center; justify-content: center;
   z-index: 10;
 }
-.back-floating svg {
-  display: block;
-  margin-right: 2px;
-}
-.back-floating:hover {
-  background: rgba(37, 99, 235, 0.8);
-  transform: scale(1.1);
-}
+.back-floating svg { display: block; margin-right: 2px; }
 
-/* Tarjeta de Contenido Interna (Oscura) */
 .content-card {
-  background: #02040a; /* Fondo negro profundo */
-  color: #ffffff; /* Texto blanco */
-  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  background: #02040a;
+  color: white;
   border-radius: 30px 30px 0 0;
   padding: 35px 25px;
   margin-top: -50px;
   position: relative;
-  z-index: 1;
   min-height: 60vh;
-  box-shadow: 0 -10px 30px rgba(0,0,0,0.6);
-  max-width: 600px; /* Centrado en pantallas grandes */
-  margin-left: auto;
-  margin-right: auto;
 }
-
-.card-header-inner {
-  display: flex;
-  align-items: center;
-  margin-bottom: 30px;
-}
-
-.page-icon {
-  width: 70px;
-  height: 70px;
-  object-fit: contain;
-  margin-right: 18px;
-  flex-shrink: 0;
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  border-radius: 0 !important;
-}
-
-.page-title h1 {
-  margin: 0;
-  font-size: 1.6em;
-  color: #ffffff;
-  text-align: left;
-}
-
-.page-title span {
-  display: block;
-  font-size: 0.9em;
-  color: #94a3b8;
-  margin-top: 5px;
-}
-
-.card-body p {
-  line-height: 1.6;
-  color: #cbd5e1;
-  margin-bottom: 20px;
-}
-
-.card-body h2 {
-  font-size: 1.3em;
-  margin-top: 35px;
-  margin-bottom: 15px;
-  color: #ffffff;
-  border-left: 4px solid #2563eb; 
-  padding-left: 12px;
-  text-align: left;
-}
-
-.card-body ul {
-  padding-left: 20px;
-  color: #cbd5e1;
-}
-
-.card-body li {
-  margin-bottom: 10px;
-}
+.card-header-inner { display: flex; align-items: center; margin-bottom: 30px; }
+.page-icon { width: 70px; height: 70px; object-fit: contain; margin-right: 18px; }
+.page-title h1 { margin: 0; font-size: 1.6em; color: white; }
+.page-title span { display: block; color: #94a3b8; font-size: 0.9em; }
+.card-body p, .card-body li { color: #cbd5e1; line-height: 1.6; }
+.card-body h2 { color: white; margin-top: 35px; border-left: 4px solid #2563eb; padding-left: 12px; }
