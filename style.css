@@ -1,325 +1,243 @@
-/* =========================================
-   VARIABLES Y RESET
-   ========================================= */
-:root {
-    --bg-dark: #0f0f0f;       /* Fondo súper oscuro (Casi negro) */
-    --bg-sidebar: #141414;    /* Fondo barra lateral */
-    --bg-light: #f4f4f9;      /* Fondo panel derecho (Estilo Flux) */
-    --accent: #ccff33;        /* Verde Kisaki */
-    --text-main: #1c1c1e;     /* Texto oscuro para panel derecho */
-    --text-muted: #8e8e93;    /* Texto gris para detalles */
-    --white: #ffffff;
-    
-    --sidebar-width: 260px;   /* Ancho del menú */
-    --border-radius-card: 24px; /* Redondeado estilo iOS/Flux */
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    -webkit-tap-highlight-color: transparent; /* Elimina flash azul en móviles */
-}
-
 body {
-    background-color: var(--bg-dark);
-    height: 100vh;
-    width: 100vw;
-    overflow: hidden; /* IMPORTANTE: El body no hace scroll, lo hacen los paneles */
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: radial-gradient(circle at top, #0d1b2a, #02040a);
+  color: #ffffff;
 }
 
-/* =========================================
-   CONTENEDOR PRINCIPAL (APP SHELL)
-   ========================================= */
-.app-container {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    background-color: var(--bg-light);
-    overflow: hidden;
+.container {
+  max-width: 480px;
+  margin: auto;
+  padding: 40px 20px;
+  text-align: center; /* Por defecto centra todo */
 }
 
-/* En pantallas grandes (PC/Tablet), le damos forma de "App flotante" */
-@media (min-width: 768px) {
-    .app-container {
-        width: 95vw;
-        height: 92vh;
-        border-radius: 40px; /* Bordes redondeados externos extremos */
-        box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-    }
+/* CLASE PARA ALINEAR A LA IZQUIERDA (Páginas de texto antiguo) */
+.text {
+  text-align: left;
 }
 
-/* =========================================
-   BARRA LATERAL (SIDEBAR)
-   ========================================= */
-.sidebar {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    width: var(--sidebar-width);
-    background-color: var(--bg-sidebar);
-    color: var(--white);
-    display: flex;
-    flex-direction: column;
-    padding: 30px 20px;
-    z-index: 1000;
-    border-right: 1px solid #333; /* La línea divisoria sutil */
-    
-    /* Lógica de ocultamiento */
-    transform: translateX(-100%); /* Oculto a la izquierda por defecto */
-    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); /* Animación suave */
-}
-
-/* Clase activa para mostrar el menú */
-.sidebar.open {
-    transform: translateX(0);
-    box-shadow: 10px 0 30px rgba(0,0,0,0.3); /* Sombra cuando se abre */
-}
-
-/* LOGO KISAKI */
-.logo-area {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 40px;
-    padding-left: 10px;
-}
-
-.logo-area h3 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    letter-spacing: -0.5px;
-}
-
-.logo-icon {
-    font-size: 24px;
-    /* Si usas una imagen real, reemplaza esto por img styles */
-}
-
-/* MENÚ DE NAVEGACIÓN */
-.menu {
-    flex: 1; /* Ocupa el espacio disponible */
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.menu-item {
-    background: transparent;
-    border: none;
-    color: var(--text-muted);
-    width: 100%;
-    padding: 16px 20px;
-    text-align: left;
-    font-size: 1rem;
-    font-weight: 500;
-    border-radius: 16px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.menu-item:hover {
-    color: var(--white);
-    background-color: rgba(255, 255, 255, 0.05);
-}
-
-/* Estado activo (sección seleccionada) */
-.menu-item.active {
-    background-color: var(--accent);
-    color: var(--bg-dark); /* Texto oscuro sobre fondo verde */
-    font-weight: 700;
-    box-shadow: 0 4px 15px rgba(204, 255, 51, 0.2);
-}
-
-/* =========================================
-   BOTÓN FLOTANTE (TOGGLE) EN LA LÍNEA
-   ========================================= */
-.toggle-btn {
-    position: absolute;
-    top: 40px; /* Ajusta la altura a tu gusto */
-    right: -24px; /* (Ancho 48px / 2) = -24px para centrarlo en la línea */
-    
-    width: 48px;
-    height: 48px;
-    background-color: var(--accent); /* Verde Kisaki */
-    border: 4px solid var(--bg-sidebar); /* Borde del color del sidebar para "recortar" */
-    border-radius: 50%;
-    
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--bg-dark);
-    z-index: 1001;
-    box-shadow: 4px 0 15px rgba(0,0,0,0.2);
-    transition: transform 0.3s ease, background-color 0.3s;
-    outline: none;
-}
-
-/* Efecto al presionar */
-.toggle-btn:active {
-    transform: scale(0.9);
-}
-
-/* Cuando el sidebar está cerrado, el botón debe verse pegado al borde izquierdo de la pantalla */
-/* NOTA: Como el sidebar tiene transform -100%, el 'right: -24px' hace que el botón 
-   se vea asomando en la pantalla exactamente como un tirador */
-
-.icon-svg {
-    width: 20px;
-    height: 20px;
-    stroke-width: 2.5;
-}
-
-/* Clases utilitarias para ocultar/mostrar iconos */
-.hidden {
-    display: none;
-}
-
-/* =========================================
-   PANEL DERECHO (CONTENIDO PRINCIPAL)
-   ========================================= */
-.main-content {
-    flex: 1;
-    height: 100%;
-    width: 100%;
-    background-color: var(--bg-light);
-    position: relative;
-    overflow-y: auto; /* IMPORTANTE: Scroll vertical aquí */
-    scroll-behavior: smooth;
-    padding: 0; 
-}
-
-/* Wrapper interno para dar márgenes consistentes */
-.content-wrapper {
-    padding: 30px 20px;
-    max-width: 800px; /* Para que no se estire infinito en PC */
-    margin: 0 auto;
-    min-height: 100%; /* Asegura que cubra al menos la pantalla para el scroll */
-    display: flex;
-    flex-direction: column;
-}
-
-/* SECCIONES (TABS) */
-.content-section {
-    display: none; /* Ocultas por defecto */
-    animation: fadeSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.content-section.active {
-    display: block;
-}
-
-@keyframes fadeSlideUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* TIPOGRAFÍA Y TARJETAS */
-.user-info {
-    font-size: 0.9rem;
-    color: var(--text-muted);
-    margin-bottom: 5px;
-}
-
-h1 {
-    font-size: 2.2rem;
-    color: var(--text-main);
-    margin-bottom: 10px;
-    line-height: 1.1;
+.text h1,
+.text h2 {
+  text-align: left;
 }
 
 .subtitle {
-    color: var(--text-muted);
-    margin-bottom: 30px;
-    font-size: 1.1rem;
+  color: #9fb3c8;
+  margin-bottom: 30px;
 }
 
-/* Tarjetas estilo Flux/iOS */
-.card {
-    background: var(--white);
-    border-radius: var(--border-radius-card);
-    padding: 25px;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.03);
-    border: 1px solid rgba(0,0,0,0.02);
+/* --- SECCIÓN DE BOTONES (ESTILO TARJETA / CARD UI) --- */
+.buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
 }
 
-.card h3 {
-    font-size: 1.2rem;
-    margin-bottom: 15px;
-    color: var(--text-main);
+.btn {
+  display: flex;
+  align-items: center; /* Centra verticalmente imagen y texto */
+  justify-content: flex-start; /* ALINEA TODO A LA IZQUIERDA */
+  
+  background: #2563eb;
+  color: #ffffff;
+  
+  padding: 16px 20px; /* Un poco más de espacio a los lados */
+  border-radius: 16px; /* Bordes más redondeados */
+  width: 100%;
+  box-sizing: border-box;
+  
+  text-decoration: none;
+  cursor: pointer;
+  
+  /* Transiciones suaves */
+  transition: transform 0.2s ease, background 0.2s;
+  position: relative;
+  overflow: hidden;
 }
 
-/* Tarjeta especial de Upgrade */
-.card-upgrade {
-    background-color: var(--accent);
-    color: var(--bg-dark);
+.btn:hover {
+  background: #1d4ed8;
+  transform: translateY(-2px); /* Pequeño efecto de elevación */
 }
 
-.btn-primary {
-    background-color: var(--bg-dark);
-    color: var(--white);
-    border: none;
-    padding: 14px 24px;
-    border-radius: 30px;
-    font-weight: 600;
-    margin-top: 15px;
-    cursor: pointer;
-    width: 100%;
+.btn:active {
+  transform: scale(0.98);
 }
 
-/* Chart placeholder (círculo ejemplo) */
-.chart-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px 0;
-}
-.circle-mockup {
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    border: 15px solid #e1e1e1;
-    border-top-color: var(--bg-dark);
-    border-right-color: #a8a8a8;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-.circle-mockup span { font-size: 1.5rem; font-weight: bold; }
-
-/* =========================================
-   FOOTER (AL FINAL DEL SCROLL)
-   ========================================= */
-.legal-footer {
-    margin-top: auto; /* Empuja el footer al final si hay poco contenido */
-    padding-top: 40px;
-    padding-bottom: 20px;
-    text-align: center;
-    opacity: 0.6;
+/* ESTILOS PARA LA IMAGEN DENTRO DEL BOTÓN DEL INDEX */
+.btn-icon {
+  width: 60px;        /* AJUSTE RECOMENDADO: 88px es muy grande, 60px se ve mejor */
+  height: 60px;
+  margin-right: 15px; /* Espacio entre imagen y texto */
+  object-fit: contain; /* Asegura que el icono se vea completo */
+  flex-shrink: 0;      /* Evita que la imagen se aplaste si el texto es largo */
 }
 
-.legal-footer p {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    font-weight: 500;
+/* CONTENEDOR DE TEXTO DEL BOTÓN */
+.btn-text {
+  display: flex;
+  flex-direction: column; /* Título arriba, descripción abajo */
+  text-align: left;       /* Fuerza el texto a la izquierda */
 }
 
-/* =========================================
-   MEDIA QUERIES (ADAPTACIÓN DE ESCRITORIO)
-   ========================================= */
-@media (min-width: 1024px) {
-    /* En PC muy grande, podemos dejar el menú fijo si quisieras, 
-       pero para mantener tu diseño "Móvil en PC", lo dejamos igual */
+.btn-title {
+  font-size: 1.05em;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.btn-desc {
+  font-size: 0.85em;
+  font-weight: 400;
+  opacity: 0.8; /* Un poco transparente para diferenciarlo del título */
+  margin-top: 2px;
+}
+
+/* BOTÓN DE VOLVER (Versión simple antigua) */
+.back {
+  margin-top: 30px;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid #2563eb;
+}
+.back:hover {
+  background: #2563eb;
+}
+
+/* --- FOOTER Y LOGO --- */
+footer {
+  margin-top: 40px;
+  font-size: 0.85em;
+  color: #7b8fa6;
+  text-align: center;
+}
+
+.footer-logo {
+  width: 28px;
+  height: auto;
+  display: block;
+  margin: 15px auto 0;
+  opacity: 0.6;
+  transition: opacity 0.3s ease;
+}
+
+.footer-logo:hover {
+  opacity: 1;
+}
+
+/* =========================================================
+   NUEVAS FUNCIONES: PÁGINAS DE DETALLE (ESTILO MODAL)
+   ========================================================= */
+
+/* 1. Fondo superior (Imagen o Color) */
+.page-header {
+  height: 240px;
+  background: linear-gradient(135deg, #1e3a8a, #2563eb); /* Degradado azul oscuro */
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  z-index: 0;
+}
+
+/* 2. Botón flotante para volver atrás (Círculo arriba a la izquierda) */
+.back-floating {
+  position: absolute;
+  top: 25px;
+  left: 20px;
+  
+  background: rgba(0, 0, 0, 0.4); /* Oscuro transparente */
+  backdrop-filter: blur(8px);      /* Efecto borroso elegante */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  
+  color: white;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  font-size: 1.3em;
+  
+  transition: background 0.2s, transform 0.2s;
+  z-index: 10;
+}
+
+.back-floating:hover {
+  background: rgba(37, 99, 235, 0.8); /* Se pone azul al pasar el mouse */
+  transform: scale(1.1);
+}
+
+/* 3. La Tarjeta de Contenido (Se superpone a la imagen) */
+.content-card {
+  background: #02040a; /* Fondo negro profundo (coincide con tu tema) */
+  border-top: 1px solid rgba(255, 255, 255, 0.15); /* Borde sutil arriba */
+  
+  border-radius: 30px 30px 0 0; /* Esquinas redondeadas solo arriba */
+  padding: 35px 25px;
+  
+  margin-top: -50px; /* ESTO HACE EL EFECTO DE SUPERPOSICIÓN */
+  position: relative;
+  z-index: 1;
+  min-height: 60vh;
+  box-shadow: 0 -10px 30px rgba(0,0,0,0.6); /* Sombra oscura hacia arriba */
+}
+
+/* Encabezado interno (Icono cuadrado + Título) */
+.card-header-inner {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.page-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  object-fit: cover;
+  margin-right: 18px;
+  background: rgba(255,255,255,0.05); /* Fondo sutil si el icono es PNG */
+}
+
+.page-title h1 {
+  margin: 0;
+  font-size: 1.6em;
+  color: #ffffff;
+}
+
+.page-title span {
+  display: block;
+  font-size: 0.9em;
+  color: #94a3b8; /* Gris azulado */
+  margin-top: 5px;
+}
+
+/* Estilos del texto dentro de la tarjeta */
+.card-body p {
+  line-height: 1.6;
+  color: #cbd5e1; /* Texto gris claro, fácil de leer */
+  margin-bottom: 20px;
+}
+
+.card-body h2 {
+  font-size: 1.3em;
+  margin-top: 35px;
+  margin-bottom: 15px;
+  color: #ffffff;
+  
+  /* Decoración pequeña al lado del título */
+  border-left: 4px solid #2563eb; 
+  padding-left: 12px;
+}
+
+.card-body ul {
+  padding-left: 20px;
+  color: #cbd5e1;
+}
+
+.card-body li {
+  margin-bottom: 10px;
 }
