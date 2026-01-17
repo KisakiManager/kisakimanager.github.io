@@ -327,8 +327,7 @@ footer {
   margin-top: 5px;
 }
 
-/* --- ESTILOS ANTIGUOS CARD-BODY (TEXTO PLANO) --- */
-/* Se mantienen activos por si quieres usarlos fuera de burbujas */
+/* --- ESTILOS ANTIGUOS CARD-BODY (Mantenidos) --- */
 .card-body p {
   line-height: 1.6;
   color: #cbd5e1;
@@ -354,39 +353,51 @@ footer {
 }
 
 /* =========================================================
-   7. ESTILOS DE BURBUJAS (OPCIONAL) - NUEVO
-   Para usarlo, envuelve tu contenido en <div class="content-bubble">
+   7. ESTILOS DE BURBUJAS (ACTUALIZADO)
    ========================================================= */
 
-/* Esta clase es para cuando quieres usar las burbujas */
 .content-bubble {
-  background-color: #e0f2fe; /* Azul muy claro, casi blanco */
-  border-radius: 24px; /* Bordes redondeados modernos */
+  /* NUEVO FONDO: Azul vibrante con transparencia */
+  background-color: rgba(59, 130, 246, 0.25);
+  
+  border-radius: 24px;
   padding: 24px;
-  margin-bottom: 20px; /* Separación entre burbujas */
-  color: #1f2937; /* Texto oscuro para leerse bien sobre el claro */
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); /* Sombra suave */
+  margin-bottom: 20px;
+  
+  /* Texto base oscuro para contraste */
+  color: #000000;
+  
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  /* Borde sutil para definir la forma */
+  border: 1px solid rgba(59, 130, 246, 0.3);
 }
 
-/* Sobrescribimos los estilos dentro de la burbuja para que se vean bien en claro */
+/* Títulos dentro de la burbuja */
 .content-bubble h2 {
   font-size: 1.25em;
-  margin-top: 0; /* Quitamos margen superior porque es el inicio de la burbuja */
+  margin-top: 0;
   margin-bottom: 12px;
-  color: #1e3a8a; /* Azul oscuro corporativo */
-  border-left: 4px solid #2563eb; /* Tu barra azul característica */
-  padding-left: 12px;
+  
+  /* CAMBIO: Color negro */
+  color: #000000; 
+  
+  /* CAMBIO: Eliminada la línea vertical y el padding izquierdo */
+  border-left: none;
+  padding-left: 0;
 }
 
+/* Párrafos dentro de la burbuja */
 .content-bubble p {
   line-height: 1.6;
-  color: #374151; /* Gris oscuro elegante */
+  /* Texto casi negro para buena lectura */
+  color: rgba(0, 0, 0, 0.85);
   margin-bottom: 15px;
 }
 
+/* Listas dentro de la burbuja */
 .content-bubble ul {
   padding-left: 20px;
-  color: #374151; /* Gris oscuro para listas */
+  color: rgba(0, 0, 0, 0.85);
   margin-bottom: 15px;
 }
 
@@ -394,7 +405,7 @@ footer {
   margin-bottom: 8px;
 }
 
-/* Quitamos el margen inferior del último elemento para que quede limpio */
+/* Quitar margen al último elemento de la burbuja */
 .content-bubble *:last-child {
   margin-bottom: 0;
 }
