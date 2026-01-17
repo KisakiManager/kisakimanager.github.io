@@ -46,14 +46,14 @@ body {
   display: flex;
   align-items: center;
   text-align: left;
-  
+
   background-color: #2563eb; 
   color: #ffffff;
-  
+
   padding: 15px 20px; 
   border-radius: 20px;
   text-decoration: none;
-  
+
   transition: transform 0.2s ease, background-color 0.2s;
   box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2);
 }
@@ -72,14 +72,14 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  
+
   width: 48px;
   height: 48px;
-  
+
   /* Fondo semitransparente detrás del icono */
   background: rgba(255, 255, 255, 0.2); 
   border-radius: 12px;
-  
+
   margin-right: 18px;
   flex-shrink: 0;
 }
@@ -110,7 +110,57 @@ body {
 }
 
 /* =========================================
-   3. ESTILOS DE BOTONES (ANTIGUOS)
+   3. NUEVO BOTÓN CTA (TELEGRAM LIME)
+   ========================================= */
+.btn-telegram-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Centra el contenido horizontalmente */
+  gap: 12px; /* Espacio entre texto e icono */
+
+  /* Color Verde Lima vibrante */
+  background-color: #ccf381; 
+  color: #000000; /* Texto negro para contraste */
+
+  padding: 18px 32px; /* Relleno generoso para forma de píldora */
+  border-radius: 50px; /* Bordes completamente redondos */
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1.1em;
+  
+  margin-top: 35px; /* Separación de la lista de arriba */
+  width: 100%;
+  box-sizing: border-box;
+
+  /* Sombra "brillante" del mismo color debajo */
+  box-shadow: 0 10px 25px -5px rgba(204, 243, 129, 0.5);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s;
+}
+
+/* Efecto Hover (Pasar el mouse) */
+.btn-telegram-cta:hover {
+  transform: translateY(-3px); /* Se levanta un poco */
+  box-shadow: 0 15px 35px -5px rgba(204, 243, 129, 0.7); /* Sombra más intensa */
+  background-color: #d9f99d; /* Un poco más claro al pasar el mouse */
+}
+
+/* Efecto Active (Al hacer clic) */
+.btn-telegram-cta:active {
+  transform: scale(0.98); /* Pequeño efecto de presión */
+  box-shadow: 0 5px 15px -5px rgba(204, 243, 129, 0.6);
+}
+
+/* Estilo del icono SVG dentro del botón */
+.btn-telegram-cta svg {
+  width: 24px;
+  height: 24px;
+  stroke: currentColor; /* Toma el color del texto (negro) */
+  /* Una pequeña inclinación para darle dinamismo */
+  transform: rotate(-10deg) translateY(-1px); 
+}
+
+/* =========================================
+   4. ESTILOS DE BOTONES (ANTIGUOS)
    Conservados por seguridad
    ========================================= */
 .buttons {
@@ -185,7 +235,7 @@ body {
 }
 
 /* =========================================
-   4. FOOTER Y LOGO
+   5. FOOTER Y LOGO
    ========================================= */
 footer {
   margin-top: 40px;
@@ -208,19 +258,19 @@ footer {
 }
 
 /* =========================================================
-   5. PÁGINAS DE DETALLE (ESTILO MODAL)
+   6. PÁGINAS DE DETALLE (ESTILO MODAL)
    ========================================================= */
 
 /* Fondo superior */
 .page-header {
   height: 240px;
   background: linear-gradient(135deg, #1e3a8a, #2563eb);
-  
+
   /* Asegura que las imágenes de fondo se vean bien */
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  
+
   position: relative;
   z-index: 0;
 }
