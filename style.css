@@ -327,7 +327,7 @@ footer {
   margin-top: 5px;
 }
 
-/* --- ESTILOS ANTIGUOS CARD-BODY (Mantenidos) --- */
+/* --- ESTILOS ANTIGUOS CARD-BODY --- */
 .card-body p {
   line-height: 1.6;
   color: #cbd5e1;
@@ -353,51 +353,47 @@ footer {
 }
 
 /* =========================================================
-   7. ESTILOS DE BURBUJAS (ACTUALIZADO)
+   7. ESTILOS DE BURBUJAS (ACTUALIZADO - TEXTO BLANCO)
    ========================================================= */
 
 .content-bubble {
-  /* NUEVO FONDO: Azul vibrante con transparencia */
+  /* Fondo Azul vibrante con transparencia */
   background-color: rgba(59, 130, 246, 0.25);
   
   border-radius: 24px;
   padding: 24px;
   margin-bottom: 20px;
   
-  /* Texto base oscuro para contraste */
-  color: #000000;
+  /* Color blanco base */
+  color: #ffffff;
   
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-  /* Borde sutil para definir la forma */
   border: 1px solid rgba(59, 130, 246, 0.3);
 }
 
-/* Títulos dentro de la burbuja */
+/* Títulos dentro de la burbuja: BLANCO y sin borde lateral */
 .content-bubble h2 {
   font-size: 1.25em;
   margin-top: 0;
   margin-bottom: 12px;
   
-  /* CAMBIO: Color negro */
-  color: #000000; 
+  color: #ffffff; /* Blanco puro */
   
-  /* CAMBIO: Eliminada la línea vertical y el padding izquierdo */
   border-left: none;
   padding-left: 0;
 }
 
-/* Párrafos dentro de la burbuja */
+/* Párrafos dentro de la burbuja: BLANCO HUMO */
 .content-bubble p {
   line-height: 1.6;
-  /* Texto casi negro para buena lectura */
-  color: rgba(0, 0, 0, 0.85);
+  color: #f1f5f9; /* Casi blanco, muy legible */
   margin-bottom: 15px;
 }
 
-/* Listas dentro de la burbuja */
+/* Listas dentro de la burbuja: BLANCO HUMO */
 .content-bubble ul {
   padding-left: 20px;
-  color: rgba(0, 0, 0, 0.85);
+  color: #f1f5f9;
   margin-bottom: 15px;
 }
 
@@ -405,7 +401,6 @@ footer {
   margin-bottom: 8px;
 }
 
-/* Quitar margen al último elemento de la burbuja */
 .content-bubble *:last-child {
   margin-bottom: 0;
 }
