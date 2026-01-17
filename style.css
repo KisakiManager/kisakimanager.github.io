@@ -127,7 +127,7 @@ body {
   text-decoration: none;
   font-weight: 700;
   font-size: 1.1em;
-  
+
   margin-top: 35px; /* Separación de la lista de arriba */
   width: 100%;
   box-sizing: border-box;
@@ -154,7 +154,10 @@ body {
 .btn-telegram-cta svg {
   width: 24px;
   height: 24px;
-  stroke: currentColor; /* Toma el color del texto (negro) */
+  /* CAMBIO IMPORTANTE: fill en lugar de stroke para que el icono sea sólido */
+  fill: currentColor; 
+  stroke: none;
+  
   /* Una pequeña inclinación para darle dinamismo */
   transform: rotate(-10deg) translateY(-1px); 
 }
