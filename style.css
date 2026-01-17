@@ -434,30 +434,35 @@ footer {
 }
 
 /* =========================================
-   9. GRUPO DE BOTONES CTA (HOME) - NUEVO
+   9. GRUPO DE BOTONES CTA (HOME) - CORREGIDO
    ========================================= */
 
-/* Contenedor para alinear el botón de Telegram y el botón QR */
+/* Contenedor para alinear los botones en una fila */
 .cta-group {
   display: flex;
   align-items: center;
+  justify-content: space-between; /* Distribución del espacio */
   gap: 12px;     /* Espacio entre los dos botones */
   margin-top: 35px;
   width: 100%;
 }
 
-/* Ajuste al botón CTA original para que se adapte al grupo */
+/* AJUSTE CLAVE: Resetear el ancho del botón grande para que quepa */
 .cta-group .btn-telegram-cta {
-  margin-top: 0; /* Quitamos el margen superior porque lo maneja el grupo */
-  flex-grow: 1;  /* Ocupa todo el espacio posible */
+  width: auto;   /* Importante: Anula el width: 100% original */
+  flex: 1;       /* Hace que ocupe todo el espacio restante disponible */
+  margin-top: 0; /* Quita el margen superior original */
 }
 
-/* Nuevo Botón Cuadrado QR */
+/* Estilo del Botón Cuadrado QR (Izquierda) */
 .btn-qr-square {
   width: 60px;   /* Cuadrado */
   height: 60px;
   background-color: #ccf381; /* Verde Lima */
-  border-radius: 18px;       /* Bordes redondeados */
+  
+  /* Borde redondeado similar al botón grande (tipo píldora/círculo) */
+  border-radius: 50px; 
+  
   display: flex;
   align-items: center;
   justify-content: center;
@@ -479,8 +484,8 @@ footer {
 }
 
 .btn-qr-square svg {
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   fill: currentColor;
 }
 
