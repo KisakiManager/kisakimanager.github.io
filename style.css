@@ -359,26 +359,30 @@ footer {
 .content-bubble {
   /* Fondo Azul vibrante con transparencia */
   background-color: rgba(59, 130, 246, 0.25);
-  
+
   border-radius: 24px;
   padding: 24px;
   margin-bottom: 20px;
-  
+
   /* Color blanco base */
   color: #ffffff;
-  
+
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
   border: 1px solid rgba(59, 130, 246, 0.3);
 }
 
 /* Títulos dentro de la burbuja: BLANCO y sin borde lateral */
 .content-bubble h2 {
+  display: flex;       /* NUEVO: Activa flexbox para alinear el icono SVG */
+  align-items: center; /* NUEVO: Centra verticalmente */
+  gap: 12px;           /* NUEVO: Espacio entre icono y texto */
+  
   font-size: 1.25em;
   margin-top: 0;
   margin-bottom: 12px;
-  
+
   color: #ffffff; /* Blanco puro */
-  
+
   border-left: none;
   padding-left: 0;
 }
@@ -403,4 +407,28 @@ footer {
 
 .content-bubble *:last-child {
   margin-bottom: 0;
+}
+
+/* =========================================================
+   8. NUEVOS ICONOS SVG (TÍTULOS Y CABECERAS)
+   ========================================================= */
+
+/* 1. Icono Grande del Título de Página (Reemplaza a .page-icon imagen) */
+.page-title-icon {
+  width: 50px;  /* Tamaño grande y visible */
+  height: 50px;
+  color: #ffffff; /* Blanco puro */
+  margin-right: 18px;
+  flex-shrink: 0;
+  
+  /* Sombra suave para que destaque sobre el fondo */
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+/* 2. Iconos pequeños dentro de las burbujas (Reemplazan Emojis) */
+.bubble-icon {
+  width: 24px;
+  height: 24px;
+  fill: currentColor; /* Toma el color blanco del texto */
+  flex-shrink: 0;
 }
