@@ -32,9 +32,7 @@ body {
 
 /* =========================================
    2. ESTILOS DE BOTONES (NUEVOS - iOS SVG)
-   Estos son los que usa el nuevo index.html
    ========================================= */
-
 .buttons-list {
   display: flex;
   flex-direction: column;
@@ -46,14 +44,11 @@ body {
   display: flex;
   align-items: center;
   text-align: left;
-
   background-color: #2563eb; 
   color: #ffffff;
-
   padding: 15px 20px; 
   border-radius: 20px;
   text-decoration: none;
-
   transition: transform 0.2s ease, background-color 0.2s;
   box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2);
 }
@@ -72,23 +67,18 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-
   width: 48px;
   height: 48px;
-
-  /* Fondo semitransparente detrás del icono */
   background: rgba(255, 255, 255, 0.2); 
   border-radius: 12px;
-
   margin-right: 18px;
   flex-shrink: 0;
 }
 
-/* Estilo del SVG dentro del contenedor */
 .icon-wrapper svg {
   width: 26px;
   height: 26px;
-  stroke: #ffffff; /* Color de las líneas */
+  stroke: #ffffff; 
 }
 
 /* Textos dentro del botón nuevo */
@@ -115,56 +105,43 @@ body {
 .btn-telegram-cta {
   display: flex;
   align-items: center;
-  justify-content: center; /* Centra el contenido horizontalmente */
-  gap: 12px; /* Espacio entre texto e icono */
-
-  /* Color Verde Lima vibrante */
+  justify-content: center;
+  gap: 12px;
   background-color: #ccf381; 
-  color: #000000; /* Texto negro para contraste */
-
-  padding: 18px 32px; /* Relleno generoso para forma de píldora */
-  border-radius: 50px; /* Bordes completamente redondos */
+  color: #000000;
+  padding: 18px 32px;
+  border-radius: 50px;
   text-decoration: none;
   font-weight: 700;
   font-size: 1.1em;
-
-  margin-top: 35px; /* Separación de la lista de arriba */
+  margin-top: 35px;
   width: 100%;
   box-sizing: border-box;
-
-  /* Sombra "brillante" del mismo color debajo */
   box-shadow: 0 10px 25px -5px rgba(204, 243, 129, 0.5);
   transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s;
 }
 
-/* Efecto Hover (Pasar el mouse) */
 .btn-telegram-cta:hover {
-  transform: translateY(-3px); /* Se levanta un poco */
-  box-shadow: 0 15px 35px -5px rgba(204, 243, 129, 0.7); /* Sombra más intensa */
-  background-color: #d9f99d; /* Un poco más claro al pasar el mouse */
+  transform: translateY(-3px);
+  box-shadow: 0 15px 35px -5px rgba(204, 243, 129, 0.7);
+  background-color: #d9f99d;
 }
 
-/* Efecto Active (Al hacer clic) */
 .btn-telegram-cta:active {
-  transform: scale(0.98); /* Pequeño efecto de presión */
+  transform: scale(0.98);
   box-shadow: 0 5px 15px -5px rgba(204, 243, 129, 0.6);
 }
 
-/* Estilo del icono SVG dentro del botón */
 .btn-telegram-cta svg {
   width: 24px;
   height: 24px;
-  /* CAMBIO IMPORTANTE: fill en lugar de stroke para que el icono sea sólido */
   fill: currentColor; 
   stroke: none;
-  
-  /* Una pequeña inclinación para darle dinamismo */
   transform: rotate(-10deg) translateY(-1px); 
 }
 
 /* =========================================
    4. ESTILOS DE BOTONES (ANTIGUOS)
-   Conservados por seguridad
    ========================================= */
 .buttons {
   display: flex;
@@ -226,7 +203,6 @@ body {
   margin-top: 2px;
 }
 
-/* BOTÓN DE VOLVER (ANTIGUO) */
 .back {
   margin-top: 30px;
   justify-content: center;
@@ -268,12 +244,9 @@ footer {
 .page-header {
   height: 240px;
   background: linear-gradient(135deg, #1e3a8a, #2563eb);
-
-  /* Asegura que las imágenes de fondo se vean bien */
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-
   position: relative;
   z-index: 0;
 }
@@ -304,6 +277,11 @@ footer {
   transform: scale(1.1);
 }
 
+.back-floating svg {
+  display: block;
+  margin-right: 2px;
+}
+
 /* Tarjeta de Contenido */
 .content-card {
   background: #02040a;
@@ -324,7 +302,6 @@ footer {
   margin-bottom: 30px;
 }
 
-/* LIMPIEZA DEL ICONO INTERNO */
 .page-icon {
   width: 70px;
   height: 70px;
@@ -350,7 +327,8 @@ footer {
   margin-top: 5px;
 }
 
-/* Texto del cuerpo */
+/* --- ESTILOS ANTIGUOS CARD-BODY (TEXTO PLANO) --- */
+/* Se mantienen activos por si quieres usarlos fuera de burbujas */
 .card-body p {
   line-height: 1.6;
   color: #cbd5e1;
@@ -375,8 +353,48 @@ footer {
   margin-bottom: 10px;
 }
 
-/* Ajuste del botón SVG de volver */
-.back-floating svg {
-  display: block;
-  margin-right: 2px;
+/* =========================================================
+   7. ESTILOS DE BURBUJAS (OPCIONAL) - NUEVO
+   Para usarlo, envuelve tu contenido en <div class="content-bubble">
+   ========================================================= */
+
+/* Esta clase es para cuando quieres usar las burbujas */
+.content-bubble {
+  background-color: #e0f2fe; /* Azul muy claro, casi blanco */
+  border-radius: 24px; /* Bordes redondeados modernos */
+  padding: 24px;
+  margin-bottom: 20px; /* Separación entre burbujas */
+  color: #1f2937; /* Texto oscuro para leerse bien sobre el claro */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); /* Sombra suave */
+}
+
+/* Sobrescribimos los estilos dentro de la burbuja para que se vean bien en claro */
+.content-bubble h2 {
+  font-size: 1.25em;
+  margin-top: 0; /* Quitamos margen superior porque es el inicio de la burbuja */
+  margin-bottom: 12px;
+  color: #1e3a8a; /* Azul oscuro corporativo */
+  border-left: 4px solid #2563eb; /* Tu barra azul característica */
+  padding-left: 12px;
+}
+
+.content-bubble p {
+  line-height: 1.6;
+  color: #374151; /* Gris oscuro elegante */
+  margin-bottom: 15px;
+}
+
+.content-bubble ul {
+  padding-left: 20px;
+  color: #374151; /* Gris oscuro para listas */
+  margin-bottom: 15px;
+}
+
+.content-bubble li {
+  margin-bottom: 8px;
+}
+
+/* Quitamos el margen inferior del último elemento para que quede limpio */
+.content-bubble *:last-child {
+  margin-bottom: 0;
 }
