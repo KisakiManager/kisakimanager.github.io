@@ -490,7 +490,7 @@ footer {
 }
 
 /* =========================================
-   10. ESTILOS PÁGINA QR Y CONTACTO - NUEVO
+   10. ESTILOS PÁGINA QR Y CONTACTO
    ========================================= */
 
 /* Marco del QR */
@@ -526,4 +526,85 @@ footer {
   margin-bottom: 30px;
   font-size: 0.95em;
   text-align: center;
+}
+
+/* =========================================
+   11. TARJETA DE NOVEDADES (NEWS CARD)
+   ========================================= */
+
+.news-card {
+  /* Fondo oscuro ligeramente más claro que el body para destacar */
+  background: linear-gradient(135deg, #1e293b, #0f172a); 
+  /* Borde sutil para definir la tarjeta */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  padding: 20px 24px;
+  margin-top: 10px;    /* Espacio respecto al header */
+  margin-bottom: 30px; /* Espacio respecto a la lista de botones */
+  text-align: left;
+  position: relative;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+  transition: transform 0.2s ease;
+}
+
+.news-card:hover {
+  transform: translateY(-2px); /* Pequeño efecto al pasar el mouse */
+}
+
+/* Etiqueta pequeña (ej: UPDATE) */
+.news-badge {
+  display: inline-block;
+  background-color: #f59e0b; /* Naranja Ámbar llamativo */
+  color: #000000;
+  font-size: 0.7em;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 8px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  letter-spacing: 0.5px;
+}
+
+/* Título de la noticia */
+.news-content h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.2em;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+/* Descripción de la noticia */
+.news-content p {
+  font-size: 0.95em;
+  color: #cbd5e1; /* Gris claro */
+  line-height: 1.5;
+  margin: 0 0 18px 0;
+}
+
+/* Botón de acción dentro de la tarjeta */
+.btn-news-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  
+  background-color: rgba(245, 158, 11, 0.15); /* Fondo naranja muy transparente */
+  color: #fbbf24; /* Texto naranja brillante */
+  
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-size: 0.9em;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s;
+}
+
+.btn-news-action:hover {
+  background-color: rgba(245, 158, 11, 0.3);
+  color: #ffffff;
+}
+
+.btn-news-action svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
 }
