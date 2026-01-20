@@ -459,10 +459,10 @@ footer {
   width: 60px;   /* Cuadrado */
   height: 60px;
   background-color: #ccf381; /* Verde Lima */
-  
+
   /* Borde redondeado similar al botón grande (tipo píldora/círculo) */
   border-radius: 50px; 
-  
+
   display: flex;
   align-items: center;
   justify-content: center;
@@ -586,10 +586,10 @@ footer {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  
+
   background-color: rgba(245, 158, 11, 0.15); /* Fondo naranja muy transparente */
   color: #fbbf24; /* Texto naranja brillante */
-  
+
   padding: 10px 16px;
   border-radius: 12px;
   font-size: 0.9em;
@@ -607,4 +607,142 @@ footer {
   width: 18px;
   height: 18px;
   fill: currentColor;
+}
+
+/* =========================================
+   12. TARJETAS DE PRECIOS INTERACTIVAS
+   ========================================= */
+
+.pricing-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+.pricing-card {
+  /* Fondo oscuro con un toque de azul, similar a tu estilo */
+  background: linear-gradient(135deg, #1e3a8a, #0f172a);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px; /* Bordes muy redondeados como pediste */
+  padding: 20px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.pricing-card:hover {
+  border-color: #2563eb;
+  transform: translateY(-2px);
+}
+
+/* Estado Activo (Cuando se selecciona) */
+.pricing-card.active {
+  background: linear-gradient(135deg, #1e40af, #172554);
+  border-color: #ccf381; /* Borde verde lima al activar */
+  box-shadow: 0 10px 30px rgba(37, 99, 235, 0.2);
+}
+
+/* --- CABECERA DE LA TARJETA (Siempre visible) --- */
+.pricing-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.pricing-title {
+  font-size: 1.4em;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.pricing-badge {
+  background-color: rgba(204, 243, 129, 0.2); /* Verde lima transparente */
+  color: #ccf381;
+  font-size: 0.75em;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 20px; /* Pill shape */
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.pricing-price {
+  font-size: 1.8em;
+  font-weight: 800;
+  color: #ffffff;
+  margin-top: 5px;
+  display: block;
+}
+
+.pricing-sub {
+  font-size: 0.85em;
+  color: #94a3b8;
+  font-weight: 400;
+}
+
+/* --- CONTENIDO OCULTO (Descripción y Ventajas) --- */
+.pricing-content {
+  max-height: 0; /* Oculto por defecto */
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease, opacity 0.4s ease;
+  margin-top: 0;
+}
+
+/* Cuando la tarjeta tiene la clase .active, mostramos esto */
+.pricing-card.active .pricing-content {
+  max-height: 300px; /* Altura suficiente para el contenido */
+  opacity: 1;
+  margin-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 15px;
+}
+
+.pricing-content ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px 0;
+  text-align: left;
+}
+
+.pricing-content li {
+  color: #cbd5e1;
+  font-size: 0.9em;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Icono de check para la lista */
+.check-icon {
+  width: 16px;
+  height: 16px;
+  fill: #ccf381; /* Verde lima */
+  flex-shrink: 0;
+}
+
+/* Botón de compra dentro de la tarjeta */
+.btn-buy {
+  display: block;
+  width: 100%;
+  background-color: #ccf381;
+  color: #000000;
+  text-align: center;
+  padding: 12px;
+  border-radius: 16px;
+  text-decoration: none;
+  font-weight: 700;
+  transition: transform 0.2s;
+  box-sizing: border-box;
+}
+
+.btn-buy:active {
+  transform: scale(0.95);
 }
