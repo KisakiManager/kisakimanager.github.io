@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Marketplace — Kisaki Manager</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="page-header" style="height: 120px; background-image: url('fondo-market.jpg');">
+    <a href="index.html" class="back-floating">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </a>
+    
+    <div style="position: absolute; bottom: -20px; left: 20px; right: 20px;">
+       <div style="background: #0f172a; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; padding: 10px 15px; display: flex; align-items: center; gap: 10px;">
+         <svg width="20" height="20" fill="none" stroke="#94a3b8" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+         <input type="text" placeholder="Buscar ítems..." style="background: transparent; border: none; color: white; outline: none; width: 100%; font-size: 0.95em;">
+       </div>
+    </div>
+  </div>
+
+  <div class="content-card" style="margin-top: 40px; min-height: 80vh;">
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+      <h2 style="margin: 0; font-size: 1.5em; color: white;">Marketplace</h2>
+      <span style="font-size: 0.8em; color: #ccf381;">7% fee apply</span>
+    </div>
+
+    <div class="market-nav">
+      <div class="market-tab active">Todo</div>
+      <div class="market-tab">Ilustraciones</div>
+      <div class="market-tab">Suscripciones</div>
+      <div class="market-tab">Stickers</div>
+      <div class="market-tab">Fotos</div>
+      <div class="market-tab">Videos</div>
+      <div class="market-tab">Otros</div>
+    </div>
+
+    <div class="products-grid">
+
+      <div class="product-card">
+        <div class="product-image" style="background-color: #475569;"></div> 
+        <div class="product-info">
+          <h3 class="product-title">Pack Anime V1</h3>
+          <div class="product-seller">
+            @VicenteArt
+            <svg class="verified-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+          </div>
+          <div class="product-price-row">
+            <span class="price-tag">2.5 TON</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card">
+        <div class="product-image" style="background-color: #3b82f6;"></div>
+        <div class="product-info">
+          <h3 class="product-title">Canal VIP Access</h3>
+          <div class="product-seller">@KisakiBot</div>
+          <div class="product-price-row">
+            <div class="price-stars">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+              <span>500</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card">
+        <div class="product-image" style="background-color: #f59e0b;"></div>
+        <div class="product-info">
+          <h3 class="product-title">Chibi Stickers</h3>
+          <div class="product-seller">@ArtistTwo</div>
+          <div class="product-price-row">
+            <span class="price-tag">1 TON</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card">
+        <div class="product-image" style="background-color: #ec4899;"></div>
+        <div class="product-info">
+          <h3 class="product-title">Cyber City 4K</h3>
+          <div class="product-seller">@DesignPro</div>
+          <div class="product-price-row">
+            <div class="price-stars">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+              <span>150</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    
+    <div style="margin-top: 40px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; color: #7b8fa6; font-size: 0.85em; padding-bottom: 60px;">
+      © Kisaki Manager
+    </div>
+
+  </div>
+
+  <div class="btn-upload-float">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+  </div>
+
+</body>
+</html>
