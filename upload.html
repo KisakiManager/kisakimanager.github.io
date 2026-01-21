@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="style.css">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
+    /* Estilos */
     .hidden-fields { display: none; background: rgba(59, 130, 246, 0.1); padding: 15px; border-radius: 12px; border: 1px dashed #3b82f6; margin-bottom: 20px; animation: fadeIn 0.3s ease; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
     .progress-container { width: 100%; background-color: rgba(255, 255, 255, 0.1); border-radius: 10px; margin-top: 15px; height: 10px; overflow: hidden; display: none; }
@@ -32,7 +33,6 @@
 
     <div class="card-body">
       <form id="uploadForm">
-
         <div class="form-group">
           <label class="form-label">Categoría</label>
           <select class="form-select" id="categorySelect">
@@ -54,10 +54,7 @@
           </div>
           <div class="form-group">
             <label class="form-label">Duración</label>
-            <select class="form-select" id="subDurationInput">
-              <option>1 Mes</option>
-              <option>Lifetime</option>
-            </select>
+            <select class="form-select" id="subDurationInput"><option>1 Mes</option><option>Lifetime</option></select>
           </div>
         </div>
 
@@ -74,117 +71,111 @@
           <p class="upload-status-text" id="uploadStatus">Iniciando...</p>
         </div>
 
-        <div class="form-group">
-          <label class="form-label">Título del Ítem</label>
-          <input type="text" id="itemTitle" class="form-input" placeholder="Ej: Pack Premium">
-        </div>
-
+        <div class="form-group"><label class="form-label">Título</label><input type="text" id="itemTitle" class="form-input" placeholder="Ej: Pack Premium"></div>
         <div class="form-group">
           <label class="form-label">Precio</label>
           <div class="currency-toggle" style="margin-bottom: 10px;">
             <div class="currency-option active" id="currTON" onclick="setCurrency('TON')">💎 TON</div>
             <div class="currency-option" id="currSTARS" onclick="setCurrency('STARS')">⭐ Stars</div>
           </div>
-          <input type="number" id="itemPrice" class="form-input" placeholder="Cantidad (Ej: 2.5)">
+          <input type="number" id="itemPrice" class="form-input" placeholder="Cantidad">
         </div>
+        <div class="form-group"><label class="form-label">Descripción</label><textarea id="itemDesc" class="form-textarea" rows="4"></textarea></div>
 
-        <div class="form-group">
-          <label class="form-label">Descripción</label>
-          <textarea id="itemDesc" class="form-textarea" rows="4"></textarea>
-        </div>
-
-        <button type="button" class="btn-telegram-cta" id="btnPublish">
-          Publicar Ítem
-        </button>
-
+        <button type="button" class="btn-telegram-cta" id="btnPublish">Publicar Ítem</button>
       </form>
     </div>
   </div>
 
   <script type="module">
-    // Importamos configuración
-    import { db, storage } from './firebase_config.js';
-    import { ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
-    import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    // 1. IMPORTAMOS DIRECTAMENTE DESDE GOOGLE
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
-    // Variables Globales
-    let selectedCurrency = 'TON';
+    // 2. TUS CREDENCIALES NUEVAS (Integradas aquí mismo)
+    const firebaseConfig = {
+      apiKey: "AIzaSyBHabVfSJo3_xFqZUMCVvHsXtCJrS1NUP4",
+      authDomain: "kisaki-manager-85953.firebaseapp.com",
+      projectId: "kisaki-manager-85953",
+      storageBucket: "kisaki-manager-85953.firebasestorage.app",
+      messagingSenderId: "714700025635",
+      appId: "1:714700025635:web:9d526f9bb4e63531206696"
+    };
+
+    // 3. INICIALIZAR Y DIAGNÓSTICO
+    let app, db, storage;
+    try {
+      app = initializeApp(firebaseConfig);
+      db = getFirestore(app);
+      storage = getStorage(app);
+      console.log("Firebase inicializado correctamente");
+    } catch (e) {
+      alert("Error grave al iniciar Firebase: " + e.message);
+    }
+
+    // 4. LÓGICA DE LA APP
     const tg = window.Telegram.WebApp;
     tg.expand();
 
-    // Elementos DOM
+    let selectedCurrency = 'TON';
     const fileInput = document.getElementById('realFileInput');
     const dropZone = document.getElementById('dropZone');
-    const fileNameDisplay = document.getElementById('fileNameDisplay');
     const categorySelect = document.getElementById('categorySelect');
 
-    // UI Helpers
+    // Funciones UI
     window.setCurrency = function(type) {
       selectedCurrency = type;
       document.getElementById('currTON').classList.toggle('active', type === 'TON');
       document.getElementById('currSTARS').classList.toggle('active', type === 'STARS');
     }
 
-    // UI: Cambio de Categoría
     categorySelect.addEventListener('change', () => {
-      const cat = categorySelect.value;
-      if (cat === 'sub') {
-        document.getElementById('subFields').style.display = 'block';
-        document.getElementById('fileField').style.display = 'none';
-      } else {
-        document.getElementById('subFields').style.display = 'none';
-        document.getElementById('fileField').style.display = 'block';
-      }
+      const isSub = categorySelect.value === 'sub';
+      document.getElementById('subFields').style.display = isSub ? 'block' : 'none';
+      document.getElementById('fileField').style.display = isSub ? 'none' : 'block';
     });
 
-    // UI: Selección de Archivo
     dropZone.addEventListener('click', () => fileInput.click());
     fileInput.addEventListener('change', () => {
       if(fileInput.files.length > 0) {
-        fileNameDisplay.innerText = "📄 " + fileInput.files[0].name;
-        fileNameDisplay.style.color = "#ccf381";
-        dropZone.style.borderColor = "#ccf381";
+        document.getElementById('fileNameDisplay').innerText = "✅ " + fileInput.files[0].name;
       }
     });
 
-    // --- PROCESO DE SUBIDA ---
-    // Escuchamos el clic en el botón con ID 'btnPublish'
+    // 5. PROCESO DE SUBIDA
     document.getElementById('btnPublish').addEventListener('click', async () => {
-      
       const title = document.getElementById('itemTitle').value;
       const price = document.getElementById('itemPrice').value;
-      const category = categorySelect.value;
-
-      if(!title || !price) {
-        return alert("Por favor completa Título y Precio.");
-      }
+      
+      if(!title || !price) return alert("Falta Título o Precio");
 
       const btn = document.getElementById('btnPublish');
-      const progressBox = document.getElementById('uploadProgressBox');
-      const progressBar = document.getElementById('uploadProgressBar');
       const statusText = document.getElementById('uploadStatus');
+      const progressBar = document.getElementById('uploadProgressBar');
+      const progressBox = document.getElementById('uploadProgressBox');
 
       btn.disabled = true;
-      btn.innerText = "Procesando...";
+      btn.innerText = "Conectando...";
 
       try {
-        let downloadURL = "";
-        // Obtenemos usuario de Telegram o ponemos Anónimo
+        const category = categorySelect.value;
         const seller = tg.initDataUnsafe?.user?.username ? '@' + tg.initDataUnsafe.user.username : '@Anonimo';
+        let downloadURL = "";
 
-        // A) Subir Archivo (Si no es suscripción)
         if (category !== 'sub') {
           const file = fileInput.files[0];
-          if (!file) throw new Error("Selecciona un archivo primero.");
+          if (!file) throw new Error("Selecciona un archivo.");
 
           progressBox.style.display = 'block';
           statusText.style.display = 'block';
+          statusText.innerText = "Iniciando subida...";
 
-          // Referencia en Storage
+          // Referencia al archivo
           const storageRef = ref(storage, 'products/' + Date.now() + '_' + file.name);
           const uploadTask = uploadBytesResumable(storageRef, file);
 
-          // Esperar subida
+          // Subida con monitoreo
           await new Promise((resolve, reject) => {
             uploadTask.on('state_changed',
               (snapshot) => {
@@ -192,47 +183,40 @@
                 progressBar.style.width = progress + '%';
                 statusText.innerText = `Subiendo... ${Math.floor(progress)}%`;
               },
-              (error) => reject(error),
+              (error) => {
+                console.error("Error Storage:", error);
+                reject(error);
+              },
               () => resolve()
             );
           });
-
           downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-        } 
-        // B) Suscripción
-        else {
+        } else {
           downloadURL = document.getElementById('subLinkInput').value;
-          if(!downloadURL) throw new Error("Falta el enlace del canal.");
         }
 
-        // C) Guardar en Base de Datos
-        statusText.innerText = "Guardando información...";
-        
+        // Guardar en DB
+        statusText.innerText = "Guardando datos...";
         await addDoc(collection(db, "products"), {
-          title: title,
-          price: parseFloat(price),
-          currency: selectedCurrency,
+          title, price: parseFloat(price), currency: selectedCurrency,
           description: document.getElementById('itemDesc').value,
-          category: category,
-          seller: seller,
-          fileUrl: downloadURL,
-          verified: false,
-          createdAt: serverTimestamp()
+          category, seller, fileUrl: downloadURL,
+          createdAt: serverTimestamp(), verified: false
         });
 
-        statusText.innerText = "¡Listo!";
-        alert("✅ Ítem publicado correctamente");
+        alert("✅ ¡Éxito! Producto publicado.");
         window.location.href = "marketplace.html";
 
       } catch (error) {
         console.error(error);
-        alert("❌ Error: " + error.message);
+        let msg = error.message;
+        if(error.code === 'storage/unauthorized') msg = "Falta permiso (Revisa Reglas Storage).";
+        
+        alert("❌ Error: " + msg);
         btn.disabled = false;
         btn.innerText = "Reintentar";
-        statusText.innerText = "Error";
       }
     });
   </script>
-
 </body>
 </html>
