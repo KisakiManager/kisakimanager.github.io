@@ -2,17 +2,32 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Subir Ítem — Kisaki Manager</title>
+  <title>Subir Ítem (Modo Diagnóstico)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    /* Estilos */
-    .hidden-fields { display: none; background: rgba(59, 130, 246, 0.1); padding: 15px; border-radius: 12px; border: 1px dashed #3b82f6; margin-bottom: 20px; animation: fadeIn 0.3s ease; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+    /* Estilos normales */
+    .hidden-fields { display: none; background: rgba(59, 130, 246, 0.1); padding: 15px; border-radius: 12px; border: 1px dashed #3b82f6; margin-bottom: 20px; }
     .progress-container { width: 100%; background-color: rgba(255, 255, 255, 0.1); border-radius: 10px; margin-top: 15px; height: 10px; overflow: hidden; display: none; }
     .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #ccf381, #a3e635); border-radius: 10px; transition: width 0.2s ease; }
     .upload-status-text { font-size: 0.85em; color: #94a3b8; text-align: center; margin-top: 8px; display: none; }
+    
+    /* ESTILOS DE LA CONSOLA DE DIAGNÓSTICO */
+    #debugConsole {
+      background: #000;
+      color: #0f0;
+      font-family: monospace;
+      font-size: 10px;
+      padding: 10px;
+      margin-top: 20px;
+      border-radius: 8px;
+      border: 1px solid #333;
+      height: 150px;
+      overflow-y: scroll;
+      word-wrap: break-word;
+      display: block; /* Visible para que veas los errores */
+    }
   </style>
 </head>
 <body>
@@ -26,8 +41,8 @@
   <div class="content-card" style="margin-top: -30px;">
     <div class="card-header-inner">
       <div class="page-title">
-        <h1>Vender Ítem</h1>
-        <span>Sube tu contenido al Marketplace</span>
+        <h1>Vender (Debug)</h1>
+        <span>Modo Diagnóstico Activado</span>
       </div>
     </div>
 
@@ -37,84 +52,87 @@
           <label class="form-label">Categoría</label>
           <select class="form-select" id="categorySelect">
             <option value="art">Ilustraciones</option>
-            <option value="sub">Suscripción Canal (Requiere Admin)</option>
+            <option value="sub">Suscripción Canal</option>
             <option value="sticker">Stickers</option>
             <option value="photo">Fotografía</option>
             <option value="video">Videos</option>
-            <option value="other">Otros</option>
           </select>
         </div>
 
         <div id="subFields" class="hidden-fields">
-          <h3 style="color:#60a5fa; margin-top:0; font-size:1em;">Configuración de Canal</h3>
-          <p style="font-size:0.85em; color:#cbd5e1;">El bot debe ser administrador del canal.</p>
-          <div class="form-group">
-            <label class="form-label">Enlace del Canal (Privado)</label>
-            <input type="text" id="subLinkInput" class="form-input" placeholder="https://t.me/...">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Duración</label>
-            <select class="form-select" id="subDurationInput"><option>1 Mes</option><option>Lifetime</option></select>
-          </div>
+          <h3 style="color:#60a5fa; margin-top:0; font-size:1em;">Canal</h3>
+          <input type="text" id="subLinkInput" class="form-input" placeholder="Enlace...">
+          <select class="form-select" id="subDurationInput"><option>Lifetime</option></select>
         </div>
 
         <div class="form-group" id="fileField">
-          <label class="form-label">Archivo del producto</label>
+          <label class="form-label">Archivo</label>
           <div class="upload-area" id="dropZone">
-            <svg class="upload-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
             <p id="fileNameDisplay" style="margin:0; color:#cbd5e1;">Toca para subir</p>
             <input type="file" id="realFileInput" style="display: none;">
           </div>
           <div class="progress-container" id="uploadProgressBox">
             <div class="progress-bar" id="uploadProgressBar"></div>
           </div>
-          <p class="upload-status-text" id="uploadStatus">Iniciando...</p>
+          <p class="upload-status-text" id="uploadStatus">Esperando...</p>
         </div>
 
-        <div class="form-group"><label class="form-label">Título</label><input type="text" id="itemTitle" class="form-input" placeholder="Ej: Pack Premium"></div>
+        <div class="form-group"><input type="text" id="itemTitle" class="form-input" placeholder="Título"></div>
         <div class="form-group">
-          <label class="form-label">Precio</label>
-          <div class="currency-toggle" style="margin-bottom: 10px;">
-            <div class="currency-option active" id="currTON" onclick="setCurrency('TON')">💎 TON</div>
-            <div class="currency-option" id="currSTARS" onclick="setCurrency('STARS')">⭐ Stars</div>
-          </div>
-          <input type="number" id="itemPrice" class="form-input" placeholder="Cantidad">
+            <div class="currency-toggle" style="margin-bottom: 10px;">
+                <div class="currency-option active" id="currTON" onclick="setCurrency('TON')">💎</div>
+                <div class="currency-option" id="currSTARS" onclick="setCurrency('STARS')">⭐</div>
+            </div>
+            <input type="number" id="itemPrice" class="form-input" placeholder="Precio">
         </div>
-        <div class="form-group"><label class="form-label">Descripción</label><textarea id="itemDesc" class="form-textarea" rows="4"></textarea></div>
+        <div class="form-group"><textarea id="itemDesc" class="form-textarea" rows="2" placeholder="Descripción"></textarea></div>
 
         <button type="button" class="btn-telegram-cta" id="btnPublish">Publicar Ítem</button>
       </form>
+      
+      <div id="debugConsole">LOG DE SISTEMA INICIADO...<br></div>
     </div>
   </div>
 
   <script type="module">
-    // 1. IMPORTAMOS DIRECTAMENTE DESDE GOOGLE
+    // --- 1. FUNCIÓN PARA ESCRIBIR EN LA PANTALLA NEGRA ---
+    function logToScreen(msg) {
+      const consoleDiv = document.getElementById('debugConsole');
+      const time = new Date().toLocaleTimeString();
+      consoleDiv.innerHTML += `[${time}] ${msg}<br>`;
+      consoleDiv.scrollTop = consoleDiv.scrollHeight; // Auto-scroll
+      console.log(msg);
+    }
+
+    logToScreen("Cargando módulos de Firebase...");
+
+    // --- 2. IMPORTACIONES ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
-    // 2. TUS CREDENCIALES NUEVAS (Integradas aquí mismo)
+    // --- 3. CREDENCIALES (CAMBIÉ EL BUCKET A .appspot.com) ---
     const firebaseConfig = {
       apiKey: "AIzaSyBHabVfSJo3_xFqZUMCVvHsXtCJrS1NUP4",
       authDomain: "kisaki-manager-85953.firebaseapp.com",
       projectId: "kisaki-manager-85953",
-      storageBucket: "kisaki-manager-85953.firebasestorage.app",
+      // CAMBIO IMPORTANTE: Probamos con .appspot.com
+      storageBucket: "kisaki-manager-85953.appspot.com", 
       messagingSenderId: "714700025635",
       appId: "1:714700025635:web:9d526f9bb4e63531206696"
     };
 
-    // 3. INICIALIZAR Y DIAGNÓSTICO
     let app, db, storage;
     try {
       app = initializeApp(firebaseConfig);
       db = getFirestore(app);
       storage = getStorage(app);
-      console.log("Firebase inicializado correctamente");
+      logToScreen("✅ Firebase Conectado (Config cargada).");
     } catch (e) {
-      alert("Error grave al iniciar Firebase: " + e.message);
+      logToScreen("❌ ERROR AL INICIAR: " + e.message);
     }
 
-    // 4. LÓGICA DE LA APP
+    // --- 4. LÓGICA ---
     const tg = window.Telegram.WebApp;
     tg.expand();
 
@@ -123,7 +141,6 @@
     const dropZone = document.getElementById('dropZone');
     const categorySelect = document.getElementById('categorySelect');
 
-    // Funciones UI
     window.setCurrency = function(type) {
       selectedCurrency = type;
       document.getElementById('currTON').classList.toggle('active', type === 'TON');
@@ -139,64 +156,76 @@
     dropZone.addEventListener('click', () => fileInput.click());
     fileInput.addEventListener('change', () => {
       if(fileInput.files.length > 0) {
-        document.getElementById('fileNameDisplay').innerText = "✅ " + fileInput.files[0].name;
+        document.getElementById('fileNameDisplay').innerText = "Archivo: " + fileInput.files[0].name;
+        logToScreen("Archivo seleccionado: " + fileInput.files[0].name + " (" + fileInput.files[0].size + " bytes)");
       }
     });
 
-    // 5. PROCESO DE SUBIDA
+    // --- 5. SUBIDA ---
     document.getElementById('btnPublish').addEventListener('click', async () => {
+      logToScreen("--- INICIANDO PROCESO DE PUBLICACIÓN ---");
+      
       const title = document.getElementById('itemTitle').value;
       const price = document.getElementById('itemPrice').value;
-      
-      if(!title || !price) return alert("Falta Título o Precio");
+
+      if(!title || !price) {
+        logToScreen("⚠️ Error: Falta título o precio.");
+        return alert("Falta Título o Precio");
+      }
 
       const btn = document.getElementById('btnPublish');
-      const statusText = document.getElementById('uploadStatus');
-      const progressBar = document.getElementById('uploadProgressBar');
-      const progressBox = document.getElementById('uploadProgressBox');
-
-      btn.disabled = true;
-      btn.innerText = "Conectando...";
+      btn.disabled = true; 
+      btn.innerText = "Procesando...";
 
       try {
         const category = categorySelect.value;
         const seller = tg.initDataUnsafe?.user?.username ? '@' + tg.initDataUnsafe.user.username : '@Anonimo';
         let downloadURL = "";
 
+        // SUBIDA DE ARCHIVO
         if (category !== 'sub') {
           const file = fileInput.files[0];
-          if (!file) throw new Error("Selecciona un archivo.");
+          if (!file) throw new Error("No hay archivo seleccionado.");
 
-          progressBox.style.display = 'block';
-          statusText.style.display = 'block';
-          statusText.innerText = "Iniciando subida...";
+          document.getElementById('uploadProgressBox').style.display = 'block';
+          document.getElementById('uploadStatus').style.display = 'block';
+          
+          logToScreen("Intentando subir a Storage...");
+          logToScreen("Bucket objetivo: " + firebaseConfig.storageBucket);
 
-          // Referencia al archivo
           const storageRef = ref(storage, 'products/' + Date.now() + '_' + file.name);
           const uploadTask = uploadBytesResumable(storageRef, file);
 
-          // Subida con monitoreo
           await new Promise((resolve, reject) => {
             uploadTask.on('state_changed',
               (snapshot) => {
                 const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                progressBar.style.width = progress + '%';
-                statusText.innerText = `Subiendo... ${Math.floor(progress)}%`;
+                document.getElementById('uploadProgressBar').style.width = progress + '%';
+                document.getElementById('uploadStatus').innerText = `Subiendo... ${Math.floor(progress)}%`;
+                logToScreen(`Progreso: ${Math.floor(progress)}%`);
               },
               (error) => {
-                console.error("Error Storage:", error);
+                logToScreen("❌ ERROR EN STORAGE: " + error.code);
+                logToScreen("Mensaje: " + error.message);
                 reject(error);
               },
-              () => resolve()
+              () => {
+                logToScreen("✅ Subida completada al 100%");
+                resolve();
+              }
             );
           });
+          
+          logToScreen("Obteniendo URL de descarga...");
           downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+          logToScreen("URL obtenida: " + downloadURL.substring(0, 20) + "...");
+          
         } else {
           downloadURL = document.getElementById('subLinkInput').value;
         }
 
-        // Guardar en DB
-        statusText.innerText = "Guardando datos...";
+        // BASE DE DATOS
+        logToScreen("Guardando en Firestore...");
         await addDoc(collection(db, "products"), {
           title, price: parseFloat(price), currency: selectedCurrency,
           description: document.getElementById('itemDesc').value,
@@ -204,15 +233,14 @@
           createdAt: serverTimestamp(), verified: false
         });
 
-        alert("✅ ¡Éxito! Producto publicado.");
+        logToScreen("✅ ¡TODO CORRECTO! Redirigiendo...");
+        alert("✅ Publicado con éxito");
         window.location.href = "marketplace.html";
 
       } catch (error) {
+        logToScreen("❌ ERROR FINAL (Catch): " + error.message);
         console.error(error);
-        let msg = error.message;
-        if(error.code === 'storage/unauthorized') msg = "Falta permiso (Revisa Reglas Storage).";
-        
-        alert("❌ Error: " + msg);
+        alert("Error: " + error.message);
         btn.disabled = false;
         btn.innerText = "Reintentar";
       }
