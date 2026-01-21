@@ -17,6 +17,33 @@
       animation: fadeIn 0.3s ease;
     }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ESTILOS NUEVOS: BARRA DE PROGRESO */
+    .progress-container {
+      width: 100%;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      margin-top: 15px;
+      height: 10px;
+      overflow: hidden;
+      display: none; /* Oculto hasta que se inicie la subida */
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #ccf381, #a3e635);
+      border-radius: 10px;
+      transition: width 0.2s ease;
+    }
+
+    .upload-status-text {
+      font-size: 0.85em;
+      color: #94a3b8;
+      text-align: center;
+      margin-top: 8px;
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -38,7 +65,7 @@
 
     <div class="card-body">
 
-      <form action="#" method="POST">
+      <form action="#" method="POST" id="uploadForm">
 
         <div class="form-group">
           <label class="form-label">Categoría</label>
@@ -58,12 +85,12 @@
             Configuración de Canal
           </h3>
           <p style="font-size:0.85em; color:#cbd5e1; margin-bottom:15px;">El bot debe ser administrador del canal para gestionar los enlaces de invitación.</p>
-          
+
           <div class="form-group">
             <label class="form-label">Enlace del Canal (Privado)</label>
             <input type="text" class="form-input" placeholder="https://t.me/+AbCdEfGh...">
           </div>
-          
+
           <div class="form-group">
             <label class="form-label">Duración del Acceso</label>
             <select class="form-select">
@@ -78,10 +105,17 @@
 
         <div class="form-group" id="fileField">
           <label class="form-label">Archivo del producto (Zip, PNG, MP4)</label>
-          <div class="upload-area">
+          
+          <div class="upload-area" id="dropZone">
             <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            <p style="margin:0; color:#cbd5e1;">Toca para subir o arrastra aquí</p>
+            <p id="fileNameDisplay" style="margin:0; color:#cbd5e1;">Toca para subir o arrastra aquí</p>
+            <input type="file" id="realFileInput" style="display: none;"> 
           </div>
+
+          <div class="progress-container" id="uploadProgressBox">
+            <div class="progress-bar" id="uploadProgressBar"></div>
+          </div>
+          <p class="upload-status-text" id="uploadStatus">Iniciando subida... 0%</p>
         </div>
 
         <div class="form-group">
@@ -106,7 +140,7 @@
           <textarea class="form-textarea" rows="4" placeholder="Describe lo que incluye..."></textarea>
         </div>
 
-        <button type="button" class="btn-telegram-cta" onclick="alert('Datos enviados al Backend (Simulación)')">
+        <button type="button" class="btn-telegram-cta" onclick="startUploadProcess()">
           Publicar Ítem
         </button>
 
@@ -123,11 +157,9 @@
       const fileField = document.getElementById('fileField');
 
       if (category === 'sub') {
-        // Si es suscripción: Mostrar campos de canal, ocultar archivo
         subFields.style.display = 'block';
         fileField.style.display = 'none';
       } else {
-        // Si es otro ítem: Mostrar archivo, ocultar campos de canal
         subFields.style.display = 'none';
         fileField.style.display = 'block';
       }
@@ -137,6 +169,72 @@
     function selectCurrency(element, type) {
       document.querySelectorAll('.currency-option').forEach(el => el.classList.remove('active'));
       element.classList.add('active');
+    }
+
+    // 3. LÓGICA DE SUBIDA DE ARCHIVOS (NUEVA)
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('realFileInput');
+    const fileNameDisplay = document.getElementById('fileNameDisplay');
+
+    // Activar input al tocar el área
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    // Mostrar nombre del archivo seleccionado
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files.length > 0) {
+        fileNameDisplay.innerText = "📄 " + fileInput.files[0].name;
+        fileNameDisplay.style.color = "#ccf381";
+        dropZone.style.borderColor = "#ccf381";
+      }
+    });
+
+    // Función principal de subida (Simulada para visualización)
+    function startUploadProcess() {
+      const category = document.getElementById('categorySelect').value;
+      
+      // Si es una suscripción, no hay archivo que subir, pasa directo
+      if(category === 'sub') {
+        alert("Suscripción creada exitosamente.");
+        window.location.href = "marketplace.html";
+        return;
+      }
+
+      // Validar si hay archivo
+      if (fileInput.files.length === 0) {
+        alert("Por favor selecciona un archivo para subir.");
+        return;
+      }
+
+      // Mostrar barra
+      const progressBox = document.getElementById('uploadProgressBox');
+      const progressBar = document.getElementById('uploadProgressBar');
+      const statusText = document.getElementById('uploadStatus');
+      
+      progressBox.style.display = 'block';
+      statusText.style.display = 'block';
+
+      let percent = 0;
+      // Intervalo para simular carga (En producción usarías XMLHttpRequest upload.onprogress)
+      const interval = setInterval(() => {
+        // Velocidad aleatoria
+        percent += Math.floor(Math.random() * 5) + 2; 
+        
+        if (percent > 100) percent = 100;
+
+        progressBar.style.width = percent + '%';
+        statusText.innerText = `Subiendo archivo... ${percent}%`;
+
+        if (percent === 100) {
+          clearInterval(interval);
+          statusText.innerText = "¡Procesando datos...";
+          statusText.style.color = "#ccf381";
+          
+          setTimeout(() => {
+            alert("Ítem publicado exitosamente en el Marketplace.");
+            window.location.href = "marketplace.html";
+          }, 800);
+        }
+      }, 100); // Velocidad del loop
     }
   </script>
 
