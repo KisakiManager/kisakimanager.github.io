@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Subir Ítem — Kisaki Manager</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="page-header" style="height: 120px; background-image: url('fondo-market.jpg');">
+    <a href="profile.html" class="back-floating">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </a>
+  </div>
+
+  <div class="content-card" style="margin-top: -30px;">
+
+    <div class="card-header-inner">
+      <div class="page-title">
+        <h1>Vender Ítem</h1>
+        <span>Sube tu contenido al Marketplace</span>
+      </div>
+    </div>
+
+    <div class="card-body">
+
+      <form action="#" method="POST"> <div class="form-group">
+          <label class="form-label">Archivo del producto (Zip, PNG, MP4)</label>
+          <div class="upload-area">
+            <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <p style="margin:0; color:#cbd5e1;">Toca para subir o arrastra aquí</p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Título del Ítem</label>
+          <input type="text" class="form-input" placeholder="Ej: Pack de Wallpapers 4K">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Categoría</label>
+          <select class="form-select">
+            <option>Ilustraciones</option>
+            <option>Suscripción Canal (Requiere Admin)</option>
+            <option>Stickers</option>
+            <option>Fotografía</option>
+            <option>Videos</option>
+            <option>Otros</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Precio y Moneda</label>
+          
+          <div class="currency-toggle" style="margin-bottom: 10px;">
+            <div class="currency-option active" onclick="selectCurrency(this, 'TON')">💎 TON</div>
+            <div class="currency-option" onclick="selectCurrency(this, 'STARS')">⭐ Stars</div>
+          </div>
+
+          <input type="number" class="form-input" placeholder="Cantidad (Ej: 2.5)">
+          
+          <span class="commission-note">ℹ️ Se descontará un 7% de comisión por venta.</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Descripción</label>
+          <textarea class="form-textarea" rows="4" placeholder="Describe lo que incluye tu producto..."></textarea>
+        </div>
+
+        <button type="button" class="btn-telegram-cta" onclick="alert('Funcionalidad Backend requerida para publicar.')">
+          Publicar Ítem
+        </button>
+
+      </form>
+
+    </div>
+  </div>
+
+  <script>
+    // Pequeño script para el toggle visual de moneda
+    function selectCurrency(element, type) {
+      document.querySelectorAll('.currency-option').forEach(el => el.classList.remove('active'));
+      element.classList.add('active');
+    }
+  </script>
+
+</body>
+</html>
