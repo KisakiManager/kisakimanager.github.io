@@ -9,21 +9,21 @@
 
   <style>
     /* =========================================
-       CORRECCIONES VISUALES ESPECÍFICAS
+       ESTILOS ESPECÍFICOS WEB APP
        ========================================= */
     
     /* Centrado del Header */
     .main-header { text-align: center; margin-bottom: 25px; }
     
-    /* Corrección Resultados Búsqueda */
+    /* Resultados Búsqueda */
     .search-results {
       background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;
       margin-top: 10px; max-height: 200px; overflow-y: auto; display: none;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5); pointer-events: auto;
     }
     .search-result-item { display: block; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); color: white; text-decoration: none; }
 
-    /* Estilos Banner Destacado */
+    /* Destacados (Banners Grandes) */
     .market-featured-container {
       display: flex; overflow-x: auto; gap: 15px; padding: 10px 0 20px 0;
       scrollbar-width: none; scroll-snap-type: x mandatory;
@@ -37,8 +37,12 @@
       position: absolute; bottom: 0; left: 0; width: 100%;
       background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); padding: 15px; box-sizing: border-box;
     }
+    .banner-badge {
+      position: absolute; top: 10px; right: 10px; background: #ef4444; color: white;
+      font-size: 0.75em; font-weight: 800; padding: 4px 8px; border-radius: 6px;
+    }
 
-    /* Corrección Botón Flotante Subir */
+    /* Botón Flotante Subir (Visible) */
     .btn-upload-fixed {
       position: fixed; bottom: 90px; right: 20px;
       width: 56px; height: 56px; background-color: #ccf381; color: #000;
@@ -49,10 +53,13 @@
     .btn-upload-fixed:active { transform: scale(0.9); }
 
     /* Paginación */
-    .pagination-container { display: flex; justify-content: center; gap: 10px; margin-top: 20px; padding-bottom: 80px; }
-    .page-dot { width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,0.1); color: white; border: none; font-size: 0.9em; }
+    .pagination-container { display: flex; justify-content: center; gap: 8px; margin-top: 20px; padding-bottom: 80px; }
+    .page-dot { width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.1); color: white; border: none; font-size: 0.9em; cursor: pointer; }
     .page-dot.active { background: #ccf381; color: black; font-weight: bold; }
 
+    /* Acordeón Planes (Estilo embebido para asegurar funcionamiento) */
+    .pricing-content { max-height: 0; opacity: 0; overflow: hidden; transition: all 0.3s ease; }
+    .pricing-card.active .pricing-content { max-height: 300px; opacity: 1; margin-top: 15px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); }
   </style>
 </head>
 
@@ -138,6 +145,7 @@
 
       <div class="market-featured-container">
         <div class="featured-banner" style="background-image: linear-gradient(135deg, #ec4899, #be185d);">
+          <span class="banner-badge">-20%</span>
           <div class="banner-overlay"><h3 style="margin:0; color:white;">Pack Anime Premium</h3><span style="color:#ccf381;">2.0 TON</span></div>
         </div>
         <div class="featured-banner" style="background-image: linear-gradient(135deg, #3b82f6, #1e40af);">
@@ -150,6 +158,7 @@
         <div class="market-tab" onclick="renderMarket('art', 1, this)">Ilustraciones</div>
         <div class="market-tab" onclick="renderMarket('vip', 1, this)">Suscripciones</div>
         <div class="market-tab" onclick="renderMarket('sticker', 1, this)">Stickers</div>
+        <div class="market-tab" onclick="renderMarket('other', 1, this)">Otros</div>
       </div>
 
       <div id="products-container" class="products-grid"></div>
@@ -167,9 +176,10 @@
       
       <div class="buttons-list">
         <a class="btn-card" href="about.html">
-          <div class="icon-wrapper"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></div>
+          <div class="icon-wrapper"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></div>
           <div class="card-text"><span class="card-title">Sobre Kisaki</span><span class="card-desc">Misión y Creador</span></div>
         </a>
+
         <a class="btn-card" href="payment-policies.html">
           <div class="icon-wrapper"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
           <div class="card-text"><span class="card-title">Políticas de Pago</span><span class="card-desc">Reembolsos y Seguridad</span></div>
@@ -207,7 +217,7 @@
     </section>
 
   </div> <div class="search-overlay" id="searchOverlay">
-    <input type="text" class="search-input" id="globalSearchInput" placeholder="Buscar..." onkeyup="globalSearch()">
+    <input type="text" class="search-input" id="globalSearchInput" placeholder="Buscar ítems, políticas..." onkeyup="globalSearch()">
     <div class="search-results" id="searchResults"></div>
   </div>
 
@@ -238,17 +248,14 @@
   <script>
     // --- 1. MEMORIA Y NAVEGACIÓN ---
     document.addEventListener("DOMContentLoaded", () => {
-      // 1.1 Generar ítems falsos para probar paginación
-      generateDummyItems();
-      
-      // 1.2 Recuperar última sección
+      generateDummyItems(); // Generar ítems falsos para probar
       const lastSection = localStorage.getItem('kisaki_last_section') || 'home';
       switchSection(lastSection);
     });
 
     function switchSection(sectionId, element) {
-      // Si el usuario pide 'legal' (desde nav), mostramos #section-policies
-      let targetId = sectionId === 'legal' ? 'policies' : sectionId;
+      // Diferenciar 'Legal' (Navbar) de 'Plans' (Home)
+      let targetId = sectionId === 'legal' ? 'legal' : sectionId;
       
       // Ocultar todo
       document.querySelectorAll('.app-section').forEach(sec => sec.classList.remove('active'));
@@ -257,45 +264,43 @@
       const target = document.getElementById('section-' + targetId);
       if(target) target.classList.add('active');
 
-      // Guardar en memoria (Truco para no volver al inicio al recargar)
+      // Guardar en memoria
       localStorage.setItem('kisaki_last_section', sectionId);
 
       // Actualizar Navbar (Visual)
       const navItems = document.querySelectorAll('.nav-item');
       navItems.forEach(n => n.classList.remove('active'));
       
-      // Lógica para resaltar el icono correcto
-      // 0:Inicio, 1:Market, 3:Legal, 4:Perfil
+      // Mapeo manual de iconos
       if(sectionId === 'home') navItems[0].classList.add('active');
       else if(sectionId === 'market') navItems[1].classList.add('active');
-      else if(sectionId === 'legal' || sectionId === 'policies') navItems[3].classList.add('active');
+      else if(sectionId === 'legal') navItems[3].classList.add('active');
       else if(sectionId === 'profile') navItems[4].classList.add('active');
-      // Si es 'plans', no resaltamos nada específico o dejamos Inicio.
+      // Si es 'plans', no activamos ningún icono de navbar específico (se queda en el último o ninguno)
 
       document.getElementById('searchOverlay').classList.remove('show');
       window.scrollTo(0,0);
     }
 
     // --- 2. MARKETPLACE LÓGICA (Paginación + Filtros) ---
-    const allItems = []; // Aquí guardaremos los 50 items generados
+    const allItems = []; 
     let currentCategory = 'all';
     let currentPage = 1;
     const itemsPerPage = 15;
 
+    // Generar 45 items falsos para probar las 3 páginas
     function generateDummyItems() {
-      const types = ['art', 'sticker', 'vip'];
-      for(let i=1; i<=50; i++) {
+      const types = ['art', 'sticker', 'vip', 'other'];
+      for(let i=1; i<=45; i++) {
         const type = types[Math.floor(Math.random() * types.length)];
         allItems.push({
-          id: i,
-          type: type,
-          title: `Item Demo ${i}`,
+          id: i, type: type,
+          title: `Demo Item ${i}`,
           price: (Math.random() * 5).toFixed(1) + ' TON',
           seller: '@Vendedor' + i,
           color: type === 'vip' ? '#3b82f6' : (type==='art' ? '#ec4899' : '#f59e0b')
         });
       }
-      // Renderizar inicio
       renderMarket('all', 1);
     }
 
@@ -303,21 +308,21 @@
       currentCategory = category;
       currentPage = page;
 
-      // Actualizar Tabs Visuales
+      // Actualizar Tabs
       if(tabElement) {
         document.querySelectorAll('.market-tab').forEach(t => t.classList.remove('active'));
         tabElement.classList.add('active');
       }
 
-      // 1. Filtrar
+      // Filtrar
       const filtered = allItems.filter(item => category === 'all' || item.type === category);
 
-      // 2. Paginar
+      // Paginar
       const start = (page - 1) * itemsPerPage;
       const end = start + itemsPerPage;
       const itemsToShow = filtered.slice(start, end);
 
-      // 3. Renderizar Productos
+      // Renderizar
       const container = document.getElementById('products-container');
       container.innerHTML = '';
       
@@ -335,7 +340,7 @@
         container.appendChild(div);
       });
 
-      // 4. Renderizar Botones Paginación
+      // Renderizar Botones Paginación
       const totalPages = Math.ceil(filtered.length / itemsPerPage);
       const pagContainer = document.getElementById('pagination-container');
       pagContainer.innerHTML = '';
@@ -374,7 +379,7 @@
       resultsDiv.innerHTML = '';
 
       const data = [
-        {t: 'Funciones Premium', a: "javascript:switchSection('plans')"},
+        {t: 'Planes Premium', a: "javascript:switchSection('plans')"},
         {t: 'Términos de Uso', a: "terms.html"},
         {t: 'Marketplace', a: "javascript:switchSection('market')"},
         {t: 'Reembolsos', a: "payment-policies.html"}
