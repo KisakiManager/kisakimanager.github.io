@@ -888,3 +888,152 @@ footer {
 .btn-upload-float:active {
   transform: scale(0.9);
 }
+
+/* =========================================
+   14. PERFIL Y FORMULARIOS DE CARGA
+   ========================================= */
+
+/* --- PERFIL DE USUARIO --- */
+.profile-header-card {
+  background: linear-gradient(135deg, #1e40af, #1e3a8a);
+  border-radius: 24px;
+  padding: 30px 20px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 25px;
+}
+
+.profile-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 3px solid #ccf381; /* Borde verde lima */
+  margin: 0 auto 15px;
+  background-color: #0f172a;
+  object-fit: cover;
+}
+
+.profile-name {
+  font-size: 1.5em;
+  font-weight: 700;
+  color: white;
+  margin: 0;
+}
+
+.profile-role {
+  display: inline-block;
+  font-size: 0.8em;
+  background: rgba(0,0,0,0.3);
+  padding: 4px 12px;
+  border-radius: 20px;
+  margin-top: 8px;
+  color: #ccf381;
+}
+
+/* Botón TON Connect (Simulado visualmente) */
+.btn-ton-connect {
+  background-color: #0098ea; /* Azul TON */
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  margin-top: 20px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.btn-ton-connect:active {
+  transform: scale(0.98);
+}
+
+/* --- FORMULARIOS DE SUBIDA (UPLOAD) --- */
+.form-group {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.form-label {
+  display: block;
+  color: #cbd5e1;
+  margin-bottom: 8px;
+  font-size: 0.9em;
+  font-weight: 600;
+}
+
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 12px 15px;
+  color: white;
+  font-size: 1em;
+  outline: none;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.form-input:focus, .form-select:focus {
+  border-color: #2563eb;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Área de carga de archivos (Drag & Drop) */
+.upload-area {
+  border: 2px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  padding: 30px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.02);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.upload-area:hover {
+  border-color: #ccf381;
+  background: rgba(204, 243, 129, 0.05);
+}
+
+.upload-icon {
+  width: 40px;
+  height: 40px;
+  color: #94a3b8;
+  margin-bottom: 10px;
+}
+
+/* Switch para tipo de moneda (TON vs Stars) */
+.currency-toggle {
+  display: flex;
+  gap: 10px;
+}
+
+.currency-option {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 10px;
+  text-align: center;
+  cursor: pointer;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.currency-option.active {
+  background: #2563eb;
+  color: white;
+  border-color: #2563eb;
+}
+
+.commission-note {
+  font-size: 0.8em;
+  color: #fbbf24; /* Ámbar */
+  margin-top: 5px;
+  display: block;
+}
