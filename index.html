@@ -5,10 +5,22 @@
   <title>Kisaki Manager</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <link rel="stylesheet" href="style.css">
+  
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <script type="module">
+    import { db } from './firebase_config.js';
+    // Esto mostrará un mensaje en la consola del navegador si la conexión es exitosa
+    console.log("🔥 Kisaki Manager: Conexión a Firebase establecida", db ? "OK" : "Error");
+    
+    // Inicializar Telegram WebApp (Tema y Expansión)
+    const tg = window.Telegram.WebApp;
+    tg.expand(); 
+  </script>
 </head>
 
 <body>
-  
+
   <div class="container" style="padding-top: 20px;">
 
     <header class="main-header" style="text-align:center; margin-bottom:25px;">
@@ -68,7 +80,7 @@
     function handleSearch(e) {
       const input = e.target.value.toLowerCase();
       const resultsDiv = document.getElementById('searchResults');
-      
+
       // Si presiona ENTER -> Ir a archivo de resultados
       if (e.key === 'Enter') {
         window.location.href = `search-results.html?q=${encodeURIComponent(input)}`;
