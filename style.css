@@ -1327,6 +1327,12 @@ body {
    21. PERFIL AVANZADO (DASHBOARD)
    ========================================= */
 
+/* AJUSTE NUEVO: Permite que la cabecera ocupe todo el ancho de la pantalla */
+.profile-full-width-header {
+  margin: -20px -20px 60px -20px; /* Márgenes negativos para romper el padding del container */
+  width: calc(100% + 40px);       /* Compensa el ancho */
+}
+
 /* Cabecera Ovalada */
 .oval-header {
   height: 200px;
@@ -1335,7 +1341,7 @@ body {
   border-bottom-right-radius: 50% 40px;
   position: relative;
   width: 100%;
-  margin-bottom: 60px; /* Espacio para que el avatar se superponga */
+  /* Ya no necesita margin-bottom aquí porque lo maneja el contenedor padre arriba */
   box-shadow: 0 10px 30px rgba(30, 58, 138, 0.4);
 }
 
