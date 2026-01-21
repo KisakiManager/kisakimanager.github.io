@@ -5,105 +5,190 @@
   <title>Marketplace — Kisaki Manager</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* Estilo extra para el icono de Play en videos */
+    .video-overlay {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.6);
+      border-radius: 50%;
+      padding: 10px;
+      display: flex;
+    }
+  </style>
 </head>
 <body>
 
-  <div class="page-header" style="height: 120px; background-image: url('fondo-market.jpg');">
+  <div class="page-header" style="height: 140px; background-image: url('fondo-market.jpg');">
     <a href="index.html" class="back-floating">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
     </a>
     
-    <div style="position: absolute; bottom: -20px; left: 20px; right: 20px;">
-       <div style="background: #0f172a; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; padding: 10px 15px; display: flex; align-items: center; gap: 10px;">
+    <div style="position: absolute; bottom: 15px; left: 20px; right: 20px;">
+       <div style="background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); border-radius: 16px; padding: 12px 15px; display: flex; align-items: center; gap: 10px;">
          <svg width="20" height="20" fill="none" stroke="#94a3b8" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-         <input type="text" placeholder="Buscar ítems..." style="background: transparent; border: none; color: white; outline: none; width: 100%; font-size: 0.95em;">
+         <input type="text" id="searchInput" placeholder="Buscar ítems, canales..." onkeyup="searchItems()" style="background: transparent; border: none; color: white; outline: none; width: 100%; font-size: 0.95em;">
        </div>
     </div>
   </div>
 
-  <div class="content-card" style="margin-top: 40px; min-height: 80vh;">
-
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-      <h2 style="margin: 0; font-size: 1.5em; color: white;">Marketplace</h2>
-      <span style="font-size: 0.8em; color: #ccf381;">7% fee apply</span>
-    </div>
+  <div class="content-card" style="margin-top: -20px; min-height: 80vh; padding-top: 25px;">
 
     <div class="market-nav">
-      <div class="market-tab active">Todo</div>
-      <div class="market-tab">Ilustraciones</div>
-      <div class="market-tab">Suscripciones</div>
-      <div class="market-tab">Stickers</div>
-      <div class="market-tab">Fotos</div>
-      <div class="market-tab">Videos</div>
-      <div class="market-tab">Otros</div>
+      <div class="market-tab active" onclick="filterSelection('all', this)">Todo</div>
+      <div class="market-tab" onclick="filterSelection('ilustracion', this)">Ilustraciones</div>
+      <div class="market-tab" onclick="filterSelection('suscripcion', this)">Canales VIP</div>
+      <div class="market-tab" onclick="filterSelection('stickers', this)">Stickers</div>
+      <div class="market-tab" onclick="filterSelection('wallpaper', this)">Wallpapers</div>
+      <div class="market-tab" onclick="filterSelection('video', this)">Videos</div>
+      <div class="market-tab" onclick="filterSelection('otros', this)">Otros</div>
     </div>
 
-    <div class="products-grid">
+    <div class="products-grid" id="productsContainer">
 
-      <div class="product-card">
-        <div class="product-image" style="background-color: #475569;"></div> 
+      <div class="product-card filter-item suscripcion">
+        <div class="product-image" style="background-color: #3b82f6; display:flex; align-items:center; justify-content:center;">
+          <span style="font-size:40px;">🔒</span>
+        </div>
         <div class="product-info">
-          <h3 class="product-title">Pack Anime V1</h3>
+          <h3 class="product-title">Canal VIP Signals</h3>
           <div class="product-seller">
-            @VicenteArt
+            @TraderPro
             <svg class="verified-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
           </div>
           <div class="product-price-row">
-            <span class="price-tag">2.5 TON</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="product-card">
-        <div class="product-image" style="background-color: #3b82f6;"></div>
-        <div class="product-info">
-          <h3 class="product-title">Canal VIP Access</h3>
-          <div class="product-seller">@KisakiBot</div>
-          <div class="product-price-row">
-            <div class="price-stars">
+            <div class="price-tag-stars">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-              <span>500</span>
+              500 Stars
             </div>
           </div>
         </div>
       </div>
 
-      <div class="product-card">
+      <div class="product-card filter-item ilustracion">
+        <div class="product-image" style="background-color: #ec4899;">
+          </div> 
+        <div class="product-info">
+          <h3 class="product-title">Pack Anime Art V1</h3>
+          <div class="product-seller">@VicenteArt</div>
+          <div class="product-price-row">
+            <div class="price-tag-ton">💎 2.5 TON</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card filter-item stickers">
         <div class="product-image" style="background-color: #f59e0b;"></div>
         <div class="product-info">
-          <h3 class="product-title">Chibi Stickers</h3>
-          <div class="product-seller">@ArtistTwo</div>
+          <h3 class="product-title">Cyber Stickers Pack</h3>
+          <div class="product-seller">@DesignLab</div>
           <div class="product-price-row">
-            <span class="price-tag">1 TON</span>
+            <div class="price-tag-ton">💎 1 TON</div>
           </div>
         </div>
       </div>
 
-      <div class="product-card">
-        <div class="product-image" style="background-color: #ec4899;"></div>
+      <div class="product-card filter-item wallpaper">
+        <div class="product-image" style="background-color: #10b981;"></div>
         <div class="product-info">
-          <h3 class="product-title">Cyber City 4K</h3>
-          <div class="product-seller">@DesignPro</div>
+          <h3 class="product-title">Neon City 4K</h3>
+          <div class="product-seller">@WallHeaven</div>
           <div class="product-price-row">
-            <div class="price-stars">
+            <div class="price-tag-stars">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-              <span>150</span>
+              150 Stars
             </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card filter-item video">
+        <div class="product-image" style="background-color: #6366f1; position: relative;">
+          <div class="video-overlay">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+          </div>
+        </div>
+        <div class="product-info">
+          <h3 class="product-title">Curso Intro Python</h3>
+          <div class="product-seller">@DevMaster</div>
+          <div class="product-price-row">
+            <div class="price-tag-ton">💎 10 TON</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card filter-item otros">
+        <div class="product-image" style="background-color: #64748b;"></div>
+        <div class="product-info">
+          <h3 class="product-title">Script Bot Anti-Spam</h3>
+          <div class="product-seller">@CodeX</div>
+          <div class="product-price-row">
+            <div class="price-tag-ton">💎 5 TON</div>
           </div>
         </div>
       </div>
 
     </div>
     
-    <div style="margin-top: 40px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; color: #7b8fa6; font-size: 0.85em; padding-bottom: 60px;">
-      © Kisaki Manager
+    <div style="margin-top: 40px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; color: #7b8fa6; font-size: 0.85em; padding-bottom: 80px;">
+      © Kisaki Manager Market
     </div>
 
   </div>
 
-  <div class="btn-upload-float">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-  </div>
+  <a href="upload.html" class="btn-upload-float">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="12" y1="5" x2="12" y2="19"></line>
+      <line x1="5" y1="12" x2="19" y2="12"></line>
+    </svg>
+  </a>
+
+  <script>
+    function filterSelection(category, element) {
+      var items = document.getElementsByClassName("filter-item");
+      
+      // 1. Mostrar/Ocultar según categoría
+      if (category == "all") category = "";
+      for (var i = 0; i < items.length; i++) {
+        items[i].style.display = "none"; // Ocultar todo primero
+        if (items[i].className.indexOf(category) > -1) {
+          items[i].style.display = "block"; // Mostrar coincidencia
+        }
+      }
+
+      // 2. Manejo de clases activas en las pestañas
+      var tabs = document.getElementsByClassName("market-tab");
+      for (var i = 0; i < tabs.length; i++) {
+        tabs[i].classList.remove("active");
+      }
+      if(element) element.classList.add("active");
+    }
+
+    // Buscador simple
+    function searchItems() {
+      var input, filter, container, items, title, i, txtValue;
+      input = document.getElementById("searchInput");
+      filter = input.value.toUpperCase();
+      container = document.getElementById("productsContainer");
+      items = container.getElementsByClassName("product-card");
+
+      for (i = 0; i < items.length; i++) {
+        title = items[i].getElementsByClassName("product-title")[0];
+        if (title) {
+          txtValue = title.textContent || title.innerText;
+          if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            items[i].style.display = "";
+          } else {
+            items[i].style.display = "none";
+          }
+        }
+      }
+    }
+
+    // Inicializar mostrando todo
+    filterSelection('all', document.querySelector('.market-tab.active'));
+  </script>
 
 </body>
 </html>
