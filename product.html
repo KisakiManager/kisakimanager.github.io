@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Detalle del Ítem</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <script src="items_db.js"></script> 
+</head>
+<body>
+
+  <div class="page-header" style="height: 80px; background: #02040a;">
+    <a href="marketplace.html" class="back-floating" style="top: 20px;">
+      <svg width="24" height="24" fill="none" stroke="#ffffff" stroke-width="3"><path d="M15 18l-6-6 6-6"/></svg>
+    </a>
+    <div id="deleteBtn" class="btn-delete-item" style="display:none;" onclick="deleteItem()">
+      <svg width="20" height="20" fill="none" stroke="white" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+    </div>
+  </div>
+
+  <div class="content-card" style="margin-top: 0; min-height: 90vh;">
+    
+    <div class="detail-banner" id="pBanner" style="border-radius: 20px; margin-bottom: 20px; height: 200px; position: relative; overflow: hidden;">
+      
+      <div id="subIconOverlay" style="display:none; position: absolute; inset:0; align-items:center; justify-content:center; background: rgba(0,0,0,0.3);">
+        <div style="width:60px; height:60px; background:rgba(255,255,255,0.2); backdrop-filter:blur(5px); border-radius:50%; display:flex; align-items:center; justify-content:center;">
+          <svg width="30" height="30" stroke="white" stroke-width="2" fill="none"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        </div>
+      </div>
+
+      <div id="discountBadge" style="display:none; position: absolute; top: 15px; right: 15px; background: #ef4444; color: white; padding: 5px 10px; border-radius: 8px; font-weight: bold; font-size: 0.9em; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+        -0%
+      </div>
+    </div>
+
+    <h1 id="pTitle" style="margin: 0 0 5px 0; font-size: 1.6em; color: white;">Cargando...</h1>
+    <div style="display:flex; align-items:center; gap:5px; margin-bottom: 20px;">
+      <span id="pSeller" style="color: #ccf381;">@Seller</span>
+      <svg id="pVerified" style="display:none; width:16px; height:16px; fill:#3b82f6;" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+    </div>
+
+    <div id="subInfoBox" style="display:none; margin-bottom: 20px;">
+      <div style="display:flex; gap:10px;">
+        <span class="sub-badge">📅 <span id="pDuration">1 Mes</span></span>
+        <span class="sub-badge" style="background:rgba(236,72,153,0.2); color:#f472b6;">Canal Privado</span>
+      </div>
+    </div>
+
+    <div class="desc-box">
+      <p id="pDesc" style="margin:0;">Descripción del producto...</p>
+    </div>
+
+    <h3 style="color: white; margin-bottom: 15px;">Método de Pago</h3>
+    
+    <div class="pay-option selected" onclick="selectPayment(this)">
+      <div class="pay-label"><span>💎</span> TON Wallet</div>
+      <div style="text-align:right;">
+        <span id="oldPriceTon" style="display:none; text-decoration: line-through; color: #64748b; font-size: 0.8em; margin-right: 5px;"></span>
+        <span class="pay-price" id="pPriceTon">0 TON</span>
+      </div>
+    </div>
+
+    <div class="pay-option" onclick="selectPayment(this)" style="margin-top:10px;">
+      <div class="pay-label"><span>⭐</span> Telegram Stars</div>
+      <div style="text-align:right;">
+        <span id="oldPriceStars" style="display:none; text-decoration: line-through; color: #64748b; font-size: 0.8em; margin-right: 5px;"></span>
+        <span class="pay-price" id="pPriceStars">0 Stars</span>
+      </div>
+    </div>
+
+    <button class="btn-telegram-cta" style="margin-top: 30px;">Comprar Ahora</button>
+
+  </div>
+
+  <style>
+    /* Estilos extra locales para este archivo */
+    .btn-delete-item {
+      position: absolute; top: 20px; right: 20px;
+      width: 40px; height: 40px; background: rgba(239, 68, 68, 0.2);
+      border: 1px solid #ef4444; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-delete-item:hover { background: #ef4444; }
+  </style>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // 1. Obtener ID de la URL
+      const params = new URLSearchParams(window.location.search);
+      const itemId = params.get('id');
+      
+      // 2. Buscar en la "Base de Datos"
+      const item = getProductById(itemId);
+
+      if (!item) {
+        document.querySelector('.content-card').innerHTML = "<h2 style='color:white; text-align:center; padding:50px;'>Ítem no encontrado</h2>";
+        return;
+      }
+
+      // 3. Rellenar Datos Básicos
+      document.title = item.title + " — Kisaki Market";
+      document.getElementById('pTitle').innerText = item.title;
+      document.getElementById('pSeller').innerText = item.seller;
+      document.getElementById('pDesc').innerText = item.description;
+      
+      // Banner / Color
+      const banner = document.getElementById('pBanner');
+      if(item.image) {
+        banner.style.backgroundImage = `url('${item.image}')`;
+      } else {
+        banner.style.backgroundColor = item.color;
+      }
+
+      // Verificado
+      if(item.verified) document.getElementById('pVerified').style.display = 'block';
+
+      // 4. Lógica de Descuento
+      let finalPriceTon = item.priceTon;
+      let finalPriceStars = item.priceStars;
+
+      if (item.discount > 0) {
+        // Calcular precios finales
+        finalPriceTon = (item.priceTon * (1 - item.discount)).toFixed(2);
+        finalPriceStars = Math.floor(item.priceStars * (1 - item.discount));
+
+        // Mostrar Badge
+        const badge = document.getElementById('discountBadge');
+        badge.innerText = `-${item.discount * 100}% OFF`;
+        badge.style.display = 'block';
+
+        // Mostrar precio anterior tachado
+        const oldTon = document.getElementById('oldPriceTon');
+        oldTon.innerText = item.priceTon + ' TON';
+        oldTon.style.display = 'inline';
+
+        const oldStars = document.getElementById('oldPriceStars');
+        oldStars.innerText = item.priceStars + ' Stars';
+        oldStars.style.display = 'inline';
+      }
+
+      // Pintar Precios Finales
+      document.getElementById('pPriceTon').innerText = finalPriceTon + ' TON';
+      document.getElementById('pPriceStars').innerText = finalPriceStars + ' Stars';
+
+      // 5. Lógica de Suscripción
+      if (item.type === 'sub') {
+        document.getElementById('subIconOverlay').style.display = 'flex';
+        document.getElementById('subInfoBox').style.display = 'block';
+        document.getElementById('pDuration').innerText = item.subDuration || 'Indefinido';
+      }
+
+      // 6. Lógica de Botón Borrar (Solo para el vendedor)
+      if (item.seller === CURRENT_USER) {
+        document.getElementById('deleteBtn').style.display = 'flex';
+      }
+    });
+
+    function selectPayment(el) {
+      document.querySelectorAll('.pay-option').forEach(o => o.classList.remove('selected'));
+      el.classList.add('selected');
+    }
+
+    function deleteItem() {
+      if(confirm("¿Estás seguro de que quieres eliminar este ítem de la venta?")) {
+        alert("Ítem eliminado (Simulación)");
+        window.location.href = "marketplace.html";
+      }
+    }
+  </script>
+
+</body>
+</html>
