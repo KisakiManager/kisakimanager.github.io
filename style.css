@@ -1470,3 +1470,32 @@ body {
   align-items: center;
   gap: 8px;
 }
+
+/* =========================================
+   22. BARRA DE PROGRESO (UPLOAD)
+   ========================================= */
+.progress-container {
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  margin-top: 15px;
+  height: 10px;
+  overflow: hidden;
+  display: none; /* Oculto por defecto */
+}
+
+.progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #ccf381, #a3e635);
+  border-radius: 10px;
+  transition: width 0.2s ease;
+}
+
+.upload-status-text {
+  font-size: 0.85em;
+  color: #94a3b8;
+  text-align: center;
+  margin-top: 5px;
+  display: none;
+}
