@@ -1348,7 +1348,7 @@ body {
 /* Contenedor del Avatar y Corona */
 .avatar-wrapper {
   position: absolute;
-  bottom: -10px;
+  bottom: -02px;
   left: 50%;
   transform: translateX(-50%);
   width: 110px;
