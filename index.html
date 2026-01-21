@@ -14,19 +14,27 @@
     .main-header { text-align: center; margin-bottom: 25px; }
     .search-results { background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; margin-top: 10px; max-height: 200px; overflow-y: auto; display: none; box-shadow: 0 10px 30px rgba(0,0,0,0.5); pointer-events: auto; }
     .search-result-item { display: block; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); color: white; text-decoration: none; }
+    
+    /* Market & Banners */
     .market-featured-container { display: flex; overflow-x: auto; gap: 15px; padding: 10px 0 20px 0; scrollbar-width: none; scroll-snap-type: x mandatory; }
     .featured-banner { min-width: 90%; height: 160px; border-radius: 20px; position: relative; overflow: hidden; scroll-snap-align: center; border: 1px solid rgba(255,255,255,0.1); background-size: cover; background-position: center; }
     .banner-overlay { position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); padding: 15px; box-sizing: border-box; }
     .banner-badge { position: absolute; top: 10px; right: 10px; background: #ef4444; color: white; font-size: 0.75em; font-weight: 800; padding: 4px 8px; border-radius: 6px; }
+    
+    /* Upload Button */
     .btn-upload-fixed { position: fixed; bottom: 90px; right: 20px; width: 56px; height: 56px; background-color: #ccf381; color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 20px rgba(0,0,0,0.5); z-index: 999; transition: transform 0.2s; }
     .btn-upload-fixed:active { transform: scale(0.9); }
+    
+    /* Pagination */
     .pagination-container { display: flex; justify-content: center; gap: 10px; margin-top: 20px; padding-bottom: 80px; }
     .page-dot { width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.1); color: white; border: none; font-size: 0.9em; cursor: pointer; }
     .page-dot.active { background: #ccf381; color: black; font-weight: bold; }
+    
+    /* Pricing Accordion */
     .pricing-content { max-height: 0; opacity: 0; overflow: hidden; transition: all 0.3s ease; }
     .pricing-card.active .pricing-content { max-height: 300px; opacity: 1; margin-top: 15px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); }
 
-    /* ESTILOS NUEVOS: DETALLE DE PRODUCTO */
+    /* Product Overlay */
     .product-detail-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #02040a; z-index: 2000; overflow-y: auto; display: none; animation: slideInRight 0.3s ease; }
     @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
     .detail-banner { width: 100%; height: 250px; background-size: cover; background-position: center; position: relative; }
@@ -44,6 +52,31 @@
     .pay-label { display: flex; align-items: center; gap: 10px; color: white; font-weight: 600; }
     .pay-price { font-weight: 800; color: #ccf381; }
     .btn-close-detail { position: absolute; top: 20px; left: 20px; width: 40px; height: 40px; background: rgba(0,0,0,0.5); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; z-index: 10; cursor: pointer; backdrop-filter: blur(4px); }
+
+    /* =========================================
+       NUEVOS ESTILOS DE PERFIL (OVAL + CROWN)
+       ========================================= */
+    .profile-full-width-header { margin: -20px -20px 60px -20px; width: calc(100% + 40px); }
+    .oval-header { height: 200px; background: linear-gradient(180deg, #3b82f6 0%, #1e3a8a 100%); border-bottom-left-radius: 50% 40px; border-bottom-right-radius: 50% 40px; position: relative; box-shadow: 0 10px 30px rgba(30, 58, 138, 0.4); }
+    .avatar-wrapper { position: absolute; bottom: -50px; left: 50%; transform: translateX(-50%); width: 110px; height: 110px; }
+    .profile-avatar-lg { width: 100%; height: 100%; border-radius: 50%; border: 4px solid #02040a; object-fit: cover; background-color: #1e293b; }
+    
+    .star-seller-crown { position: absolute; top: 0; right: 0; background: #fbbf24; color: #000; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid #02040a; box-shadow: 0 4px 10px rgba(0,0,0,0.5); z-index: 10; opacity: 0; transform: scale(0.5); transition: all 0.3s ease; }
+    .star-seller-crown.active { opacity: 1; transform: scale(1); }
+
+    .profile-info-center { text-align: center; margin-bottom: 25px; padding: 0 10px; }
+    .profile-bio-box { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 15px; margin-top: 15px; font-size: 0.9em; color: #cbd5e1; line-height: 1.5; }
+    
+    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 25px; }
+    .stat-card { background: linear-gradient(135deg, #1e293b, #0f172a); padding: 15px 5px; border-radius: 16px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
+    .stat-value { display: block; font-size: 1.1em; font-weight: 800; color: white; }
+    .stat-label { font-size: 0.7em; color: #94a3b8; margin-top: 4px; display: block; }
+
+    .wallet-card { background: linear-gradient(135deg, #059669, #064e3b); border-radius: 20px; padding: 20px; color: white; margin-bottom: 25px; box-shadow: 0 8px 20px rgba(5, 150, 105, 0.2); }
+    .wallet-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+    .wallet-balance { font-size: 1.6em; font-weight: 800; display:block;}
+    .wallet-sub { font-size: 0.85em; opacity: 0.8; }
+    .withdrawal-info { background: rgba(0,0,0,0.2); padding: 10px; border-radius: 10px; font-size: 0.8em; display: flex; align-items: center; gap: 8px; }
   </style>
 </head>
 
@@ -61,7 +94,7 @@
         <div class="news-content">
           <span class="news-badge">🔔 Novedades v1.4.0</span>
           <h3>Lanzamiento WebApp Oficial</h3>
-          <p>Kisaki Manager ahora funciona como una aplicación nativa.</p>
+          <p>Kisaki Manager ahora funciona como una aplicación nativa. Navega sin recargas.</p>
           <div class="blog-reactions">
             <button class="reaction-btn" onclick="react(this)">👍 <span class="count">124</span></button>
             <button class="reaction-btn" onclick="react(this)">❤️ <span class="count">45</span></button>
@@ -93,9 +126,7 @@
             <span class="pricing-badge">Mensual</span>
           </div>
           <div class="pricing-content">
-            <ul>
-              <li><svg class="check-icon" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Automatización</li>
-            </ul>
+            <ul><li><svg class="check-icon" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Automatización</li></ul>
             <a href="#" class="btn-buy">Adquirir</a>
           </div>
         </div>
@@ -105,9 +136,7 @@
             <span class="pricing-badge" style="background:rgba(37,99,235,0.2); color:#60a5fa;">Lifetime</span>
           </div>
           <div class="pricing-content">
-            <ul>
-              <li><svg class="check-icon" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Tu propia marca</li>
-            </ul>
+            <ul><li><svg class="check-icon" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Tu propia marca</li></ul>
             <a href="#" class="btn-buy">Clonar</a>
           </div>
         </div>
@@ -152,20 +181,47 @@
     </section>
 
     <section id="section-profile" class="app-section">
-      <div class="profile-card-inner">
-        <img src="https://cdn-icons-png.flaticon.com/512/147/147144.png" class="profile-avatar" style="border: 3px solid #ccf381;">
-        <h2 class="profile-name">Vicente</h2>
-        <span class="profile-role">Admin / Vendedor</span>
-        <div class="profile-stats">
-          <div class="stat-box"><span class="stat-num">0</span><span class="stat-label">Ventas</span></div>
-          <div class="stat-box"><span class="stat-num">5</span><span class="stat-label">Ítems</span></div>
+      <div class="profile-full-width-header">
+        <div class="oval-header">
+          <div class="avatar-wrapper">
+            <img src="https://cdn-icons-png.flaticon.com/512/147/147144.png" alt="Avatar" class="profile-avatar-lg" id="userAvatar">
+            <div class="star-seller-crown" id="crownIcon" title="Vendedor Estrella">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            </div>
+          </div>
         </div>
-        <button class="btn-ton-connect"><svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg> Conectar Wallet</button>
       </div>
-      <div class="content-bubble">
-        <h2>📦 Mis Publicaciones</h2>
-        <p style="text-align:center; color:#64748b; margin-top:15px;">Gestiona tus ventas aquí.</p>
+
+      <div class="profile-info-center">
+        <h1 style="margin:0; font-size:1.6em; color:white;">Vicente</h1>
+        <span style="color:#3b82f6; font-size:0.9em;">@VicenteUser</span>
+        <div class="profile-bio-box">Diseñador gráfico y desarrollador. Me especializo en ilustraciones estilo anime y bots. 🎨🤖</div>
       </div>
+
+      <div class="stats-grid">
+        <div class="stat-card"><span class="stat-value" style="color:#fbbf24;">4.9 ★</span><span class="stat-label">Valoración</span></div>
+        <div class="stat-card"><span class="stat-value">124</span><span class="stat-label">Ventas</span></div>
+        <div class="stat-card"><span class="stat-value">8</span><span class="stat-label">Compras</span></div>
+      </div>
+
+      <h3 style="margin-bottom:15px; color:white;">Finanzas</h3>
+      <div class="wallet-card">
+        <div class="wallet-row">
+          <div><span class="wallet-balance">15.4 TON</span><div class="wallet-sub">≈ $82.50 USD</div></div>
+          <div style="text-align:right;"><span class="wallet-balance" style="font-size:1.2em; color:#fbbf24;">2,500</span><div class="wallet-sub">Stars Pendientes</div></div>
+        </div>
+        <div class="withdrawal-info">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <div><strong>Retiro:</strong> Las Stars se convierten a TON en aprox. 21 días.</div>
+        </div>
+      </div>
+
+      <a href="contact.html" class="btn-card" style="justify-content: center; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); margin-bottom: 40px;">
+        <div class="icon-wrapper" style="background:transparent; margin-right:10px; width:auto; height:auto;">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+        </div>
+        <span style="font-weight:600;">Contactar Soporte</span>
+      </a>
     </section>
 
   </div>
@@ -176,66 +232,34 @@
   </div>
 
   <div class="product-detail-overlay" id="productDetailOverlay">
-    
-    <div class="btn-close-detail" onclick="closeProductDetail()">
-      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
-    </div>
-
+    <div class="btn-close-detail" onclick="closeProductDetail()"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></div>
     <div class="detail-banner" id="pBanner">
       <div class="detail-banner-overlay"></div>
-      <div class="detail-icon-wrapper" id="pIconWrapper" style="display:none;">
-        <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-      </div>
+      <div class="detail-icon-wrapper" id="pIconWrapper" style="display:none;"><svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div>
     </div>
-
     <div class="detail-content">
-      <h2 class="detail-title" id="pTitle">Título del Producto</h2>
+      <h2 class="detail-title" id="pTitle">Título</h2>
       <span class="detail-seller" id="pSeller">@Vendedor</span>
-
       <div id="pSubInfo" style="display:none;">
-        <div class="sub-info-row">
-          <span class="sub-badge" id="pDuration">1 Mes</span>
-          <span class="sub-badge" style="background:rgba(236,72,153,0.2); color:#f472b6;">Canal Privado</span>
-        </div>
+        <div class="sub-info-row"><span class="sub-badge" id="pDuration">1 Mes</span><span class="sub-badge" style="background:rgba(236,72,153,0.2); color:#f472b6;">Canal Privado</span></div>
       </div>
-
-      <div class="desc-box">
-        <p style="margin:0;">Este es un paquete exclusivo verificado por Kisaki Manager. Incluye acceso inmediato tras el pago confirmado en la Blockchain o vía Telegram Stars.</p>
-      </div>
-
+      <div class="desc-box"><p style="margin:0;">Paquete exclusivo verificado. Acceso inmediato tras pago.</p></div>
       <h3 style="color:white; margin-bottom:15px;">Método de Pago</h3>
       <div class="payment-selector">
-        <div class="pay-option selected" onclick="selectPayment(this)">
-          <div class="pay-label"><span style="font-size:1.2em;">💎</span> TON Wallet</div>
-          <span class="pay-price" id="pPriceTon">2.5 TON</span>
-        </div>
-        <div class="pay-option" onclick="selectPayment(this)">
-          <div class="pay-label"><span style="font-size:1.2em;">⭐</span> Telegram Stars</div>
-          <span class="pay-price" id="pPriceStars">500 Stars</span>
-        </div>
+        <div class="pay-option selected" onclick="selectPayment(this)"><div class="pay-label"><span style="font-size:1.2em;">💎</span> TON Wallet</div><span class="pay-price" id="pPriceTon">2.5 TON</span></div>
+        <div class="pay-option" onclick="selectPayment(this)"><div class="pay-label"><span style="font-size:1.2em;">⭐</span> Stars</div><span class="pay-price" id="pPriceStars">500 Stars</span></div>
       </div>
-
       <button class="btn-telegram-cta" onclick="alert('Iniciando pago...')">Pagar Ahora</button>
       <div style="height:50px;"></div>
     </div>
   </div>
 
   <nav class="bottom-nav">
-    <div class="nav-item active" onclick="switchSection('home', this)">
-      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Inicio
-    </div>
-    <div class="nav-item" onclick="switchSection('market', this)">
-      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.38 3.4a2 2 0 0 0-1.79-1.11H5.41a2 2 0 0 0-1.79 1.11L1 9h22l-2.62-5.6z"/><path d="M1 9h22v10a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V9z"/></svg>Market
-    </div>
-    <div class="nav-item" onclick="toggleSearch()">
-      <div class="nav-search-btn"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
-    </div>
-    <div class="nav-item" onclick="switchSection('legal', this)">
-      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>Legal
-    </div>
-    <div class="nav-item" onclick="switchSection('profile', this)">
-      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Perfil
-    </div>
+    <div class="nav-item active" onclick="switchSection('home', this)"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Inicio</div>
+    <div class="nav-item" onclick="switchSection('market', this)"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.38 3.4a2 2 0 0 0-1.79-1.11H5.41a2 2 0 0 0-1.79 1.11L1 9h22l-2.62-5.6z"/><path d="M1 9h22v10a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V9z"/></svg>Market</div>
+    <div class="nav-item" onclick="toggleSearch()"><div class="nav-search-btn"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div></div>
+    <div class="nav-item" onclick="switchSection('legal', this)"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>Legal</div>
+    <div class="nav-item" onclick="switchSection('profile', this)"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Perfil</div>
   </nav>
 
   <script>
@@ -243,6 +267,11 @@
       generateDummyItems();
       const lastSection = localStorage.getItem('kisaki_last_section') || 'home';
       switchSection(lastSection);
+      
+      // Lógica Corona Perfil
+      const userData = { rating: 4.9 }; // Dato simulado
+      const crown = document.getElementById('crownIcon');
+      if (crown && userData.rating >= 4.9) crown.classList.add('active');
     });
 
     function switchSection(sectionId, element) {
@@ -263,59 +292,41 @@
       window.scrollTo(0,0);
     }
 
-    /* --- LÓGICA DE DETALLE DE PRODUCTO --- */
     function openProductDetail(item) {
       const overlay = document.getElementById('productDetailOverlay');
       const banner = document.getElementById('pBanner');
-      
-      // Llenar datos
       document.getElementById('pTitle').innerText = item.title;
       document.getElementById('pSeller').innerText = item.seller;
       document.getElementById('pPriceTon').innerText = item.priceTon || '2.0 TON';
       document.getElementById('pPriceStars').innerText = item.priceStars || '500 Stars';
 
-      // Lógica de Banner vs Icono (Suscripción)
       if (item.type === 'vip' || item.type === 'suscripcion') {
-        banner.style.backgroundColor = '#1e3a8a'; // Color base
+        banner.style.backgroundColor = '#1e3a8a';
         banner.style.backgroundImage = 'none';
         document.getElementById('pIconWrapper').style.display = 'flex';
         document.getElementById('pSubInfo').style.display = 'block';
         document.getElementById('pDuration').innerText = '1 Mes (Renovable)';
       } else {
         banner.style.backgroundColor = item.color;
-        // En prod usarías: banner.style.backgroundImage = `url(${item.image})`;
         document.getElementById('pIconWrapper').style.display = 'none';
         document.getElementById('pSubInfo').style.display = 'none';
       }
-
       overlay.style.display = 'block';
     }
 
-    function closeProductDetail() {
-      document.getElementById('productDetailOverlay').style.display = 'none';
-    }
+    function closeProductDetail() { document.getElementById('productDetailOverlay').style.display = 'none'; }
+    function selectPayment(el) { document.querySelectorAll('.pay-option').forEach(o => o.classList.remove('selected')); el.classList.add('selected'); }
 
-    function selectPayment(el) {
-      document.querySelectorAll('.pay-option').forEach(o => o.classList.remove('selected'));
-      el.classList.add('selected');
-    }
-
-    /* --- MARKETPLACE --- */
-    const allItems = []; 
-    let currentCategory = 'all';
-    const itemsPerPage = 15;
-
+    /* Market Logic */
+    const allItems = []; let currentCategory = 'all'; const itemsPerPage = 15;
     function generateDummyItems() {
       const types = ['art', 'sticker', 'vip', 'other'];
       for(let i=1; i<=45; i++) {
         const type = types[Math.floor(Math.random() * types.length)];
         allItems.push({
-          id: i, type: type,
-          title: type==='vip' ? `Canal VIP ${i}` : `Pack Demo ${i}`,
-          priceTon: (Math.random() * 5).toFixed(1) + ' TON',
-          priceStars: Math.floor(Math.random() * 500) + 100 + ' Stars',
-          seller: '@Vendedor' + i,
-          color: type === 'vip' ? '#3b82f6' : (type==='art' ? '#ec4899' : '#f59e0b')
+          id: i, type: type, title: type==='vip' ? `Canal VIP ${i}` : `Pack Demo ${i}`,
+          priceTon: (Math.random() * 5).toFixed(1) + ' TON', priceStars: Math.floor(Math.random()*500)+100 + ' Stars',
+          seller: '@Vendedor' + i, color: type === 'vip' ? '#3b82f6' : (type==='art' ? '#ec4899' : '#f59e0b')
         });
       }
       renderMarket('all', 1);
@@ -323,84 +334,43 @@
 
     function renderMarket(category, page, tabElement) {
       currentCategory = category;
-      if(tabElement) {
-        document.querySelectorAll('.market-tab').forEach(t => t.classList.remove('active'));
-        tabElement.classList.add('active');
-      }
+      if(tabElement) { document.querySelectorAll('.market-tab').forEach(t => t.classList.remove('active')); tabElement.classList.add('active'); }
       const filtered = allItems.filter(item => category === 'all' || item.type === category);
       const start = (page - 1) * itemsPerPage;
       const end = start + itemsPerPage;
       const itemsToShow = filtered.slice(start, end);
-
       const container = document.getElementById('products-container');
       container.innerHTML = '';
-      
       itemsToShow.forEach(item => {
-        const div = document.createElement('div');
-        div.className = `product-card filter-item ${item.type}`;
-        // Al hacer click, abrimos el detalle pasando el objeto item
+        const div = document.createElement('div'); div.className = `product-card filter-item ${item.type}`;
         div.onclick = function() { openProductDetail(item); };
-        
-        let iconHtml = '';
-        if(item.type === 'vip') iconHtml = '<div style="font-size:2em;">🔒</div>';
-
-        div.innerHTML = `
-          <div class="product-image" style="background-color: ${item.color}; display:flex; justify-content:center; align-items:center;">${iconHtml}</div>
-          <div class="product-info">
-            <h3 class="product-title">${item.title}</h3>
-            <div class="product-seller">${item.seller}</div>
-            <div class="product-price-row"><span class="price-tag-ton">💎 ${item.priceTon}</span></div>
-          </div>
-        `;
+        let iconHtml = item.type === 'vip' ? '<div style="font-size:2em;">🔒</div>' : '';
+        div.innerHTML = `<div class="product-image" style="background-color: ${item.color}; display:flex; justify-content:center; align-items:center;">${iconHtml}</div><div class="product-info"><h3 class="product-title">${item.title}</h3><div class="product-seller">${item.seller}</div><div class="product-price-row"><span class="price-tag-ton">💎 ${item.priceTon}</span></div></div>`;
         container.appendChild(div);
       });
-
       const totalPages = Math.ceil(filtered.length / itemsPerPage);
       const pagContainer = document.getElementById('pagination-container');
       pagContainer.innerHTML = '';
       if(totalPages > 1) {
         for(let i=1; i<=totalPages; i++) {
-          const btn = document.createElement('button');
-          btn.className = `page-dot ${i === page ? 'active' : ''}`;
-          btn.innerText = i;
-          btn.onclick = () => renderMarket(currentCategory, i);
-          pagContainer.appendChild(btn);
+          const btn = document.createElement('button'); btn.className = `page-dot ${i === page ? 'active' : ''}`;
+          btn.innerText = i; btn.onclick = () => renderMarket(currentCategory, i); pagContainer.appendChild(btn);
         }
       }
     }
 
-    function toggleCard(card) {
-      if (card.classList.contains('active')) card.classList.remove('active');
-      else {
-        document.querySelectorAll('.pricing-card').forEach(c => c.classList.remove('active'));
-        card.classList.add('active');
-      }
-    }
-
-    function toggleSearch() {
-      const overlay = document.getElementById('searchOverlay');
-      overlay.classList.toggle('show');
-      if(overlay.classList.contains('show')) document.getElementById('globalSearchInput').focus();
-    }
-
+    function toggleCard(card) { if (card.classList.contains('active')) card.classList.remove('active'); else { document.querySelectorAll('.pricing-card').forEach(c => c.classList.remove('active')); card.classList.add('active'); } }
+    function toggleSearch() { const overlay = document.getElementById('searchOverlay'); overlay.classList.toggle('show'); if(overlay.classList.contains('show')) document.getElementById('globalSearchInput').focus(); }
     function globalSearch() {
       const input = document.getElementById('globalSearchInput').value.toLowerCase();
-      const resultsDiv = document.getElementById('searchResults');
-      resultsDiv.innerHTML = '';
+      const resultsDiv = document.getElementById('searchResults'); resultsDiv.innerHTML = '';
       const data = [{t: 'Funciones Premium', a: "javascript:switchSection('plans')"}, {t: 'Términos', a: "terms.html"}, {t: 'Marketplace', a: "javascript:switchSection('market')"}];
       if(input.length > 1) {
         resultsDiv.style.display = 'block';
-        data.filter(d => d.t.toLowerCase().includes(input)).forEach(m => {
-           resultsDiv.innerHTML += `<a href="${m.a}" class="search-result-item" onclick="toggleSearch()">${m.t}</a>`;
-        });
+        data.filter(d => d.t.toLowerCase().includes(input)).forEach(m => { resultsDiv.innerHTML += `<a href="${m.a}" class="search-result-item" onclick="toggleSearch()">${m.t}</a>`; });
       } else { resultsDiv.style.display = 'none'; }
     }
-
-    function react(btn) {
-      btn.classList.toggle('active');
-      let count = parseInt(btn.querySelector('.count').innerText);
-      btn.querySelector('.count').innerText = btn.classList.contains('active') ? count + 1 : count - 1;
-    }
+    function react(btn) { btn.classList.toggle('active'); let count = parseInt(btn.querySelector('.count').innerText); btn.querySelector('.count').innerText = btn.classList.contains('active') ? count + 1 : count - 1; }
   </script>
 </body>
 </html>
