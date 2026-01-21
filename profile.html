@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Mi Perfil — Kisaki Manager</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+</head>
+<body>
+
+  <div class="page-header" style="height: 150px; background-image: url('fondo-pagos.jpg');">
+    <a href="index.html" class="back-floating">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </a>
+  </div>
+
+  <div class="content-card" style="margin-top: -60px;">
+
+    <div class="profile-header-card">
+      <img src="https://via.placeholder.com/80" alt="User Avatar" class="profile-avatar" id="userAvatar">
+      
+      <h2 class="profile-name" id="userName">Cargando...</h2>
+      <span class="profile-role">Usuario Verificado</span>
+
+      <button class="btn-ton-connect" id="ton-connect-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+        Conectar Wallet TON
+      </button>
+    </div>
+
+    <div class="card-body">
+      
+      <div class="content-bubble">
+        <h2>🛍️ Estado de Vendedor</h2>
+        <p>Actualmente eres un <strong>Comprador</strong>. Para vender tus propios ítems y ganar TON/Stars, necesitas verificarte.</p>
+        
+        <a href="upload.html" class="btn-telegram-cta" style="margin-top: 15px; font-size: 1em; padding: 12px;">
+          Empezar a Vender
+        </a>
+      </div>
+
+      <div class="content-bubble">
+        <h2>📦 Mis Ítems</h2>
+        <p>Aquí aparecerán los productos que has comprado o descargado.</p>
+        <div style="text-align: center; padding: 20px; color: #64748b;">
+          No tienes ítems aún.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Simulación: En producción esto usa Telegram.WebApp.initDataUnsafe
+    document.addEventListener("DOMContentLoaded", () => {
+      // Simulamos que Telegram nos da estos datos
+      const mockUser = {
+        first_name: "Vicente",
+        photo_url: "https://cdn-icons-png.flaticon.com/512/147/147144.png" // Avatar genérico
+      };
+
+      document.getElementById('userName').innerText = mockUser.first_name;
+      document.getElementById('userAvatar').src = mockUser.photo_url;
+    });
+  </script>
+
+</body>
+</html>
