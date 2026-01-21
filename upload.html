@@ -24,12 +24,15 @@
 
   <div class="content-card" style="margin-top: -30px;">
     <div class="card-header-inner">
-      <div class="page-title"><h1>Vender Ítem</h1><span>Sube tu contenido al Marketplace</span></div>
+      <div class="page-title">
+        <h1>Vender Ítem</h1>
+        <span>Sube tu contenido al Marketplace</span>
+      </div>
     </div>
 
     <div class="card-body">
       <form id="uploadForm">
-        
+
         <div class="form-group">
           <label class="form-label">Categoría</label>
           <select class="form-select" id="categorySelect">
@@ -51,7 +54,10 @@
           </div>
           <div class="form-group">
             <label class="form-label">Duración</label>
-            <select class="form-select" id="subDurationInput"><option>1 Mes</option><option>Lifetime</option></select>
+            <select class="form-select" id="subDurationInput">
+              <option>1 Mes</option>
+              <option>Lifetime</option>
+            </select>
           </div>
         </div>
 
@@ -62,7 +68,9 @@
             <p id="fileNameDisplay" style="margin:0; color:#cbd5e1;">Toca para subir</p>
             <input type="file" id="realFileInput" style="display: none;">
           </div>
-          <div class="progress-container" id="uploadProgressBox"><div class="progress-bar" id="uploadProgressBar"></div></div>
+          <div class="progress-container" id="uploadProgressBox">
+            <div class="progress-bar" id="uploadProgressBar"></div>
+          </div>
           <p class="upload-status-text" id="uploadStatus">Iniciando...</p>
         </div>
 
@@ -85,13 +93,16 @@
           <textarea id="itemDesc" class="form-textarea" rows="4"></textarea>
         </div>
 
-        <button type="button" class="btn-telegram-cta" id="btnPublish">Publicar Ítem</button>
+        <button type="button" class="btn-telegram-cta" id="btnPublish">
+          Publicar Ítem
+        </button>
+
       </form>
     </div>
   </div>
 
   <script type="module">
-    // 1. Importaciones de Firebase (Usando CDN oficial)
+    // Importamos configuración
     import { db, storage } from './firebase_config.js';
     import { ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
     import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -107,14 +118,14 @@
     const fileNameDisplay = document.getElementById('fileNameDisplay');
     const categorySelect = document.getElementById('categorySelect');
 
-    // UI: Manejo de campos visuales
+    // UI Helpers
     window.setCurrency = function(type) {
       selectedCurrency = type;
       document.getElementById('currTON').classList.toggle('active', type === 'TON');
       document.getElementById('currSTARS').classList.toggle('active', type === 'STARS');
     }
 
-    // UI: Mostrar/Ocultar campos de suscripción
+    // UI: Cambio de Categoría
     categorySelect.addEventListener('change', () => {
       const cat = categorySelect.value;
       if (cat === 'sub') {
@@ -126,7 +137,7 @@
       }
     });
 
-    // UI: Selección de archivo
+    // UI: Selección de Archivo
     dropZone.addEventListener('click', () => fileInput.click());
     fileInput.addEventListener('change', () => {
       if(fileInput.files.length > 0) {
@@ -136,19 +147,17 @@
       }
     });
 
-    // --- LÓGICA PRINCIPAL DE SUBIDA ---
+    // --- PROCESO DE SUBIDA ---
+    // Escuchamos el clic en el botón con ID 'btnPublish'
     document.getElementById('btnPublish').addEventListener('click', async () => {
-      // 1. Obtener valores
+      
       const title = document.getElementById('itemTitle').value;
       const price = document.getElementById('itemPrice').value;
-      const desc = document.getElementById('itemDesc').value;
       const category = categorySelect.value;
-      
-      // Obtener usuario de Telegram (o anónimo si se prueba fuera)
-      const seller = tg.initDataUnsafe?.user?.username ? '@' + tg.initDataUnsafe.user.username : '@Anonimo';
 
-      // 2. Validaciones básicas
-      if(!title || !price) return alert("Por favor completa el título y el precio.");
+      if(!title || !price) {
+        return alert("Por favor completa Título y Precio.");
+      }
 
       const btn = document.getElementById('btnPublish');
       const progressBox = document.getElementById('uploadProgressBox');
@@ -160,20 +169,22 @@
 
       try {
         let downloadURL = "";
+        // Obtenemos usuario de Telegram o ponemos Anónimo
+        const seller = tg.initDataUnsafe?.user?.username ? '@' + tg.initDataUnsafe.user.username : '@Anonimo';
 
-        // CASO A: Subir archivo a Storage (si no es suscripción)
+        // A) Subir Archivo (Si no es suscripción)
         if (category !== 'sub') {
           const file = fileInput.files[0];
-          if (!file) throw new Error("Selecciona un archivo para subir.");
+          if (!file) throw new Error("Selecciona un archivo primero.");
 
           progressBox.style.display = 'block';
           statusText.style.display = 'block';
 
-          // Referencia: products/TIMESTAMP_nombrearchivo
+          // Referencia en Storage
           const storageRef = ref(storage, 'products/' + Date.now() + '_' + file.name);
           const uploadTask = uploadBytesResumable(storageRef, file);
 
-          // Promesa para controlar la barra de carga
+          // Esperar subida
           await new Promise((resolve, reject) => {
             uploadTask.on('state_changed',
               (snapshot) => {
@@ -186,46 +197,39 @@
             );
           });
 
-          // Obtener la URL pública del archivo subido
           downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
         } 
-        // CASO B: Es suscripción, usar el enlace escrito
+        // B) Suscripción
         else {
           downloadURL = document.getElementById('subLinkInput').value;
-          if(!downloadURL) throw new Error("Escribe el enlace del canal.");
+          if(!downloadURL) throw new Error("Falta el enlace del canal.");
         }
 
-        // 3. Guardar metadatos en Firestore (Base de Datos)
-        statusText.innerText = "Guardando datos...";
+        // C) Guardar en Base de Datos
+        statusText.innerText = "Guardando información...";
         
-        // Añadir documento a la colección "products"
         await addDoc(collection(db, "products"), {
           title: title,
           price: parseFloat(price),
           currency: selectedCurrency,
-          description: desc,
+          description: document.getElementById('itemDesc').value,
           category: category,
           seller: seller,
-          fileUrl: downloadURL, // Aquí va el link de descarga o del canal
-          subDuration: category === 'sub' ? document.getElementById('subDurationInput').value : null,
+          fileUrl: downloadURL,
           verified: false,
           createdAt: serverTimestamp()
         });
 
-        statusText.innerText = "¡Éxito!";
-        statusText.style.color = "#ccf381";
-        
-        setTimeout(() => {
-          alert("Ítem publicado exitosamente.");
-          window.location.href = "marketplace.html";
-        }, 1000);
+        statusText.innerText = "¡Listo!";
+        alert("✅ Ítem publicado correctamente");
+        window.location.href = "marketplace.html";
 
       } catch (error) {
-        console.error("Error:", error);
-        alert("Ocurrió un error: " + error.message);
+        console.error(error);
+        alert("❌ Error: " + error.message);
         btn.disabled = false;
-        btn.innerText = "Reintentar Publicar";
-        statusText.innerText = "Error en la subida";
+        btn.innerText = "Reintentar";
+        statusText.innerText = "Error";
       }
     });
   </script>
