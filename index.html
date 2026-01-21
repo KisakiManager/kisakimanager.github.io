@@ -6,6 +6,76 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <link rel="stylesheet" href="style.css">
   <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+
+  <style>
+    /* =========================================
+       CORRECCIONES Y NUEVOS ESTILOS
+       ========================================= */
+    
+    /* 1. Botón Flotante de Subida (Más arriba) */
+    .btn-upload-float {
+      bottom: 95px !important; /* Arriba de la barra de navegación */
+      right: 20px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+    }
+
+    /* 2. Botón Naranja (Abrir Bot) */
+    .btn-orange-cta {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: white;
+      padding: 16px; border-radius: 50px;
+      text-decoration: none; font-weight: 700;
+      box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
+      transition: transform 0.2s;
+    }
+    .btn-orange-cta:active { transform: scale(0.98); }
+
+    /* 3. Botón Azul Gradiente (Ver Funciones) */
+    .btn-blue-gradient {
+      display: flex; align-items: center; justify-content: space-between;
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: white;
+      padding: 18px 25px; border-radius: 20px;
+      text-decoration: none; font-weight: 700; margin-top: 20px;
+      box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3);
+      transition: transform 0.2s;
+    }
+    .btn-blue-gradient:active { transform: scale(0.98); }
+
+    /* 4. Sección Destacados (Marketplace) */
+    .market-featured-title {
+      font-size: 1.1em; color: white; font-weight: 700; margin-bottom: 10px; display: block;
+    }
+    
+    .market-featured-container {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 15px;
+      margin-bottom: 25px;
+      display: flex;
+      gap: 15px;
+      overflow-x: auto; /* Scroll horizontal */
+      scrollbar-width: none;
+    }
+    .market-featured-container::-webkit-scrollbar { display: none; }
+
+    .featured-item {
+      min-width: 140px;
+      background: linear-gradient(180deg, #1e293b, #0f172a);
+      border-radius: 12px;
+      padding: 10px;
+      border: 1px solid rgba(204, 243, 129, 0.3); /* Borde verdoso sutil */
+      position: relative;
+    }
+    
+    .badge-discount {
+      position: absolute; top: 8px; right: 8px;
+      background: #ef4444; color: white; font-size: 0.65em; font-weight: bold;
+      padding: 2px 6px; border-radius: 6px;
+    }
+  </style>
 </head>
 
 <body>
@@ -27,7 +97,6 @@
             ¡Bienvenidos a la nueva experiencia! Ahora Kisaki Manager funciona como una aplicación nativa. 
             Navega por el marketplace, gestiona tu perfil y consulta políticas sin recargas.
           </p>
-          
           <div class="blog-reactions">
             <button class="reaction-btn" onclick="react(this)">👍 <span class="count">124</span></button>
             <button class="reaction-btn" onclick="react(this)">👎 <span class="count">2</span></button>
@@ -36,11 +105,19 @@
         </div>
       </div>
 
-      <div style="margin-top: 20px;">
-        <h3 style="text-align: left; color: #fff;">Destacado</h3>
-        <div class="cta-group" style="margin-top: 15px;">
-           <a href="https://t.me/KisakiManagerBot" class="btn-telegram-cta" target="_blank">
-             <span>Abrir Bot</span>
+      <a href="#" onclick="switchSection('policies')" class="btn-blue-gradient">
+        <div style="display:flex; flex-direction:column; align-items:flex-start;">
+          <span style="font-size:1.1em;">Funciones Premium</span>
+          <span style="font-size:0.8em; opacity:0.8; font-weight:400;">Ver planes y beneficios</span>
+        </div>
+        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+
+      <div style="margin-top: 30px;">
+        <h3 style="text-align: left; color: #fff; margin-bottom:15px;">Acceso Rápido</h3>
+        <div class="cta-group">
+           <a href="https://t.me/KisakiManagerBot" class="btn-orange-cta" target="_blank">
+             <span>Abrir Bot Oficial</span>
              <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M20.665 3.717l-17.73 6.837c-1.21.486-1.203 1.161-.222 1.462l4.552 1.42 10.532-6.645c.498-.303.953-.14.579.192l-8.533 7.701h-.002l.002.001-.314 4.692c.46 0 .663-.211.921-.46l2.211-2.15 4.599 3.397c.848.467 1.457.227 1.668-.793l3.016-14.208c.309-1.239-.473-1.8-1.282-1.444z"/></svg>
            </a>
         </div>
@@ -50,9 +127,29 @@
 
     <section id="section-market" class="app-section">
       
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <h2 style="margin: 0; color: white;">Marketplace</h2>
-        <span style="font-size: 0.8em; color: #ccf381;">7% fee</span>
+        <span style="font-size: 0.8em; color: #fbbf24; background: rgba(251, 191, 36, 0.1); padding: 4px 8px; border-radius: 8px;">7% fee</span>
+      </div>
+
+      <span class="market-featured-title">🔥 Destacado</span>
+      <div class="market-featured-container">
+        <div class="featured-item">
+          <span class="badge-discount">-20%</span>
+          <div style="width:100%; height:80px; background:#ec4899; border-radius:8px; margin-bottom:8px;"></div>
+          <div style="font-size:0.9em; color:white; font-weight:bold;">Anime Pack</div>
+          <div style="font-size:0.8em; color:#ccf381;">2 TON</div>
+        </div>
+        <div class="featured-item">
+          <div style="width:100%; height:80px; background:#3b82f6; border-radius:8px; margin-bottom:8px; display:flex; align-items:center; justify-content:center;">🔒</div>
+          <div style="font-size:0.9em; color:white; font-weight:bold;">VIP Channel</div>
+          <div style="font-size:0.8em; color:#fbbf24;">450 Stars</div>
+        </div>
+        <div class="featured-item">
+           <div style="width:100%; height:80px; background:#10b981; border-radius:8px; margin-bottom:8px;"></div>
+           <div style="font-size:0.9em; color:white; font-weight:bold;">Neon City</div>
+           <div style="font-size:0.8em; color:#fbbf24;">100 Stars</div>
+        </div>
       </div>
 
       <div class="market-nav">
@@ -63,7 +160,7 @@
       </div>
 
       <div id="market-pages-container">
-        <div class="products-grid page-1">
+        <div class="products-grid">
           
           <div class="product-card filter-item art">
             <div class="product-image" style="background-color: #ec4899;"></div>
@@ -82,13 +179,19 @@
               <div class="product-price-row"><span class="price-tag-stars">⭐ 500</span></div>
             </div>
           </div>
-          
+
+          <div class="product-card filter-item sticker">
+            <div class="product-image" style="background-color: #f59e0b;"></div>
+            <div class="product-info">
+              <h3 class="product-title">Chibi Stickers</h3>
+              <div class="product-seller">@ArtistX</div>
+              <div class="product-price-row"><span class="price-tag-ton">💎 1 TON</span></div>
+            </div>
           </div>
+          
+        </div>
       </div>
 
-      <div class="pagination-controls" id="paginationControls">
-        </div>
-      
       <a href="upload.html" class="btn-upload-float">
         <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
       </a>
@@ -99,18 +202,31 @@
       <h2 style="color: white; margin-bottom: 20px;">Centro Legal</h2>
       
       <div class="buttons-list">
+        <a class="btn-card" href="payments.html">
+          <div class="icon-wrapper"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>
+          <div class="card-text"><span class="card-title">Planes y Precios</span><span class="card-desc">Funciones Premium del Bot</span></div>
+        </a>
+
+        <a class="btn-card" href="about.html">
+          <div class="icon-wrapper"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></div>
+          <div class="card-text"><span class="card-title">Sobre Kisaki</span><span class="card-desc">Misión y Creador</span></div>
+        </a>
+
         <a class="btn-card" href="payment-policies.html">
           <div class="icon-wrapper"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20"/></svg></div>
-          <div class="card-text"><span class="card-title">Pagos</span><span class="card-desc">Reembolsos y Seguridad</span></div>
+          <div class="card-text"><span class="card-title">Políticas de Pago</span><span class="card-desc">Reembolsos y Seguridad</span></div>
         </a>
+        
         <a class="btn-card" href="privacy.html">
           <div class="icon-wrapper"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
           <div class="card-text"><span class="card-title">Privacidad</span><span class="card-desc">Protección de datos</span></div>
         </a>
+
         <a class="btn-card" href="terms.html">
           <div class="icon-wrapper"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg></div>
           <div class="card-text"><span class="card-title">Términos</span><span class="card-desc">Reglas del servicio</span></div>
         </a>
+
         <a class="btn-card" href="minors.html">
           <div class="icon-wrapper"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/></svg></div>
           <div class="card-text"><span class="card-title">Menores</span><span class="card-desc">Restricciones de edad</span></div>
@@ -128,181 +244,110 @@
 
       <div class="content-bubble">
         <h2>📦 Mis Ítems</h2>
-        <p style="text-align:center; color:#64748b; padding:10px;">Nada por aquí aún.</p>
+        <p style="text-align:center; color:#64748b; padding:10px;">No tienes compras recientes.</p>
       </div>
     </section>
 
   </div> <div class="search-overlay" id="searchOverlay">
-    <input type="text" class="search-input" id="globalSearchInput" placeholder="Buscar en Kisaki..." onkeyup="globalSearch()">
-    <div class="search-results" id="searchResults">
-      </div>
+    <input type="text" class="search-input" id="globalSearchInput" placeholder="Buscar..." onkeyup="globalSearch()">
+    <div class="search-results" id="searchResults"></div>
   </div>
 
 
   <nav class="bottom-nav">
-    
     <a href="#" class="nav-item active" onclick="switchSection('home', this)">
       <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
       Inicio
     </a>
-
     <a href="#" class="nav-item" onclick="switchSection('market', this)">
       <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20.38 3.4a2 2 0 0 0-1.79-1.11H5.41a2 2 0 0 0-1.79 1.11L1 9h22l-2.62-5.6z"></path><path d="M1 9h22v10a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V9z"></path></svg>
       Market
     </a>
-
     <div class="nav-item" onclick="toggleSearch()">
       <div class="nav-search-btn">
-        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
       </div>
     </div>
-
     <a href="#" class="nav-item" onclick="switchSection('policies', this)">
-      <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+      <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><text x="8" y="16" font-size="8" fill="currentColor" stroke="none">L</text></svg>
       Legal
     </a>
-
     <a href="#" class="nav-item" onclick="switchSection('profile', this)">
       <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
       Perfil
     </a>
-
   </nav>
 
   <script>
-    
-    /* --- 1. NAVEGACIÓN SPA --- */
+    /* LOGICA DE NAVEGACION Y FILTRADO CORREGIDA */
+
     function switchSection(sectionId, element) {
-      // Ocultar todas las secciones
+      // 1. Ocultar todas
       document.querySelectorAll('.app-section').forEach(sec => sec.classList.remove('active'));
-      
-      // Mostrar la seleccionada
+      // 2. Mostrar elegida
       document.getElementById('section-' + sectionId).classList.add('active');
-
-      // Actualizar iconos activos
-      document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-      if(element) element.classList.add('active');
-
-      // Si se abre una sección, cerrar el buscador si estaba abierto
+      
+      // 3. Actualizar Nav (si se pasó el elemento)
+      if(element) {
+        document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+        element.classList.add('active');
+      }
+      // Cerrar buscador
       document.getElementById('searchOverlay').classList.remove('show');
     }
 
-    /* --- 2. BUSCADOR FLOTANTE --- */
     function toggleSearch() {
       const overlay = document.getElementById('searchOverlay');
       overlay.classList.toggle('show');
-      if(overlay.classList.contains('show')) {
-        document.getElementById('globalSearchInput').focus();
-      }
+      if(overlay.classList.contains('show')) document.getElementById('globalSearchInput').focus();
     }
 
-    // Datos simulados para la búsqueda
-    const searchData = [
-      { title: "Políticas de Pago", link: "payment-policies.html", type: "Legal" },
-      { title: "Creador (Vicente)", link: "about.html", type: "Info" },
-      { title: "Marketplace: Stickers", link: "#", onclick: "switchSection('market')", type: "Store" },
-      { title: "Reembolsos", link: "payment-policies.html", type: "Legal" },
-      { title: "Telegram Business", link: "payments.html", type: "Plan" }
-    ];
+    // Filtrado del Marketplace (CORREGIDO)
+    function filterMarket(category, element) {
+      // Actualizar pestañas
+      document.querySelectorAll('.market-tab').forEach(tab => tab.classList.remove('active'));
+      element.classList.add('active');
 
+      const items = document.querySelectorAll('.filter-item');
+      
+      items.forEach(item => {
+        if(category === 'all') {
+          item.style.display = 'block';
+        } else {
+          if(item.classList.contains(category)) {
+            item.style.display = 'block';
+          } else {
+            item.style.display = 'none';
+          }
+        }
+      });
+    }
+
+    // Búsqueda simple
     function globalSearch() {
       const input = document.getElementById('globalSearchInput').value.toLowerCase();
-      const resultsContainer = document.getElementById('searchResults');
-      resultsContainer.innerHTML = ''; // Limpiar
-
-      if(input.length < 2) {
-        resultsContainer.style.display = 'none';
-        return;
-      }
-
-      // Filtrar y tomar solo los 3 primeros
-      const results = searchData.filter(item => item.title.toLowerCase().includes(input)).slice(0, 3);
-
-      if(results.length > 0) {
-        resultsContainer.style.display = 'block';
-        results.forEach(item => {
-          const div = document.createElement('a');
-          div.className = 'search-result-item';
-          div.href = item.link;
-          if(item.onclick) div.setAttribute('onclick', item.onclick);
-          
-          div.innerHTML = `
-            <span style="background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px; font-size:0.7em;">${item.type}</span>
-            <span>${item.title}</span>
-          `;
-          resultsContainer.appendChild(div);
-        });
-      } else {
-        resultsContainer.style.display = 'none';
-      }
-    }
-
-    /* --- 3. REACCIONES DE BLOG --- */
-    function react(btn) {
-      // Simula toggle de reacción
-      btn.classList.toggle('active');
-      const countSpan = btn.querySelector('.count');
-      let count = parseInt(countSpan.innerText);
+      const resultsDiv = document.getElementById('searchResults');
+      resultsDiv.innerHTML = ''; 
       
-      if(btn.classList.contains('active')) {
-        countSpan.innerText = count + 1;
+      const data = [
+        {t: 'Planes Premium', l: "javascript:switchSection('policies')"},
+        {t: 'Marketplace', l: "javascript:switchSection('market')"},
+        {t: 'Sobre Kisaki', l: "about.html"},
+        {t: 'Reembolsos', l: "payment-policies.html"}
+      ];
+
+      if(input.length > 1) {
+        const matches = data.filter(d => d.t.toLowerCase().includes(input));
+        if(matches.length > 0) {
+          resultsDiv.style.display = 'block';
+          matches.forEach(m => {
+             resultsDiv.innerHTML += `<div style="padding:10px; border-bottom:1px solid #333; color:#ccc;" onclick="${m.l}">${m.t}</div>`;
+          });
+        }
       } else {
-        countSpan.innerText = count - 1;
+        resultsDiv.style.display = 'none';
       }
     }
-
-    /* --- 4. PAGINACIÓN AUTOMÁTICA DEL MARKET --- */
-    // Simulación: Generar ítems extra para probar que la paginación funciona
-    document.addEventListener("DOMContentLoaded", () => {
-      const container = document.querySelector('.products-grid');
-      // Añadimos 20 ítems falsos para tener más de 15
-      for(let i=0; i<20; i++) {
-        const clone = container.children[0].cloneNode(true);
-        clone.querySelector('.product-title').innerText = "Item Demo " + (i+1);
-        container.appendChild(clone);
-      }
-      setupPagination();
-    });
-
-    function setupPagination() {
-      const items = document.querySelectorAll('.product-card');
-      const itemsPerPage = 15;
-      const totalPages = Math.ceil(items.length / itemsPerPage);
-      const maxPages = 10; // Límite pedido por usuario
-
-      // Mostrar solo la página 1 al inicio
-      showPage(1);
-
-      // Crear controles
-      const controls = document.getElementById('paginationControls');
-      controls.innerHTML = '';
-      
-      for(let i=1; i <= Math.min(totalPages, maxPages); i++) {
-        const btn = document.createElement('button');
-        btn.className = `page-btn ${i===1 ? 'active' : ''}`;
-        btn.innerText = i;
-        btn.onclick = function() {
-          showPage(i);
-          document.querySelectorAll('.page-btn').forEach(b => b.classList.remove('active'));
-          this.classList.add('active');
-        };
-        controls.appendChild(btn);
-      }
-
-      function showPage(page) {
-        const start = (page - 1) * itemsPerPage;
-        const end = start + itemsPerPage;
-        
-        items.forEach((item, index) => {
-          if(index >= start && index < end) {
-            item.style.display = 'block'; // Mostrar si está en rango
-          } else {
-            item.style.display = 'none'; // Ocultar
-          }
-        });
-      }
-    }
-
   </script>
 
 </body>
