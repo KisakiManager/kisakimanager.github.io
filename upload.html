@@ -5,45 +5,13 @@
   <title>Subir Ítem — Kisaki Manager</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    /* Estilo para el panel de suscripción (oculto por defecto) */
-    .hidden-fields {
-      display: none;
-      background: rgba(59, 130, 246, 0.1);
-      padding: 15px;
-      border-radius: 12px;
-      border: 1px dashed #3b82f6;
-      margin-bottom: 20px;
-      animation: fadeIn 0.3s ease;
-    }
+    .hidden-fields { display: none; background: rgba(59, 130, 246, 0.1); padding: 15px; border-radius: 12px; border: 1px dashed #3b82f6; margin-bottom: 20px; animation: fadeIn 0.3s ease; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
-
-    /* ESTILOS NUEVOS: BARRA DE PROGRESO */
-    .progress-container {
-      width: 100%;
-      background-color: rgba(255, 255, 255, 0.1);
-      border-radius: 10px;
-      margin-top: 15px;
-      height: 10px;
-      overflow: hidden;
-      display: none; /* Oculto hasta que se inicie la subida */
-    }
-
-    .progress-bar {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #ccf381, #a3e635);
-      border-radius: 10px;
-      transition: width 0.2s ease;
-    }
-
-    .upload-status-text {
-      font-size: 0.85em;
-      color: #94a3b8;
-      text-align: center;
-      margin-top: 8px;
-      display: none;
-    }
+    .progress-container { width: 100%; background-color: rgba(255, 255, 255, 0.1); border-radius: 10px; margin-top: 15px; height: 10px; overflow: hidden; display: none; }
+    .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #ccf381, #a3e635); border-radius: 10px; transition: width 0.2s ease; }
+    .upload-status-text { font-size: 0.85em; color: #94a3b8; text-align: center; margin-top: 8px; display: none; }
   </style>
 </head>
 <body>
@@ -55,21 +23,16 @@
   </div>
 
   <div class="content-card" style="margin-top: -30px;">
-
     <div class="card-header-inner">
-      <div class="page-title">
-        <h1>Vender Ítem</h1>
-        <span>Sube tu contenido al Marketplace</span>
-      </div>
+      <div class="page-title"><h1>Vender Ítem</h1><span>Sube tu contenido al Marketplace</span></div>
     </div>
 
     <div class="card-body">
-
-      <form action="#" method="POST" id="uploadForm">
-
+      <form id="uploadForm">
+        
         <div class="form-group">
           <label class="form-label">Categoría</label>
-          <select class="form-select" id="categorySelect" onchange="toggleSubFields()">
+          <select class="form-select" id="categorySelect">
             <option value="art">Ilustraciones</option>
             <option value="sub">Suscripción Canal (Requiere Admin)</option>
             <option value="sticker">Stickers</option>
@@ -80,162 +43,191 @@
         </div>
 
         <div id="subFields" class="hidden-fields">
-          <h3 style="color:#60a5fa; margin-top:0; font-size:1em; display:flex; align-items:center; gap:8px;">
-            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-            Configuración de Canal
-          </h3>
-          <p style="font-size:0.85em; color:#cbd5e1; margin-bottom:15px;">El bot debe ser administrador del canal para gestionar los enlaces de invitación.</p>
-
+          <h3 style="color:#60a5fa; margin-top:0; font-size:1em;">Configuración de Canal</h3>
+          <p style="font-size:0.85em; color:#cbd5e1;">El bot debe ser administrador del canal.</p>
           <div class="form-group">
             <label class="form-label">Enlace del Canal (Privado)</label>
-            <input type="text" class="form-input" placeholder="https://t.me/+AbCdEfGh...">
+            <input type="text" id="subLinkInput" class="form-input" placeholder="https://t.me/...">
           </div>
-
           <div class="form-group">
-            <label class="form-label">Duración del Acceso</label>
-            <select class="form-select">
-              <option>1 Mes</option>
-              <option>3 Meses</option>
-              <option>6 Meses</option>
-              <option>1 Año</option>
-              <option>Permanente (Lifetime)</option>
-            </select>
+            <label class="form-label">Duración</label>
+            <select class="form-select" id="subDurationInput"><option>1 Mes</option><option>Lifetime</option></select>
           </div>
         </div>
 
         <div class="form-group" id="fileField">
-          <label class="form-label">Archivo del producto (Zip, PNG, MP4)</label>
-          
+          <label class="form-label">Archivo del producto</label>
           <div class="upload-area" id="dropZone">
-            <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            <p id="fileNameDisplay" style="margin:0; color:#cbd5e1;">Toca para subir o arrastra aquí</p>
-            <input type="file" id="realFileInput" style="display: none;"> 
+            <svg class="upload-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <p id="fileNameDisplay" style="margin:0; color:#cbd5e1;">Toca para subir</p>
+            <input type="file" id="realFileInput" style="display: none;">
           </div>
-
-          <div class="progress-container" id="uploadProgressBox">
-            <div class="progress-bar" id="uploadProgressBar"></div>
-          </div>
-          <p class="upload-status-text" id="uploadStatus">Iniciando subida... 0%</p>
+          <div class="progress-container" id="uploadProgressBox"><div class="progress-bar" id="uploadProgressBar"></div></div>
+          <p class="upload-status-text" id="uploadStatus">Iniciando...</p>
         </div>
 
         <div class="form-group">
           <label class="form-label">Título del Ítem</label>
-          <input type="text" class="form-input" placeholder="Ej: Pack Premium">
+          <input type="text" id="itemTitle" class="form-input" placeholder="Ej: Pack Premium">
         </div>
 
         <div class="form-group">
-          <label class="form-label">Precio y Moneda</label>
-
+          <label class="form-label">Precio</label>
           <div class="currency-toggle" style="margin-bottom: 10px;">
-            <div class="currency-option active" onclick="selectCurrency(this, 'TON')">💎 TON</div>
-            <div class="currency-option" onclick="selectCurrency(this, 'STARS')">⭐ Stars</div>
+            <div class="currency-option active" id="currTON" onclick="setCurrency('TON')">💎 TON</div>
+            <div class="currency-option" id="currSTARS" onclick="setCurrency('STARS')">⭐ Stars</div>
           </div>
-
-          <input type="number" class="form-input" placeholder="Cantidad (Ej: 2.5)">
-          <span class="commission-note">ℹ️ Se descontará un 7% de comisión por venta.</span>
+          <input type="number" id="itemPrice" class="form-input" placeholder="Cantidad (Ej: 2.5)">
         </div>
 
         <div class="form-group">
           <label class="form-label">Descripción</label>
-          <textarea class="form-textarea" rows="4" placeholder="Describe lo que incluye..."></textarea>
+          <textarea id="itemDesc" class="form-textarea" rows="4"></textarea>
         </div>
 
-        <button type="button" class="btn-telegram-cta" onclick="startUploadProcess()">
-          Publicar Ítem
-        </button>
-
+        <button type="button" class="btn-telegram-cta" id="btnPublish">Publicar Ítem</button>
       </form>
-
     </div>
   </div>
 
-  <script>
-    // 1. Lógica para mostrar/ocultar campos de suscripción
-    function toggleSubFields() {
-      const category = document.getElementById('categorySelect').value;
-      const subFields = document.getElementById('subFields');
-      const fileField = document.getElementById('fileField');
+  <script type="module">
+    // 1. Importaciones de Firebase (Usando CDN oficial)
+    import { db, storage } from './firebase_config.js';
+    import { ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+    import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-      if (category === 'sub') {
-        subFields.style.display = 'block';
-        fileField.style.display = 'none';
-      } else {
-        subFields.style.display = 'none';
-        fileField.style.display = 'block';
-      }
-    }
+    // Variables Globales
+    let selectedCurrency = 'TON';
+    const tg = window.Telegram.WebApp;
+    tg.expand();
 
-    // 2. Lógica visual de moneda
-    function selectCurrency(element, type) {
-      document.querySelectorAll('.currency-option').forEach(el => el.classList.remove('active'));
-      element.classList.add('active');
-    }
-
-    // 3. LÓGICA DE SUBIDA DE ARCHIVOS (NUEVA)
-    const dropZone = document.getElementById('dropZone');
+    // Elementos DOM
     const fileInput = document.getElementById('realFileInput');
+    const dropZone = document.getElementById('dropZone');
     const fileNameDisplay = document.getElementById('fileNameDisplay');
+    const categorySelect = document.getElementById('categorySelect');
 
-    // Activar input al tocar el área
+    // UI: Manejo de campos visuales
+    window.setCurrency = function(type) {
+      selectedCurrency = type;
+      document.getElementById('currTON').classList.toggle('active', type === 'TON');
+      document.getElementById('currSTARS').classList.toggle('active', type === 'STARS');
+    }
+
+    // UI: Mostrar/Ocultar campos de suscripción
+    categorySelect.addEventListener('change', () => {
+      const cat = categorySelect.value;
+      if (cat === 'sub') {
+        document.getElementById('subFields').style.display = 'block';
+        document.getElementById('fileField').style.display = 'none';
+      } else {
+        document.getElementById('subFields').style.display = 'none';
+        document.getElementById('fileField').style.display = 'block';
+      }
+    });
+
+    // UI: Selección de archivo
     dropZone.addEventListener('click', () => fileInput.click());
-
-    // Mostrar nombre del archivo seleccionado
     fileInput.addEventListener('change', () => {
-      if (fileInput.files.length > 0) {
+      if(fileInput.files.length > 0) {
         fileNameDisplay.innerText = "📄 " + fileInput.files[0].name;
         fileNameDisplay.style.color = "#ccf381";
         dropZone.style.borderColor = "#ccf381";
       }
     });
 
-    // Función principal de subida (Simulada para visualización)
-    function startUploadProcess() {
-      const category = document.getElementById('categorySelect').value;
+    // --- LÓGICA PRINCIPAL DE SUBIDA ---
+    document.getElementById('btnPublish').addEventListener('click', async () => {
+      // 1. Obtener valores
+      const title = document.getElementById('itemTitle').value;
+      const price = document.getElementById('itemPrice').value;
+      const desc = document.getElementById('itemDesc').value;
+      const category = categorySelect.value;
       
-      // Si es una suscripción, no hay archivo que subir, pasa directo
-      if(category === 'sub') {
-        alert("Suscripción creada exitosamente.");
-        window.location.href = "marketplace.html";
-        return;
-      }
+      // Obtener usuario de Telegram (o anónimo si se prueba fuera)
+      const seller = tg.initDataUnsafe?.user?.username ? '@' + tg.initDataUnsafe.user.username : '@Anonimo';
 
-      // Validar si hay archivo
-      if (fileInput.files.length === 0) {
-        alert("Por favor selecciona un archivo para subir.");
-        return;
-      }
+      // 2. Validaciones básicas
+      if(!title || !price) return alert("Por favor completa el título y el precio.");
 
-      // Mostrar barra
+      const btn = document.getElementById('btnPublish');
       const progressBox = document.getElementById('uploadProgressBox');
       const progressBar = document.getElementById('uploadProgressBar');
       const statusText = document.getElementById('uploadStatus');
-      
-      progressBox.style.display = 'block';
-      statusText.style.display = 'block';
 
-      let percent = 0;
-      // Intervalo para simular carga (En producción usarías XMLHttpRequest upload.onprogress)
-      const interval = setInterval(() => {
-        // Velocidad aleatoria
-        percent += Math.floor(Math.random() * 5) + 2; 
-        
-        if (percent > 100) percent = 100;
+      btn.disabled = true;
+      btn.innerText = "Procesando...";
 
-        progressBar.style.width = percent + '%';
-        statusText.innerText = `Subiendo archivo... ${percent}%`;
+      try {
+        let downloadURL = "";
 
-        if (percent === 100) {
-          clearInterval(interval);
-          statusText.innerText = "¡Procesando datos...";
-          statusText.style.color = "#ccf381";
-          
-          setTimeout(() => {
-            alert("Ítem publicado exitosamente en el Marketplace.");
-            window.location.href = "marketplace.html";
-          }, 800);
+        // CASO A: Subir archivo a Storage (si no es suscripción)
+        if (category !== 'sub') {
+          const file = fileInput.files[0];
+          if (!file) throw new Error("Selecciona un archivo para subir.");
+
+          progressBox.style.display = 'block';
+          statusText.style.display = 'block';
+
+          // Referencia: products/TIMESTAMP_nombrearchivo
+          const storageRef = ref(storage, 'products/' + Date.now() + '_' + file.name);
+          const uploadTask = uploadBytesResumable(storageRef, file);
+
+          // Promesa para controlar la barra de carga
+          await new Promise((resolve, reject) => {
+            uploadTask.on('state_changed',
+              (snapshot) => {
+                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                progressBar.style.width = progress + '%';
+                statusText.innerText = `Subiendo... ${Math.floor(progress)}%`;
+              },
+              (error) => reject(error),
+              () => resolve()
+            );
+          });
+
+          // Obtener la URL pública del archivo subido
+          downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+        } 
+        // CASO B: Es suscripción, usar el enlace escrito
+        else {
+          downloadURL = document.getElementById('subLinkInput').value;
+          if(!downloadURL) throw new Error("Escribe el enlace del canal.");
         }
-      }, 100); // Velocidad del loop
-    }
+
+        // 3. Guardar metadatos en Firestore (Base de Datos)
+        statusText.innerText = "Guardando datos...";
+        
+        // Añadir documento a la colección "products"
+        await addDoc(collection(db, "products"), {
+          title: title,
+          price: parseFloat(price),
+          currency: selectedCurrency,
+          description: desc,
+          category: category,
+          seller: seller,
+          fileUrl: downloadURL, // Aquí va el link de descarga o del canal
+          subDuration: category === 'sub' ? document.getElementById('subDurationInput').value : null,
+          verified: false,
+          createdAt: serverTimestamp()
+        });
+
+        statusText.innerText = "¡Éxito!";
+        statusText.style.color = "#ccf381";
+        
+        setTimeout(() => {
+          alert("Ítem publicado exitosamente.");
+          window.location.href = "marketplace.html";
+        }, 1000);
+
+      } catch (error) {
+        console.error("Error:", error);
+        alert("Ocurrió un error: " + error.message);
+        btn.disabled = false;
+        btn.innerText = "Reintentar Publicar";
+        statusText.innerText = "Error en la subida";
+      }
+    });
   </script>
 
 </body>
