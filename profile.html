@@ -5,6 +5,7 @@
   <title>Mi Perfil — Kisaki Manager</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
 </head>
 <body>
@@ -16,7 +17,7 @@
 
     <div class="avatar-wrapper">
       <img src="https://cdn-icons-png.flaticon.com/512/147/147144.png" alt="Avatar" class="profile-avatar-lg" id="userAvatar">
-      
+
       <div class="star-seller-crown" id="crownIcon" title="Vendedor Estrella">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
       </div>
@@ -26,11 +27,11 @@
   <div class="container" style="padding-top: 0;">
 
     <div class="profile-info-center">
-      <h1 style="margin:0; font-size:1.6em;">Vicente</h1>
-      <span style="color:#3b82f6; font-size:0.9em;">@VicenteUser</span>
+      <h1 style="margin:0; font-size:1.6em;" id="profileName">Cargando...</h1>
+      <span style="color:#3b82f6; font-size:0.9em;" id="profileUsername">@Usuario</span>
 
-      <div class="profile-bio-box">
-        Diseñador gráfico y desarrollador de Bots. Me especializo en ilustraciones estilo anime y configuraciones de Telegram Business. 🎨🤖
+      <div class="profile-bio-box" id="profileBio" style="cursor: pointer;">
+        Toca aquí para escribir tu biografía personalizada... ✏️
       </div>
     </div>
 
@@ -53,7 +54,7 @@
 
     <h3 style="margin-bottom:15px; color:white;">Finanzas</h3>
     <div class="wallet-card">
-      
+
       <div class="wallet-row">
         <div>
           <span class="wallet-balance">15.4 TON</span>
@@ -82,22 +83,75 @@
     </a>
 
     <div style="margin-top: 40px; text-align: center; color: #7b8fa6; font-size: 0.85em; padding-bottom: 40px;">
-      User ID: 892103 • Kisaki Manager
+      User ID: <span id="userIdDisplay">---</span> • Kisaki Manager
     </div>
 
   </div>
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      // Datos simulados (Vendrían del Backend)
-      const userData = {
-        rating: 4.9, // Cambia esto a 4.8 para ver cómo desaparece la corona
-        isVerified: true
+      // --- 1. CONEXIÓN CON TELEGRAM ---
+      const tg = window.Telegram.WebApp;
+      tg.expand(); // Expandir pantalla completa
+
+      // Elementos del DOM
+      const nameEl = document.getElementById('profileName');
+      const usernameEl = document.getElementById('profileUsername');
+      const avatarEl = document.getElementById('userAvatar');
+      const bioEl = document.getElementById('profileBio');
+      const userIdEl = document.getElementById('userIdDisplay');
+
+      // --- 2. CARGAR DATOS REALES DEL USUARIO ---
+      if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+        const user = tg.initDataUnsafe.user;
+
+        // Nombre
+        nameEl.innerText = user.first_name + (user.last_name ? ' ' + user.last_name : '');
+        
+        // Username
+        if (user.username) {
+          usernameEl.innerText = '@' + user.username;
+        } else {
+          usernameEl.innerText = 'Sin alias';
+        }
+
+        // Foto de Perfil (Si tiene)
+        if (user.photo_url) {
+          avatarEl.src = user.photo_url;
+        }
+
+        // ID de Usuario en el footer
+        if (user.id) userIdEl.innerText = user.id;
+      } else {
+        // Fallback si se abre en navegador normal
+        nameEl.innerText = "Vicente (Demo)";
+        usernameEl.innerText = "@VicenteUser";
+      }
+
+      // --- 3. GESTIÓN DE BIOGRAFÍA (Persistencia Local) ---
+      // Cargar bio guardada anteriormente
+      const savedBio = localStorage.getItem('kisaki_user_bio');
+      if (savedBio) {
+        bioEl.innerText = savedBio;
+      }
+
+      // Editar bio al hacer clic
+      bioEl.onclick = function() {
+        // Vibración háptica de Telegram (Mejora la sensación de app)
+        if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+
+        const currentText = bioEl.innerText;
+        const newBio = prompt("Edita tu biografía:", currentText);
+        
+        if (newBio !== null && newBio.trim() !== "") {
+          bioEl.innerText = newBio;
+          localStorage.setItem('kisaki_user_bio', newBio); // Guardar en el teléfono
+        }
       };
 
+      // --- 4. LÓGICA DE CORONA (Estática por ahora) ---
+      const userData = { rating: 4.9 }; // Esto vendría de tu base de datos futura
       const crown = document.getElementById('crownIcon');
-
-      // Lógica: Si el rating es 4.9 o 5.0, mostramos la corona
       if (userData.rating >= 4.9) {
         crown.classList.add('active');
       } else {
