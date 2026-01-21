@@ -9,83 +9,102 @@
 
   <style>
     /* =========================================
-       CORRECCIONES Y NUEVOS ESTILOS
+       CORRECCIONES DE ESTILO (CSS)
        ========================================= */
     
-    /* 1. Botón Flotante de Subida (Más arriba) */
-    .btn-upload-float {
-      bottom: 95px !important; /* Arriba de la barra de navegación */
-      right: 20px;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.5);
-    }
-
-    /* 2. Botón Naranja (Abrir Bot) */
-    .btn-orange-cta {
-      display: flex; align-items: center; justify-content: center; gap: 10px;
-      background: linear-gradient(135deg, #f59e0b, #d97706);
-      color: white;
-      padding: 16px; border-radius: 50px;
-      text-decoration: none; font-weight: 700;
-      box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
-      transition: transform 0.2s;
-    }
-    .btn-orange-cta:active { transform: scale(0.98); }
-
-    /* 3. Botón Azul Gradiente (Ver Funciones) */
-    .btn-blue-gradient {
-      display: flex; align-items: center; justify-content: space-between;
-      background: linear-gradient(135deg, #3b82f6, #2563eb);
-      color: white;
-      padding: 18px 25px; border-radius: 20px;
-      text-decoration: none; font-weight: 700; margin-top: 20px;
-      box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3);
-      transition: transform 0.2s;
-    }
-    .btn-blue-gradient:active { transform: scale(0.98); }
-
-    /* 4. Sección Destacados (Marketplace) */
-    .market-featured-title {
-      font-size: 1.1em; color: white; font-weight: 700; margin-bottom: 10px; display: block;
-    }
-    
-    .market-featured-container {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 20px;
-      padding: 15px;
+    /* 1. Centrado del Header Principal */
+    .main-header {
+      text-align: center; /* Centrar texto */
       margin-bottom: 25px;
+    }
+    .main-header h1 { margin-bottom: 5px; }
+
+    /* 2. Resultados de Búsqueda (Corrección Visual) */
+    .search-results {
+      background: #0f172a;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      margin-top: 10px;
+      max-height: 200px;
+      overflow-y: auto;
+      display: none; /* Oculto por defecto */
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .search-result-item {
+      display: block;
+      padding: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      color: white;
+      text-decoration: none;
+    }
+    .search-result-item:hover { background: #1e293b; }
+
+    /* 3. Destacados Grandes (Banner Style) */
+    .market-featured-container {
       display: flex;
+      overflow-x: auto;
       gap: 15px;
-      overflow-x: auto; /* Scroll horizontal */
+      padding: 10px 0 20px 0;
       scrollbar-width: none;
+      scroll-snap-type: x mandatory; /* Efecto de enganche */
     }
     .market-featured-container::-webkit-scrollbar { display: none; }
 
-    .featured-item {
-      min-width: 140px;
-      background: linear-gradient(180deg, #1e293b, #0f172a);
-      border-radius: 12px;
-      padding: 10px;
-      border: 1px solid rgba(204, 243, 129, 0.3); /* Borde verdoso sutil */
+    .featured-banner {
+      min-width: 90%; /* Ocupa casi todo el ancho */
+      height: 160px;
+      border-radius: 20px;
       position: relative;
+      overflow: hidden;
+      scroll-snap-align: center; /* Centrar al soltar */
+      border: 1px solid rgba(255,255,255,0.1);
+      background-size: cover;
+      background-position: center;
     }
-    
-    .badge-discount {
-      position: absolute; top: 8px; right: 8px;
-      background: #ef4444; color: white; font-size: 0.65em; font-weight: bold;
-      padding: 2px 6px; border-radius: 6px;
+
+    .banner-overlay {
+      position: absolute; bottom: 0; left: 0; width: 100%;
+      background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+      padding: 15px;
+      box-sizing: border-box;
     }
+
+    .banner-badge {
+      position: absolute; top: 10px; right: 10px;
+      background: #ef4444; color: white; 
+      font-weight: 800; font-size: 0.8em;
+      padding: 5px 10px; border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    /* 4. Estilos de Perfil (Integrados) */
+    .profile-card-inner {
+      background: linear-gradient(135deg, #1e3a8a, #172554);
+      border-radius: 24px;
+      padding: 30px 20px;
+      text-align: center;
+      margin-bottom: 25px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .profile-stats {
+      display: flex; justify-content: space-around; margin-top: 20px;
+      background: rgba(0,0,0,0.2); padding: 10px; border-radius: 12px;
+    }
+    .stat-box span { display: block; }
+    .stat-num { font-weight: bold; color: white; font-size: 1.1em; }
+    .stat-label { font-size: 0.75em; color: #94a3b8; }
+
   </style>
 </head>
 
 <body>
   
-  <header class="main-header" style="margin-bottom: 20px;">
-    <h1>Kisaki Manager</h1>
-    <p class="subtitle">WebApp Oficial v2.0</p>
-  </header>
+  <div class="container" style="padding-top: 20px;">
 
-  <div class="container" style="padding-top: 0;">
+    <header class="main-header">
+      <h1>Kisaki Manager</h1>
+      <p class="subtitle">WebApp Oficial v2.0</p>
+    </header>
 
     <section id="section-home" class="app-section active">
       
@@ -94,101 +113,79 @@
           <span class="news-badge">🔔 Novedades v1.4.0</span>
           <h3>Lanzamiento WebApp Oficial</h3>
           <p>
-            ¡Bienvenidos a la nueva experiencia! Ahora Kisaki Manager funciona como una aplicación nativa. 
-            Navega por el marketplace, gestiona tu perfil y consulta políticas sin recargas.
+            Kisaki Manager ahora funciona como una aplicación nativa. Navega sin recargas.
           </p>
           <div class="blog-reactions">
             <button class="reaction-btn" onclick="react(this)">👍 <span class="count">124</span></button>
-            <button class="reaction-btn" onclick="react(this)">👎 <span class="count">2</span></button>
-            <button class="reaction-btn" onclick="react(this)">😲 <span class="count">45</span></button>
+            <button class="reaction-btn" onclick="react(this)">❤️ <span class="count">45</span></button>
           </div>
         </div>
       </div>
 
-      <a href="#" onclick="switchSection('policies')" class="btn-blue-gradient">
+      <a href="#" onclick="switchSection('policies')" class="btn-card" style="background: linear-gradient(135deg, #3b82f6, #2563eb); justify-content: space-between;">
         <div style="display:flex; flex-direction:column; align-items:flex-start;">
-          <span style="font-size:1.1em;">Funciones Premium</span>
-          <span style="font-size:0.8em; opacity:0.8; font-weight:400;">Ver planes y beneficios</span>
+          <span style="font-size:1.1em; font-weight:700;">Funciones Premium</span>
+          <span style="font-size:0.85em; opacity:0.9;">Ver planes y beneficios</span>
         </div>
-        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
       </a>
 
-      <div style="margin-top: 30px;">
-        <h3 style="text-align: left; color: #fff; margin-bottom:15px;">Acceso Rápido</h3>
-        <div class="cta-group">
-           <a href="https://t.me/KisakiManagerBot" class="btn-orange-cta" target="_blank">
-             <span>Abrir Bot Oficial</span>
-             <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M20.665 3.717l-17.73 6.837c-1.21.486-1.203 1.161-.222 1.462l4.552 1.42 10.532-6.645c.498-.303.953-.14.579.192l-8.533 7.701h-.002l.002.001-.314 4.692c.46 0 .663-.211.921-.46l2.211-2.15 4.599 3.397c.848.467 1.457.227 1.668-.793l3.016-14.208c.309-1.239-.473-1.8-1.282-1.444z"/></svg>
-           </a>
-        </div>
+      <div style="margin-top: 25px;">
+        <h3 style="text-align: left; color: #fff; margin-bottom:10px;">Acceso Rápido</h3>
+        <a href="https://t.me/KisakiManagerBot" class="btn-telegram-cta" style="background: linear-gradient(135deg, #f59e0b, #d97706); box-shadow: 0 10px 25px rgba(245, 158, 11, 0.3);" target="_blank">
+          <span>Abrir Bot Oficial</span>
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M20.665 3.717l-17.73 6.837c-1.21.486-1.203 1.161-.222 1.462l4.552 1.42 10.532-6.645c.498-.303.953-.14.579.192l-8.533 7.701h-.002l.002.001-.314 4.692c.46 0 .663-.211.921-.46l2.211-2.15 4.599 3.397c.848.467 1.457.227 1.668-.793l3.016-14.208c.309-1.239-.473-1.8-1.282-1.444z"/></svg>
+        </a>
       </div>
 
     </section>
 
     <section id="section-market" class="app-section">
       
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h2 style="margin: 0; color: white;">Marketplace</h2>
-        <span style="font-size: 0.8em; color: #fbbf24; background: rgba(251, 191, 36, 0.1); padding: 4px 8px; border-radius: 8px;">7% fee</span>
-      </div>
+      <h2 style="color: white; margin-bottom: 15px;">Marketplace</h2>
 
-      <span class="market-featured-title">🔥 Destacado</span>
       <div class="market-featured-container">
-        <div class="featured-item">
-          <span class="badge-discount">-20%</span>
-          <div style="width:100%; height:80px; background:#ec4899; border-radius:8px; margin-bottom:8px;"></div>
-          <div style="font-size:0.9em; color:white; font-weight:bold;">Anime Pack</div>
-          <div style="font-size:0.8em; color:#ccf381;">2 TON</div>
+        
+        <div class="featured-banner" style="background-image: linear-gradient(135deg, #ec4899, #be185d);">
+          <span class="banner-badge">-20% OFF</span>
+          <div class="banner-overlay">
+            <h3 style="margin:0; color:white;">Pack Anime Premium</h3>
+            <span style="color:#ccf381; font-weight:bold;">2.0 TON</span>
+          </div>
         </div>
-        <div class="featured-item">
-          <div style="width:100%; height:80px; background:#3b82f6; border-radius:8px; margin-bottom:8px; display:flex; align-items:center; justify-content:center;">🔒</div>
-          <div style="font-size:0.9em; color:white; font-weight:bold;">VIP Channel</div>
-          <div style="font-size:0.8em; color:#fbbf24;">450 Stars</div>
+
+        <div class="featured-banner" style="background-image: linear-gradient(135deg, #3b82f6, #1e40af);">
+          <div class="banner-overlay">
+            <h3 style="margin:0; color:white;">Acceso VIP Señales</h3>
+            <span style="color:#fbbf24; font-weight:bold;">500 Stars</span>
+          </div>
         </div>
-        <div class="featured-item">
-           <div style="width:100%; height:80px; background:#10b981; border-radius:8px; margin-bottom:8px;"></div>
-           <div style="font-size:0.9em; color:white; font-weight:bold;">Neon City</div>
-           <div style="font-size:0.8em; color:#fbbf24;">100 Stars</div>
-        </div>
+
       </div>
 
       <div class="market-nav">
         <div class="market-tab active" onclick="filterMarket('all', this)">Todo</div>
         <div class="market-tab" onclick="filterMarket('art', this)">Ilustraciones</div>
-        <div class="market-tab" onclick="filterMarket('vip', this)">Suscripciones</div>
+        <div class="market-tab" onclick="filterMarket('vip', this)">Canales</div>
         <div class="market-tab" onclick="filterMarket('sticker', this)">Stickers</div>
       </div>
 
-      <div id="market-pages-container">
-        <div class="products-grid">
-          
-          <div class="product-card filter-item art">
-            <div class="product-image" style="background-color: #ec4899;"></div>
-            <div class="product-info">
-              <h3 class="product-title">Anime Pack V1</h3>
-              <div class="product-seller">@VicenteArt</div>
-              <div class="product-price-row"><span class="price-tag-ton">💎 2.5 TON</span></div>
-            </div>
+      <div class="products-grid">
+        <div class="product-card filter-item art">
+          <div class="product-image" style="background-color: #ec4899;"></div>
+          <div class="product-info">
+            <h3 class="product-title">Anime Art V1</h3>
+            <div class="product-seller">@VicenteArt</div>
+            <div class="product-price-row"><span class="price-tag-ton">💎 2.5 TON</span></div>
           </div>
-
-          <div class="product-card filter-item vip">
-            <div class="product-image" style="background-color: #3b82f6; display:flex; justify-content:center; align-items:center;">🔒</div>
-            <div class="product-info">
-              <h3 class="product-title">Canal VIP</h3>
-              <div class="product-seller">@TraderBot</div>
-              <div class="product-price-row"><span class="price-tag-stars">⭐ 500</span></div>
-            </div>
+        </div>
+        <div class="product-card filter-item sticker">
+          <div class="product-image" style="background-color: #f59e0b;"></div>
+          <div class="product-info">
+            <h3 class="product-title">Cyber Stickers</h3>
+            <div class="product-seller">@DesignLab</div>
+            <div class="product-price-row"><span class="price-tag-ton">💎 1 TON</span></div>
           </div>
-
-          <div class="product-card filter-item sticker">
-            <div class="product-image" style="background-color: #f59e0b;"></div>
-            <div class="product-info">
-              <h3 class="product-title">Chibi Stickers</h3>
-              <div class="product-seller">@ArtistX</div>
-              <div class="product-price-row"><span class="price-tag-ton">💎 1 TON</span></div>
-            </div>
-          </div>
-          
         </div>
       </div>
 
@@ -202,138 +199,143 @@
       <h2 style="color: white; margin-bottom: 20px;">Centro Legal</h2>
       
       <div class="buttons-list">
-        <a class="btn-card" href="payments.html">
-          <div class="icon-wrapper"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>
-          <div class="card-text"><span class="card-title">Planes y Precios</span><span class="card-desc">Funciones Premium del Bot</span></div>
-        </a>
-
         <a class="btn-card" href="about.html">
           <div class="icon-wrapper"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></div>
-          <div class="card-text"><span class="card-title">Sobre Kisaki</span><span class="card-desc">Misión y Creador</span></div>
+          <div class="card-text"><span class="card-title">Sobre Kisaki</span><span class="card-desc">Misión y Visión</span></div>
         </a>
 
+        <a class="btn-card" href="payments.html">
+          <div class="icon-wrapper"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>
+          <div class="card-text"><span class="card-title">Planes y Precios</span><span class="card-desc">Opciones de compra</span></div>
+        </a>
         <a class="btn-card" href="payment-policies.html">
           <div class="icon-wrapper"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20"/></svg></div>
-          <div class="card-text"><span class="card-title">Políticas de Pago</span><span class="card-desc">Reembolsos y Seguridad</span></div>
+          <div class="card-text"><span class="card-title">Políticas de Pago</span><span class="card-desc">Reglas financieras</span></div>
         </a>
-        
-        <a class="btn-card" href="privacy.html">
-          <div class="icon-wrapper"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-          <div class="card-text"><span class="card-title">Privacidad</span><span class="card-desc">Protección de datos</span></div>
-        </a>
-
         <a class="btn-card" href="terms.html">
           <div class="icon-wrapper"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg></div>
-          <div class="card-text"><span class="card-title">Términos</span><span class="card-desc">Reglas del servicio</span></div>
-        </a>
-
-        <a class="btn-card" href="minors.html">
-          <div class="icon-wrapper"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/></svg></div>
-          <div class="card-text"><span class="card-title">Menores</span><span class="card-desc">Restricciones de edad</span></div>
+          <div class="card-text"><span class="card-title">Términos de Uso</span><span class="card-desc">Reglas generales</span></div>
         </a>
       </div>
     </section>
 
     <section id="section-profile" class="app-section">
-      <div class="profile-header-card">
-        <img src="https://via.placeholder.com/80" class="profile-avatar">
+      
+      <div class="profile-card-inner">
+        <img src="https://cdn-icons-png.flaticon.com/512/147/147144.png" class="profile-avatar" style="border: 3px solid #ccf381;">
         <h2 class="profile-name">Vicente</h2>
         <span class="profile-role">Admin / Vendedor</span>
-        <button class="btn-ton-connect">Conectar Wallet</button>
+        
+        <div class="profile-stats">
+          <div class="stat-box"><span class="stat-num">0</span><span class="stat-label">Ventas</span></div>
+          <div class="stat-box"><span class="stat-num">0</span><span class="stat-label">Ítems</span></div>
+          <div class="stat-box"><span class="stat-num">0</span><span class="stat-label">Compras</span></div>
+        </div>
+
+        <button class="btn-ton-connect">
+          <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+          Conectar Wallet
+        </button>
       </div>
 
       <div class="content-bubble">
-        <h2>📦 Mis Ítems</h2>
-        <p style="text-align:center; color:#64748b; padding:10px;">No tienes compras recientes.</p>
+        <h2>📦 Mis Publicaciones</h2>
+        <p style="text-align:center; color:#64748b; margin-top:15px;">No has subido ítems todavía.</p>
+        <a href="upload.html" class="btn-telegram-cta" style="margin-top:15px; font-size:0.9em; padding:10px;">Subir Nuevo Ítem</a>
       </div>
+
     </section>
 
   </div> <div class="search-overlay" id="searchOverlay">
-    <input type="text" class="search-input" id="globalSearchInput" placeholder="Buscar..." onkeyup="globalSearch()">
-    <div class="search-results" id="searchResults"></div>
+    <input type="text" class="search-input" id="globalSearchInput" placeholder="Buscar ítems, políticas..." onkeyup="globalSearch()">
+    <div class="search-results" id="searchResults">
+      </div>
   </div>
 
 
   <nav class="bottom-nav">
-    <a href="#" class="nav-item active" onclick="switchSection('home', this)">
+    <div class="nav-item active" onclick="switchSection('home', this)">
       <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
       Inicio
-    </a>
-    <a href="#" class="nav-item" onclick="switchSection('market', this)">
+    </div>
+    <div class="nav-item" onclick="switchSection('market', this)">
       <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20.38 3.4a2 2 0 0 0-1.79-1.11H5.41a2 2 0 0 0-1.79 1.11L1 9h22l-2.62-5.6z"></path><path d="M1 9h22v10a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V9z"></path></svg>
       Market
-    </a>
+    </div>
     <div class="nav-item" onclick="toggleSearch()">
       <div class="nav-search-btn">
         <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
       </div>
     </div>
-    <a href="#" class="nav-item" onclick="switchSection('policies', this)">
+    <div class="nav-item" onclick="switchSection('policies', this)">
       <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><text x="8" y="16" font-size="8" fill="currentColor" stroke="none">L</text></svg>
       Legal
-    </a>
-    <a href="#" class="nav-item" onclick="switchSection('profile', this)">
+    </div>
+    <div class="nav-item" onclick="switchSection('profile', this)">
       <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
       Perfil
-    </a>
+    </div>
   </nav>
 
   <script>
-    /* LOGICA DE NAVEGACION Y FILTRADO CORREGIDA */
+    // 1. MEMORIA DE NAVEGACIÓN (Persistencia)
+    document.addEventListener("DOMContentLoaded", () => {
+      // Recuperar última sección visitada
+      const lastSection = localStorage.getItem('kisaki_last_section') || 'home';
+      
+      // Activar sección y botón correspondiente
+      switchSection(lastSection);
+      
+      // Actualizar visualmente la barra de navegación
+      const navItems = document.querySelectorAll('.nav-item');
+      // Mapeo simple de índice (Home=0, Market=1, Legal=3, Profile=4)
+      const indexMap = { 'home': 0, 'market': 1, 'policies': 3, 'profile': 4 };
+      if (indexMap[lastSection] !== undefined) {
+        navItems.forEach(n => n.classList.remove('active'));
+        navItems[indexMap[lastSection]].classList.add('active');
+      }
+    });
 
     function switchSection(sectionId, element) {
-      // 1. Ocultar todas
+      // Guardar en memoria
+      localStorage.setItem('kisaki_last_section', sectionId);
+
+      // Ocultar todo
       document.querySelectorAll('.app-section').forEach(sec => sec.classList.remove('active'));
-      // 2. Mostrar elegida
-      document.getElementById('section-' + sectionId).classList.add('active');
       
-      // 3. Actualizar Nav (si se pasó el elemento)
+      // Mostrar destino
+      const target = document.getElementById('section-' + sectionId);
+      if(target) target.classList.add('active');
+
+      // Actualizar iconos nav (si se pasó el elemento clickeado)
       if(element) {
         document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
         element.classList.add('active');
       }
-      // Cerrar buscador
+
+      // Cerrar buscador si estaba abierto
       document.getElementById('searchOverlay').classList.remove('show');
+      window.scrollTo(0,0); // Ir arriba
     }
 
+    // 2. BUSCADOR MEJORADO
     function toggleSearch() {
       const overlay = document.getElementById('searchOverlay');
       overlay.classList.toggle('show');
       if(overlay.classList.contains('show')) document.getElementById('globalSearchInput').focus();
     }
 
-    // Filtrado del Marketplace (CORREGIDO)
-    function filterMarket(category, element) {
-      // Actualizar pestañas
-      document.querySelectorAll('.market-tab').forEach(tab => tab.classList.remove('active'));
-      element.classList.add('active');
-
-      const items = document.querySelectorAll('.filter-item');
-      
-      items.forEach(item => {
-        if(category === 'all') {
-          item.style.display = 'block';
-        } else {
-          if(item.classList.contains(category)) {
-            item.style.display = 'block';
-          } else {
-            item.style.display = 'none';
-          }
-        }
-      });
-    }
-
-    // Búsqueda simple
     function globalSearch() {
       const input = document.getElementById('globalSearchInput').value.toLowerCase();
       const resultsDiv = document.getElementById('searchResults');
       resultsDiv.innerHTML = ''; 
-      
+
       const data = [
         {t: 'Planes Premium', l: "javascript:switchSection('policies')"},
-        {t: 'Marketplace', l: "javascript:switchSection('market')"},
-        {t: 'Sobre Kisaki', l: "about.html"},
-        {t: 'Reembolsos', l: "payment-policies.html"}
+        {t: 'Marketplace Stickers', l: "javascript:switchSection('market'); filterMarket('sticker')"},
+        {t: 'Sobre Kisaki', l: "about.html"}, // Externo
+        {t: 'Reembolsos', l: "payment-policies.html"}, // Externo
+        {t: 'Mi Perfil', l: "javascript:switchSection('profile')"}
       ];
 
       if(input.length > 1) {
@@ -341,12 +343,36 @@
         if(matches.length > 0) {
           resultsDiv.style.display = 'block';
           matches.forEach(m => {
-             resultsDiv.innerHTML += `<div style="padding:10px; border-bottom:1px solid #333; color:#ccc;" onclick="${m.l}">${m.t}</div>`;
+             resultsDiv.innerHTML += `<a href="${m.l}" class="search-result-item" onclick="toggleSearch()">${m.t}</a>`;
           });
+        } else {
+          resultsDiv.style.display = 'none';
         }
       } else {
         resultsDiv.style.display = 'none';
       }
+    }
+
+    // 3. FILTRADO MARKETPLACE
+    function filterMarket(category, element) {
+      if(element) {
+        document.querySelectorAll('.market-tab').forEach(tab => tab.classList.remove('active'));
+        element.classList.add('active');
+      }
+      const items = document.querySelectorAll('.filter-item');
+      items.forEach(item => {
+        if(category === 'all' || item.classList.contains(category)) {
+          item.style.display = 'block';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    }
+
+    function react(btn) {
+      btn.classList.toggle('active');
+      let count = parseInt(btn.querySelector('.count').innerText);
+      btn.querySelector('.count').innerText = btn.classList.contains('active') ? count + 1 : count - 1;
     }
   </script>
 
