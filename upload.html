@@ -5,11 +5,24 @@
   <title>Subir Ítem — Kisaki Manager</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* Estilo para el panel de suscripción (oculto por defecto) */
+    .hidden-fields {
+      display: none;
+      background: rgba(59, 130, 246, 0.1);
+      padding: 15px;
+      border-radius: 12px;
+      border: 1px dashed #3b82f6;
+      margin-bottom: 20px;
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
 </head>
 <body>
 
   <div class="page-header" style="height: 120px; background-image: url('fondo-market.jpg');">
-    <a href="profile.html" class="back-floating">
+    <a href="index.html" class="back-floating">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
     </a>
   </div>
@@ -25,7 +38,45 @@
 
     <div class="card-body">
 
-      <form action="#" method="POST"> <div class="form-group">
+      <form action="#" method="POST">
+
+        <div class="form-group">
+          <label class="form-label">Categoría</label>
+          <select class="form-select" id="categorySelect" onchange="toggleSubFields()">
+            <option value="art">Ilustraciones</option>
+            <option value="sub">Suscripción Canal (Requiere Admin)</option>
+            <option value="sticker">Stickers</option>
+            <option value="photo">Fotografía</option>
+            <option value="video">Videos</option>
+            <option value="other">Otros</option>
+          </select>
+        </div>
+
+        <div id="subFields" class="hidden-fields">
+          <h3 style="color:#60a5fa; margin-top:0; font-size:1em; display:flex; align-items:center; gap:8px;">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            Configuración de Canal
+          </h3>
+          <p style="font-size:0.85em; color:#cbd5e1; margin-bottom:15px;">El bot debe ser administrador del canal para gestionar los enlaces de invitación.</p>
+          
+          <div class="form-group">
+            <label class="form-label">Enlace del Canal (Privado)</label>
+            <input type="text" class="form-input" placeholder="https://t.me/+AbCdEfGh...">
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Duración del Acceso</label>
+            <select class="form-select">
+              <option>1 Mes</option>
+              <option>3 Meses</option>
+              <option>6 Meses</option>
+              <option>1 Año</option>
+              <option>Permanente (Lifetime)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group" id="fileField">
           <label class="form-label">Archivo del producto (Zip, PNG, MP4)</label>
           <div class="upload-area">
             <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
@@ -35,40 +86,27 @@
 
         <div class="form-group">
           <label class="form-label">Título del Ítem</label>
-          <input type="text" class="form-input" placeholder="Ej: Pack de Wallpapers 4K">
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Categoría</label>
-          <select class="form-select">
-            <option>Ilustraciones</option>
-            <option>Suscripción Canal (Requiere Admin)</option>
-            <option>Stickers</option>
-            <option>Fotografía</option>
-            <option>Videos</option>
-            <option>Otros</option>
-          </select>
+          <input type="text" class="form-input" placeholder="Ej: Pack Premium">
         </div>
 
         <div class="form-group">
           <label class="form-label">Precio y Moneda</label>
-          
+
           <div class="currency-toggle" style="margin-bottom: 10px;">
             <div class="currency-option active" onclick="selectCurrency(this, 'TON')">💎 TON</div>
             <div class="currency-option" onclick="selectCurrency(this, 'STARS')">⭐ Stars</div>
           </div>
 
           <input type="number" class="form-input" placeholder="Cantidad (Ej: 2.5)">
-          
           <span class="commission-note">ℹ️ Se descontará un 7% de comisión por venta.</span>
         </div>
 
         <div class="form-group">
           <label class="form-label">Descripción</label>
-          <textarea class="form-textarea" rows="4" placeholder="Describe lo que incluye tu producto..."></textarea>
+          <textarea class="form-textarea" rows="4" placeholder="Describe lo que incluye..."></textarea>
         </div>
 
-        <button type="button" class="btn-telegram-cta" onclick="alert('Funcionalidad Backend requerida para publicar.')">
+        <button type="button" class="btn-telegram-cta" onclick="alert('Datos enviados al Backend (Simulación)')">
           Publicar Ítem
         </button>
 
@@ -78,7 +116,24 @@
   </div>
 
   <script>
-    // Pequeño script para el toggle visual de moneda
+    // 1. Lógica para mostrar/ocultar campos de suscripción
+    function toggleSubFields() {
+      const category = document.getElementById('categorySelect').value;
+      const subFields = document.getElementById('subFields');
+      const fileField = document.getElementById('fileField');
+
+      if (category === 'sub') {
+        // Si es suscripción: Mostrar campos de canal, ocultar archivo
+        subFields.style.display = 'block';
+        fileField.style.display = 'none';
+      } else {
+        // Si es otro ítem: Mostrar archivo, ocultar campos de canal
+        subFields.style.display = 'none';
+        fileField.style.display = 'block';
+      }
+    }
+
+    // 2. Lógica visual de moneda
     function selectCurrency(element, type) {
       document.querySelectorAll('.currency-option').forEach(el => el.classList.remove('active'));
       element.classList.add('active');
