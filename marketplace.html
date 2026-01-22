@@ -15,7 +15,8 @@
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
-      background-color: #1e293b; /* Color de fondo por si no carga img */
+      background-color: #1e293b;
+      position: relative;
     }
     .video-overlay {
       position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
@@ -33,7 +34,8 @@
 <body>
 
   <div class="page-header" style="height: 140px; background-image: url('fondo-market.jpg');">
-    <a href="javascript:history.back()" class="back-floating">
+    
+    <a href="index.html" class="back-floating">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
     </a>
 
@@ -82,11 +84,10 @@
     let supabase;
     try {
         supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        // Inicializar Telegram
         const tg = window.Telegram.WebApp;
         tg.expand();
     } catch (e) {
-        alert("Error iniciando librerías: " + e.message);
+        console.error("Error init:", e);
     }
 
     let allLoadedProducts = [];
@@ -107,6 +108,8 @@
       container.innerHTML = '<div class="loading-spinner"></div>';
 
       try {
+        console.log("Iniciando carga de productos...");
+        
         // Consulta a Supabase
         let query = supabase
             .from('marketplace_items')
@@ -122,15 +125,17 @@
 
         if (error) throw error;
 
+        console.log("Productos cargados:", data);
         allLoadedProducts = data; // Guardamos para búsqueda local
         renderItems(data);
 
       } catch (err) {
         console.error("Error Supabase:", err);
         container.innerHTML = `
-            <div style="grid-column: 1 / -1; text-align:center; padding:20px; color:#ef4444;">
-                <p>❌ Error cargando ítems</p>
+            <div style="grid-column: 1 / -1; text-align:center; padding:20px; color:#ef4444; background: rgba(239, 68, 68, 0.1); border-radius: 8px;">
+                <p>❌ <b>Error cargando ítems</b></p>
                 <small>${err.message}</small>
+                <p style="font-size:0.8em; margin-top:10px;">(Verifica las políticas RLS en Supabase)</p>
             </div>`;
       }
     }
@@ -148,7 +153,12 @@
       items.forEach(item => {
         const link = document.createElement('a');
         link.href = "#"; 
-        link.onclick = function() { alert("Has tocado el ítem: " + item.title); }; // Placeholder acción
+        // Acción al tocar el ítem
+        link.onclick = function() { 
+            // Aquí en el futuro redirigiremos a product.html
+            alert("Has tocado el ítem: " + item.title + "\n(Pronto: Página de compra)"); 
+        };
+        
         link.className = `product-card filter-item ${item.category}`;
         link.style.textDecoration = 'none';
 
@@ -159,13 +169,13 @@
         // Categorías que usan la imagen de fondo
         const isVisual = ['art', 'photo', 'sticker'].includes(item.category);
         
-        // Si es visual y tiene URL válida (imagen)
+        // Si es visual y tiene URL válida
         if (isVisual && item.file_url) {
             bgStyle = `background-image: url('${item.file_url}');`;
         } 
-        // Si no es visual o no tiene imagen, ponemos iconos
+        // Si no, usamos iconos
         else {
-            if(item.category === 'sub') contentHtml = '<span style="font-size:40px;">💎</span>'; // Icono para VIP
+            if(item.category === 'sub') contentHtml = '<span style="font-size:40px;">💎</span>';
             else if(item.category === 'video') contentHtml = '<div class="video-overlay"><span style="color:white; font-size:20px;">▶</span></div>';
             else if(item.category === 'file') contentHtml = '<span style="font-size:40px;">📁</span>';
             else contentHtml = '<span style="font-size:40px;">📦</span>';
@@ -174,11 +184,16 @@
         // Selección de moneda
         const currencyIcon = item.currency === 'STARS' ? '⭐' : '💎';
         const displayPrice = item.price ? `${currencyIcon} ${item.price}` : 'Gratis';
+        
+        // Si es video y tiene URL, intentamos mostrar preview
+        const videoTag = (item.category === 'video' && item.file_url) 
+            ? `<video src="${item.file_url}" style="width:100%; height:100%; object-fit:cover; position:absolute; z-index:0;" muted loop playsinline onmouseover="this.play()" onmouseout="this.pause()"></video>` 
+            : '';
 
         link.innerHTML = `
-          <div class="product-image" style="${bgStyle} height: 140px; display:flex; justify-content:center; align-items:center; position: relative;">
+          <div class="product-image" style="${bgStyle} height: 140px; display:flex; justify-content:center; align-items:center; position: relative; overflow:hidden;">
             ${contentHtml}
-            ${item.category === 'video' && item.file_url ? `<video src="${item.file_url}" style="width:100%; height:100%; object-fit:cover; position:absolute; z-index:0;" muted loop onmouseover="this.play()" onmouseout="this.pause()"></video>` : ''}
+            ${videoTag}
           </div>
           <div class="product-info">
             <h3 class="product-title">${item.title}</h3>
