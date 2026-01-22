@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Kisaki Analytics</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <link rel="stylesheet" href="style.css">
   
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -12,194 +11,201 @@
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
   <style>
-    /* ESTILO CYBER DASHBOARD */
-    body { background-color: #0b1120; color: #e2e8f0; }
-
-    .dashboard-header {
-      padding: 20px;
-      background: linear-gradient(to bottom, #1e293b, transparent);
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-    }
-
-    /* KPI CARDS (Tarjetas de métricas superiores) */
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      padding: 15px;
-      margin-top: -20px;
-    }
-
-    .kpi-card {
-      background: rgba(30, 41, 59, 0.7);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 12px;
-      padding: 15px;
-      position: relative;
-    }
+    /* ESTILOS (Mismos que antes) */
+    body { background-color: #0f172a; color: #e2e8f0; padding-bottom: 40px; }
+    .dashboard-header { padding: 20px; background: linear-gradient(to bottom, #1e293b, transparent); margin-bottom: 10px; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 0 15px; margin-bottom: 25px; }
+    .kpi-card { background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 15px; display: flex; flex-direction: column; }
+    .kpi-label { font-size: 0.75em; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px; }
+    .kpi-number { font-size: 1.4em; font-weight: 800; color: #fff; }
+    .kpi-trend { font-size: 0.75em; margin-top: 5px; display: flex; align-items: center; gap: 4px; }
+    .trend-up { color: #ccf381; } .trend-down { color: #f87171; }
+    .chart-box { margin: 0 15px 20px 15px; background: #1e293b; border-radius: 16px; padding: 15px; border: 1px solid rgba(255,255,255,0.05); position: relative; overflow: hidden; }
+    .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+    .section-title { font-weight: 700; font-size: 1em; color: #fff; }
+    .ai-insight { margin: 0 15px 25px 15px; padding: 15px; background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(168, 85, 247, 0.1)); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 16px; }
+    .ai-title { color: #60a5fa; font-size: 0.85em; font-weight: 700; display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+    .premium-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(4px); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; text-align: center; }
     
-    .kpi-title { font-size: 0.8em; color: #94a3b8; display: block; margin-bottom: 5px; }
-    .kpi-value { font-size: 1.4em; font-weight: 700; color: #fff; }
-    .kpi-trend { font-size: 0.75em; display: flex; align-items: center; gap: 4px; margin-top: 5px; }
-    .trend-up { color: #ccf381; } /* Verde Neón */
-    .trend-down { color: #ef4444; } /* Rojo */
-
-    /* SECCIONES DE GRÁFICOS */
-    .chart-container {
-      margin: 15px;
-      padding: 15px;
-      background: #162032;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,0.05);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-    }
-    
-    .section-title {
-      font-size: 1em; font-weight: 600; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;
-    }
-
-    /* AI INSIGHT BOX */
-    .ai-box {
-      margin: 15px;
-      padding: 15px;
-      background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(147,51,234,0.1));
-      border: 1px solid rgba(59,130,246,0.3);
-      border-radius: 12px;
-      position: relative;
-    }
-    .ai-header { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; color: #60a5fa; font-weight: bold; }
-    
-    /* MODALES Y PREMIUN */
-    .blur-overlay { filter: blur(4px); pointer-events: none; user-select: none; }
-    .premium-lock {
-      position: absolute; top:0; left:0; width:100%; height:100%;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      background: rgba(11, 17, 32, 0.8); z-index: 10;
-      border-radius: 16px;
-    }
+    /* Loader simple */
+    .loading-pulse { animation: pulse 1.5s infinite; opacity: 0.5; }
+    @keyframes pulse { 0% { opacity: 0.3; } 50% { opacity: 1; } 100% { opacity: 0.3; } }
   </style>
 </head>
 <body>
 
   <div class="dashboard-header">
-    <a href="index.html" style="color:white; text-decoration:none; display:flex; align-items:center; gap:10px; font-size:0.9em;">
+    <a href="index.html" style="color:#94a3b8; text-decoration:none; display:flex; align-items:center; gap:8px; font-size:0.9em; margin-bottom:10px;">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
-      Volver
+      Volver al Inicio
     </a>
-    <h1 style="margin: 10px 0 0 0; font-size: 1.5em;">Panel de Control</h1>
-    <div style="font-size:0.85em; color:#94a3b8;">Canal: <b style="color:#ccf381">@KisakiChannel</b></div>
+    <div style="display:flex; justify-content:space-between; align-items:end;">
+        <div>
+            <h1 style="margin:0; font-size:1.8em;">Analytics</h1>
+            <span style="font-size:0.85em; color:#64748b;" id="channelNameDisplay">Cargando...</span>
+        </div>
+        <div style="background:#334155; padding:6px 12px; border-radius:20px; font-size:0.8em; color:white;">7 Días ▼</div>
+    </div>
   </div>
 
   <div class="kpi-grid">
     <div class="kpi-card">
-      <span class="kpi-title">Suscriptores</span>
-      <div class="kpi-value" id="kpiSubs">12,450</div>
-      <div class="kpi-trend trend-up">▲ +125 (Hoy)</div>
+      <span class="kpi-label">Suscriptores</span>
+      <span class="kpi-number loading-pulse" id="valSubs">--</span>
+      <span class="kpi-trend" id="trendSubs">Calculando...</span>
     </div>
     <div class="kpi-card">
-      <span class="kpi-title">Engagement</span>
-      <div class="kpi-value">8.4%</div>
-      <div class="kpi-trend trend-down">▼ -0.2%</div>
+      <span class="kpi-label">Vistas (Est)</span>
+      <span class="kpi-number loading-pulse" id="valViews">--</span>
+      <span class="kpi-trend trend-up">▲ -- Hoy</span>
     </div>
     <div class="kpi-card">
-      <span class="kpi-title">Vistas Totales</span>
-      <div class="kpi-value">45.2K</div>
-      <div class="kpi-trend trend-up">▲ +1.2K</div>
+      <span class="kpi-label">Engagement</span>
+      <span class="kpi-number">--%</span> <span class="kpi-trend trend-down">▼ 0.0%</span>
     </div>
     <div class="kpi-card">
-      <span class="kpi-title">Ingresos (Est)</span>
-      <div class="kpi-value">$340</div>
-      <div class="kpi-trend trend-up">▲ 15 Stars</div>
+      <span class="kpi-label">Ingresos</span>
+      <span class="kpi-number">💎 --</span>
+      <span class="kpi-trend trend-up">Stars</span>
     </div>
   </div>
 
-  <div class="ai-box">
-    <div class="ai-header">
-      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10H12V2z"></path></svg>
-      Kisaki AI Insight
+  <div class="ai-insight">
+    <div class="ai-title">
+      <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10H12V2z"></path></svg>
+      Kisaki AI
     </div>
-    <p style="font-size: 0.9em; line-height: 1.4; color: #cbd5e1; margin: 0;">
-      Tu crecimiento ha aumentado un 12% esta semana. Los posts publicados a las <b>18:00</b> tienen un 40% más de retención. Te recomiendo subir contenido visual hoy.
+    <p id="aiText" style="margin:0; font-size:0.9em; color:#cbd5e1; line-height:1.4;">
+      Analizando datos del canal... Espera a que el bot recolecte suficiente información (24-48h).
     </p>
   </div>
 
-  <div class="chart-container">
-    <div class="section-title">
-      Crecimiento de Audiencia
-      <span style="font-size:0.7em; background:#334155; padding:2px 6px; border-radius:4px;">7 Días</span>
+  <div class="chart-box">
+    <div class="section-header">
+      <span class="section-title">Crecimiento de Audiencia</span>
     </div>
     <div id="growthChart"></div>
   </div>
 
-  <div class="chart-container" style="position:relative;">
-    <div class="section-title">Mejores Horarios</div>
-    
-    <div class="premium-lock">
-      <div style="font-size:30px; margin-bottom:10px;">🔒</div>
-      <div style="font-weight:bold; color:white;">Función Premium</div>
-      <button class="btn-telegram-cta" style="margin-top:10px; width:auto; padding: 8px 20px;">Desbloquear</button>
+  <div class="chart-box" style="height: 250px;">
+    <div class="section-header">
+      <span class="section-title">Mejores Horarios</span>
     </div>
-
-    <div id="heatmapChart" class="blur-overlay"></div>
+    <div class="premium-overlay">
+      <div style="font-size:30px; margin-bottom:10px;">🔒</div>
+      <h3 style="margin:0; color:white;">Función Premium</h3>
+      <p style="font-size:0.85em; color:#94a3b8; margin:5px 0 15px 0;">Desbloquea el mapa de calor detallado.</p>
+      <button style="background:#ccf381; color:#000; border:none; padding:8px 20px; border-radius:20px; font-weight:bold;">Mejorar Plan</button>
+    </div>
+    <div id="heatmapChart" style="filter: blur(5px);"></div>
   </div>
 
   <script>
-    // INICIALIZAR TELEGRAM
     const tg = window.Telegram.WebApp;
     tg.expand();
-
-    // --- CONFIGURACIÓN DE GRÁFICAS (APEXCHARTS) ---
     
-    // 1. Gráfica de Línea (Crecimiento)
-    const growthOptions = {
-      series: [{
-        name: 'Subs',
-        data: [12300, 12320, 12350, 12380, 12400, 12410, 12450]
-      }],
-      chart: {
-        type: 'area',
-        height: 200,
-        toolbar: { show: false },
-        background: 'transparent'
-      },
-      colors: ['#ccf381'], // Tu color verde marca
+    // --- CONEXIÓN SUPABASE ---
+    const SUPABASE_URL = 'https://ndkupidhlauzroduvech.supabase.co'; 
+    const SUPABASE_KEY = 'sb_publishable_fSQ9uBUx_YTfxr2QL2-kfQ_pdE2cqHv'; 
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // Variables globales para la gráfica
+    let chartInstance = null;
+
+    // --- INICIALIZAR GRÁFICA VACÍA ---
+    const optionsGrowth = {
+      series: [{ name: 'Subs', data: [] }],
+      chart: { type: 'area', height: 200, toolbar: { show: false }, background: 'transparent', fontFamily: 'inherit' },
+      colors: ['#ccf381'],
       stroke: { curve: 'smooth', width: 2 },
-      fill: {
-        type: 'gradient',
-        gradient: {
-          shadeIntensity: 1,
-          opacityFrom: 0.4,
-          opacityTo: 0.0,
-          stops: [0, 90, 100]
-        }
-      },
+      fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.05, stops: [0, 90, 100] } },
       dataLabels: { enabled: false },
-      theme: { mode: 'dark' }, // Modo oscuro automático
-      grid: { borderColor: '#334155', strokeDashArray: 4 },
-      xaxis: {
-        categories: ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'],
-        labels: { style: { colors: '#94a3b8' } }
-      },
-      yaxis: { show: false }
-    };
-
-    const growthChart = new ApexCharts(document.querySelector("#growthChart"), growthOptions);
-    growthChart.render();
-
-    // 2. Gráfica Falsa para el fondo Premium (Heatmap)
-    const heatmapOptions = {
-      series: [
-        { name: '10:00', data: [20, 30, 40, 50] },
-        { name: '14:00', data: [10, 20, 60, 40] },
-        { name: '18:00', data: [50, 60, 90, 80] }
-      ],
-      chart: { type: 'heatmap', height: 200, toolbar: { show: false }, background: 'transparent' },
-      colors: ['#3b82f6'],
       theme: { mode: 'dark' },
-      dataLabels: { enabled: false }
+      grid: { borderColor: '#334155', strokeDashArray: 4 },
+      xaxis: { categories: [], labels: { style: { colors: '#94a3b8' } }, axisBorder: { show: false }, axisTicks: { show: false } },
+      yaxis: { show: false },
+      tooltip: { theme: 'dark' }
     };
-    new ApexCharts(document.querySelector("#heatmapChart"), heatmapOptions).render();
+    chartInstance = new ApexCharts(document.querySelector("#growthChart"), optionsGrowth);
+    chartInstance.render();
+
+    // Gráfica Dummy para Premium
+    new ApexCharts(document.querySelector("#heatmapChart"), {
+        series: [{name:'L',data:[10,40]},{name:'M',data:[20,50]}],
+        chart:{type:'heatmap',height:200,toolbar:{show:false}},
+        theme:{mode:'dark'},xaxis:{labels:{show:false}},yaxis:{show:false}
+    }).render();
+
+    // --- LÓGICA PRINCIPAL: CARGAR DATOS REALES ---
+    async function loadRealStats() {
+        try {
+            // 1. Pedir los últimos 7 registros ordenados por fecha
+            const { data, error } = await supabase
+                .from('channel_stats')
+                .select('*')
+                .order('created_at', { ascending: true }) // Del más antiguo al más nuevo
+                .limit(7);
+
+            if (error) throw error;
+
+            if (!data || data.length === 0) {
+                document.getElementById('aiText').innerText = "⚠️ No hay datos recolectados. Asegúrate de que el Bot está encendido en Railway.";
+                document.getElementById('valSubs').innerText = "0";
+                document.getElementById('valSubs').classList.remove('loading-pulse');
+                return;
+            }
+
+            // 2. Procesar datos
+            const lastEntry = data[data.length - 1]; // El dato de hoy
+            const prevEntry = data.length > 1 ? data[data.length - 2] : null; // El dato de ayer (si existe)
+
+            // Actualizar textos
+            document.getElementById('channelNameDisplay').innerText = lastEntry.channel_name || "Mi Canal";
+            document.getElementById('valSubs').innerText = lastEntry.total_subs.toLocaleString();
+            document.getElementById('valSubs').classList.remove('loading-pulse');
+            
+            // Simular views (ya que la API a veces da 0 si no se configura bien)
+            document.getElementById('valViews').innerText = (lastEntry.total_views > 0) ? lastEntry.total_views : "--";
+            document.getElementById('valViews').classList.remove('loading-pulse');
+
+            // 3. Calcular Tendencia (Hoy vs Ayer)
+            if (prevEntry) {
+                const diff = lastEntry.total_subs - prevEntry.total_subs;
+                const trendElem = document.getElementById('trendSubs');
+                if (diff > 0) {
+                    trendElem.innerHTML = `▲ +${diff} Recientes`;
+                    trendElem.className = "kpi-trend trend-up";
+                } else if (diff < 0) {
+                    trendElem.innerHTML = `▼ ${diff} Perdidos`;
+                    trendElem.className = "kpi-trend trend-down";
+                } else {
+                    trendElem.innerHTML = `= Sin cambios`;
+                    trendElem.className = "kpi-trend";
+                }
+            }
+
+            // 4. Actualizar Gráfica
+            const chartData = data.map(row => row.total_subs);
+            const chartDates = data.map(row => {
+                const date = new Date(row.created_at);
+                return date.toLocaleDateString('es-ES', { weekday: 'short' }); // "Lun", "Mar"
+            });
+
+            chartInstance.updateOptions({
+                xaxis: { categories: chartDates }
+            });
+            chartInstance.updateSeries([{
+                data: chartData
+            }]);
+
+        } catch (err) {
+            console.error("Error cargando stats:", err);
+            document.getElementById('aiText').innerText = "❌ Error de conexión con la base de datos.";
+        }
+    }
+
+    // Ejecutar al cargar
+    loadRealStats();
 
   </script>
 </body>
