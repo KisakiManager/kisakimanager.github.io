@@ -19,17 +19,18 @@
     .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #ccf381, #a3e635); border-radius: 10px; transition: width 0.4s ease; }
     .upload-status-text { font-size: 0.85em; color: #94a3b8; text-align: center; margin-top: 8px; display: none; }
 
-    /* ZONA DE CARGA: Estilo limpio y clickable */
+    /* ZONA DE CARGA (LABEL) */
+    /* Usamos label para que el clic sea nativo */
     .upload-area {
       cursor: pointer;
-      display: block;
+      display: block; /* Importante para que se comporte como bloque */
       position: relative;
-      border: 2px dashed #334155; /* Borde visible para que sepa dónde tocar */
+      border: 2px dashed #334155;
       transition: all 0.3s ease;
-      padding: 20px; /* Espacio interno para facilitar el toque */
+      padding: 20px;
     }
     
-    /* Clase extra para cuando hay archivo seleccionado (Feedback Visual) */
+    /* Clase extra para cuando hay archivo seleccionado */
     .upload-area.file-selected {
       background-color: rgba(204, 243, 129, 0.1); /* Fondo Verde suave */
       border-color: #ccf381;
@@ -81,7 +82,7 @@
         <div class="form-group" id="fileField">
           <label class="form-label">Archivo del producto (Zip, PNG, MP4)</label>
 
-          <div class="upload-area" id="dropZone">
+          <label class="upload-area" id="dropZone" for="realFileInput">
             <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
             
             <p id="fileNameDisplay" style="margin:0; color:#cbd5e1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90%;">Toca para subir o arrastra aquí</p>
@@ -89,7 +90,7 @@
             <input type="file" id="realFileInput" 
                    style="display: none;" 
                    accept="image/*,video/*,.zip,.rar,.pdf"> 
-          </div>
+          </label>
 
           <div class="progress-container" id="uploadProgressBox">
             <div class="progress-bar" id="uploadProgressBar"></div>
@@ -143,18 +144,14 @@
     }
 
     // ----------------------------------------------------
-    // 3. LÓGICA DE SELECCIÓN DE ARCHIVO (MÉTODO DIRECTO)
+    // 3. LÓGICA DE FEEDBACK VISUAL (Solo para mostrar el nombre)
     // ----------------------------------------------------
+    // Nota: Ya no necesitamos JS para ABRIR la galería, el <label> lo hace solo.
+    
     const dropZone = document.getElementById('dropZone');
     const fileInput = document.getElementById('realFileInput');
     const fileNameDisplay = document.getElementById('fileNameDisplay');
 
-    // A) La orden directa de JS: Al tocar el DIV, abre el INPUT
-    dropZone.addEventListener('click', () => {
-        fileInput.click(); 
-    });
-
-    // B) Cuando el archivo se selecciona, actualizamos la vista
     fileInput.addEventListener('change', function() {
       if (this.files && this.files.length > 0) {
         const file = this.files[0];
