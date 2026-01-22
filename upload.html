@@ -10,41 +10,39 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
   <style>
-    /* Estilo para el panel de suscripción */
+    /* Estilos generales */
     .hidden-fields { display: none; background: rgba(59, 130, 246, 0.1); padding: 15px; border-radius: 12px; border: 1px dashed #3b82f6; margin-bottom: 20px; animation: fadeIn 0.3s ease; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* ESTILOS DE BARRA DE PROGRESO */
     .progress-container { width: 100%; background-color: rgba(255, 255, 255, 0.1); border-radius: 10px; margin-top: 15px; height: 10px; overflow: hidden; display: none; }
     .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #ccf381, #a3e635); border-radius: 10px; transition: width 0.4s ease; }
     .upload-status-text { font-size: 0.85em; color: #94a3b8; text-align: center; margin-top: 8px; display: none; }
 
-    /* ZONA DE CARGA (LABEL) */
+    /* ZONA DE CARGA MEJORADA */
     .upload-area {
       cursor: pointer;
-      display: block;
-      position: relative;
-      border: 2px dashed #334155;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 2px dashed #334155; 
       transition: all 0.3s ease;
       padding: 20px;
+      text-align: center;
+      min-height: 100px; /* Altura mínima para que se vea bien */
     }
     
-    /* Clase extra para cuando hay archivo seleccionado */
+    /* Feedback visual verde */
     .upload-area.file-selected {
-      background-color: rgba(204, 243, 129, 0.1) !important; /* Fondo Verde suave */
-      border-color: #ccf381 !important;
+      background-color: rgba(204, 243, 129, 0.1);
+      border-color: #ccf381;
     }
     
-    /* Input oculto pero accesible */
-    .input-hidden {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        padding: 0;
-        margin: -1px;
-        overflow: hidden;
-        clip: rect(0,0,0,0);
-        border: 0;
+    /* Negrita para el nombre del archivo (Mejora CSS recomendada) */
+    .file-name-bold {
+        font-weight: 700;
+        color: #ccf381;
+        word-break: break-all; /* Para que nombres largos no rompan el diseño */
     }
   </style>
 </head>
@@ -81,29 +79,27 @@
         </div>
 
         <div id="subFields" class="hidden-fields">
-          <h3 style="color:#60a5fa; margin-top:0; font-size:1em; display:flex; align-items:center; gap:8px;">
-            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-            Configuración de Canal
-          </h3>
-          <p style="font-size:0.85em; color:#cbd5e1; margin-bottom:15px;">El bot debe ser administrador del canal.</p>
-          <div class="form-group"><label class="form-label">Enlace del Canal</label><input type="text" id="subLinkInput" class="form-input" placeholder="https://t.me/+AbCdEfGh..."></div>
+          <h3 style="color:#60a5fa; margin-top:0; font-size:1em;">Canal</h3>
+          <p style="font-size:0.85em; color:#cbd5e1; margin-bottom:15px;">El bot debe ser admin.</p>
+          <div class="form-group"><label class="form-label">Enlace</label><input type="text" id="subLinkInput" class="form-input" placeholder="https://t.me/+AbCdEfGh..."></div>
           <div class="form-group"><label class="form-label">Duración</label><select class="form-select" id="subDurationInput"><option>1 Mes</option><option>Lifetime</option></select></div>
         </div>
 
         <div class="form-group" id="fileField">
           <label class="form-label">Archivo del producto (Zip, PNG, MP4)</label>
 
-          <label class="upload-area" id="dropZone" for="realFileInput">
-            <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <div class="upload-area" id="dropZone">
+            <div id="defaultContent">
+                <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:10px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <p style="margin:0; color:#cbd5e1;">Toca para subir</p>
+            </div>
             
-            <p id="fileNameDisplay" style="margin:0; color:#cbd5e1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90%;">Toca para subir o arrastra aquí</p>
+            <div id="previewContainer" style="display:none; text-align:center; width:100%;"></div>
 
             <input type="file" id="realFileInput" 
-                   class="input-hidden"
-                   onclick="this.value=null"
-                   onchange="mostrarNombreArchivo()"
+                   style="display: none;" 
                    accept="image/*,video/*,.zip,.rar,.pdf"> 
-          </label>
+          </div>
 
           <div class="progress-container" id="uploadProgressBox">
             <div class="progress-bar" id="uploadProgressBar"></div>
@@ -132,16 +128,19 @@
   </div>
 
   <script>
-    // 1. SUPABASE
+    // 1. CONFIGURACIÓN E INICIO
     const SUPABASE_URL = 'https://ndkupidhlauzroduvech.supabase.co'; 
     const SUPABASE_KEY = 'sb_publishable_fSQ9uBUx_YTfxr2QL2-kfQ_pdE2cqHv'; 
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // 2. UI GLOBAL
     const tg = window.Telegram.WebApp;
     tg.expand();
+    // Mejora de Telegram: Evitar cierre accidental
+    tg.enableClosingConfirmation(); 
+    
     let selectedCurrency = 'TON';
 
+    // 2. TOGGLES VISUALES
     function toggleSubFields() {
       const category = document.getElementById('categorySelect').value;
       const subFields = document.getElementById('subFields');
@@ -156,32 +155,59 @@
       document.getElementById('currSTARS').classList.toggle('active', type === 'STARS');
     }
 
-    // ----------------------------------------------------
-    // 3. FUNCIÓN VISUAL (Llamada directa desde el HTML)
-    // ----------------------------------------------------
-    function mostrarNombreArchivo() {
-        const input = document.getElementById('realFileInput');
-        const fileNameDisplay = document.getElementById('fileNameDisplay');
-        const dropZone = document.getElementById('dropZone');
+    // 3. LÓGICA DE ARCHIVOS "PREMIUM" (CON PREVIEW)
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('realFileInput');
+    const defaultContent = document.getElementById('defaultContent');
+    const previewContainer = document.getElementById('previewContainer');
 
-        if (input.files && input.files.length > 0) {
-            const file = input.files[0];
-            // Actualizar texto
-            fileNameDisplay.innerHTML = `✅ <b>${file.name}</b>`;
-            // Cambiar colores
-            fileNameDisplay.style.color = "#ccf381"; 
-            dropZone.classList.add('file-selected');
+    // A) CLICK FORZADO (La solución infalible para móviles)
+    dropZone.addEventListener('click', () => {
+        fileInput.click(); 
+    });
+
+    // B) PREVIEW AUTOMÁTICO
+    fileInput.addEventListener('change', () => {
+      if(fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        
+        // Estilos de éxito
+        dropZone.classList.add('file-selected');
+        defaultContent.style.display = 'none'; // Ocultar icono por defecto
+        previewContainer.style.display = 'block'; // Mostrar contenedor
+
+        // SI ES IMAGEN -> MUESTRA LA FOTO
+        if (file.type.startsWith("image/")) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                previewContainer.innerHTML = `
+                  <img src="${e.target.result}" style="max-height:100px; max-width:100%; border-radius:8px; border: 2px solid #ccf381; margin-bottom:8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                  <div class="file-name-bold">✅ ${file.name}</div>
+                `;
+            };
+            reader.readAsDataURL(file);
+        } 
+        // SI ES OTRO ARCHIVO -> MUESTRA TEXTO BONITO
+        else {
+            previewContainer.innerHTML = `
+              <div style="font-size: 40px;">📄</div>
+              <div class="file-name-bold" style="margin-top:5px;">✅ ${file.name}</div>
+              <div style="font-size: 0.8em; color: #94a3b8;">(${(file.size / 1024 / 1024).toFixed(2)} MB)</div>
+            `;
         }
-    }
+
+        // Haptic Feedback (Vibración ligera al seleccionar)
+        if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+      }
+    });
 
     // 4. SUBIDA A SUPABASE
     document.getElementById('btnPublish').addEventListener('click', async () => {
       const title = document.getElementById('itemTitle').value;
       const price = document.getElementById('itemPrice').value;
       const category = document.getElementById('categorySelect').value;
-      const fileInput = document.getElementById('realFileInput'); // Referencia fresca
 
-      if(!title || !price) return alert("Por favor completa el Título y el Precio.");
+      if(!title || !price) return alert("Falta Título o Precio");
 
       const btn = document.getElementById('btnPublish');
       const progressBox = document.getElementById('uploadProgressBox');
@@ -198,15 +224,13 @@
         const seller = tg.initDataUnsafe?.user?.username ? '@' + tg.initDataUnsafe.user.username : '@Anonimo';
 
         if(category !== 'sub') {
-           if (!fileInput.files || fileInput.files.length === 0) {
-               throw new Error("Debes seleccionar un archivo.");
-           }
            const file = fileInput.files[0];
+           if (!file) throw new Error("Debes seleccionar un archivo.");
 
            progressBar.style.width = '30%';
            statusText.innerText = "Subiendo archivo...";
 
-           // Nombre limpio
+           // Nombre único
            const fileName = Date.now() + '_' + file.name.replace(/\s+/g, '-');
 
            const { data, error } = await supabase.storage
@@ -216,7 +240,7 @@
            if (error) throw error;
 
            progressBar.style.width = '80%';
-           statusText.innerText = "Generando enlace...";
+           statusText.innerText = "Creando enlace...";
 
            const { data: publicData } = supabase.storage
              .from('products')
@@ -228,7 +252,7 @@
            if(!finalUrl) throw new Error("Falta el enlace del canal.");
         }
 
-        statusText.innerText = "Guardando...";
+        statusText.innerText = "Guardando datos...";
         progressBar.style.width = '90%';
 
         const { error: dbError } = await supabase
@@ -245,13 +269,16 @@
 
         if (dbError) throw dbError;
 
+        // Reset seguro después de éxito
+        fileInput.value = ""; 
+
         progressBar.style.width = '100%';
         statusText.innerText = "¡Completado!";
-        setTimeout(() => { alert("✅ ¡Ítem publicado!"); window.location.href = "marketplace.html"; }, 500);
+        setTimeout(() => { alert("✅ ¡Publicado!"); window.location.href = "marketplace.html"; }, 500);
 
       } catch (error) {
         console.error(error);
-        alert("❌ Error: " + error.message);
+        alert("Error: " + error.message);
         btn.disabled = false;
         btn.innerText = "Reintentar";
         progressBar.style.width = '0%';
