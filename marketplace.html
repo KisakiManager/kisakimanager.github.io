@@ -10,93 +10,82 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
   <style>
-    /* Estilos extra para las imágenes reales */
+    /* Estilos base */
     .product-image {
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      background-color: #1e293b;
-      position: relative;
+      background-size: cover; background-position: center; background-repeat: no-repeat;
+      background-color: #1e293b; position: relative;
     }
     .video-overlay {
       position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
       background: rgba(0,0,0,0.6); border-radius: 50%; padding: 10px; display: flex;
     }
     
-    /* ESTILO DEL BOTÓN DE RECARGA */
-    .btn-refresh-container {
-      text-align: center;
-      margin-bottom: 20px;
-    }
+    /* Botón Recarga */
+    .btn-refresh-container { text-align: center; margin-bottom: 20px; }
     .btn-refresh {
       background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid #3b82f6;
       padding: 10px 20px; border-radius: 20px; font-size: 0.9em; font-weight: 600;
       cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
       transition: all 0.3s ease; width: 80%; justify-content: center;
+      /* Aseguramos que sea clickable */
+      position: relative; z-index: 100;
     }
     .btn-refresh:active { transform: scale(0.98); background: #3b82f6; color: white; }
     
-    /* Animación de giro */
+    /* Animaciones */
     .spin-anim { animation: spin 1s linear infinite; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-    /* Spinner inicial */
     .loading-spinner {
       border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid #3b82f6;
       border-radius: 50%; width: 30px; height: 30px;
       animation: spin 1s linear infinite; margin: 50px auto;
     }
     
-    /* --- CORRECCIÓN CLAVE: ESTILOS DE PESTAÑAS --- */
+    /* --- ZONA CRÍTICA: PESTAÑAS --- */
     .market-nav {
       display: flex;
       gap: 10px;
       overflow-x: auto;
-      padding-bottom: 5px;
+      padding-bottom: 10px; /* Un poco más de espacio táctil */
       margin-bottom: 20px;
       scrollbar-width: none;
       
-      /* TRUCO DE MAGIA: Forzamos que esté ENCIMA de todo */
+      /* ARREGLO DE CAPAS: Z-Index muy alto */
       position: relative; 
-      z-index: 50; 
+      z-index: 999 !important; 
+      
+      /* Espacio superior para separarse del buscador "fantasma" */
+      margin-top: 10px; 
     }
     .market-nav::-webkit-scrollbar { display: none; }
 
-    /* Usamos botones reales ahora */
     .market-tab {
-      background: rgba(255,255,255,0.05); /* Fondo gris oscuro */
-      color: #94a3b8;
+      background: rgba(255,255,255,0.05); color: #94a3b8;
       border: 1px solid rgba(255,255,255,0.1);
-      padding: 8px 16px;
+      padding: 10px 18px; /* Botones más gorditos para mejor tacto */
       border-radius: 20px;
       font-size: 0.9em;
       white-space: nowrap;
       cursor: pointer;
       transition: all 0.2s ease;
-      /* Reset de estilos de botón */
-      font-family: inherit;
-      outline: none;
-      -webkit-tap-highlight-color: transparent; /* Quita el flash azul en Android */
+      font-family: inherit; outline: none; -webkit-tap-highlight-color: transparent;
     }
 
-    /* Estado Activo */
     .market-tab.active {
-      background: rgba(59, 130, 246, 0.15); /* Azul suave */
-      color: #60a5fa; /* Texto azul */
-      border-color: #3b82f6;
-      font-weight: 600;
+      background: rgba(59, 130, 246, 0.15); color: #60a5fa;
+      border-color: #3b82f6; font-weight: 600;
       box-shadow: 0 0 10px rgba(59, 130, 246, 0.2);
     }
   </style>
 </head>
 <body>
 
-  <div class="page-header" style="height: 140px; background-image: url('fondo-market.jpg');">
-    <a href="index.html" class="back-floating" style="position: relative; z-index: 60;">
+  <div class="page-header" style="height: 140px; background-image: url('fondo-market.jpg'); position: relative; z-index: 1;">
+    <a href="index.html" class="back-floating" style="position: relative; z-index: 10;">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
     </a>
 
-    <div style="position: absolute; bottom: 15px; left: 20px; right: 20px; z-index: 40;">
+    <div style="position: absolute; bottom: 15px; left: 20px; right: 20px; z-index: 5;">
        <div style="background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); border-radius: 16px; padding: 12px 15px; display: flex; align-items: center; gap: 10px;">
          <svg width="20" height="20" fill="none" stroke="#94a3b8" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
          <input type="text" id="searchInput" placeholder="Buscar ítems..." onkeyup="searchLocal()" style="background: transparent; border: none; color: white; outline: none; width: 100%; font-size: 0.95em;">
@@ -104,17 +93,17 @@
     </div>
   </div>
 
-  <div class="content-card" style="margin-top: -20px; min-height: 80vh; padding-top: 25px; position: relative; z-index: 30;">
+  <div class="content-card" style="margin-top: -20px; min-height: 80vh; padding-top: 25px; position: relative; z-index: 50; background-color: #0f172a;">
 
     <div class="market-nav">
-      <button class="market-tab active" onclick="changeCategory('all', this)">Todo</button>
-      <button class="market-tab" onclick="changeCategory('art', this)">Ilustraciones</button>
-      <button class="market-tab" onclick="changeCategory('sub', this)">Suscripciones</button>
-      <button class="market-tab" onclick="changeCategory('sticker', this)">Stickers</button>
-      <button class="market-tab" onclick="changeCategory('photo', this)">Fotos</button>
-      <button class="market-tab" onclick="changeCategory('file', this)">Archivos</button>
-      <button class="market-tab" onclick="changeCategory('video', this)">Videos</button>
-      <button class="market-tab" onclick="changeCategory('other', this)">Otros</button>
+      <button class="market-tab active" onclick="window.changeCategory('all', this)">Todo</button>
+      <button class="market-tab" onclick="window.changeCategory('art', this)">Ilustraciones</button>
+      <button class="market-tab" onclick="window.changeCategory('sub', this)">Suscripciones</button>
+      <button class="market-tab" onclick="window.changeCategory('sticker', this)">Stickers</button>
+      <button class="market-tab" onclick="window.changeCategory('photo', this)">Fotos</button>
+      <button class="market-tab" onclick="window.changeCategory('file', this)">Archivos</button>
+      <button class="market-tab" onclick="window.changeCategory('video', this)">Videos</button>
+      <button class="market-tab" onclick="window.changeCategory('other', this)">Otros</button>
     </div>
 
     <div class="btn-refresh-container">
@@ -133,7 +122,7 @@
 
   </div>
 
-  <a href="upload.html" class="btn-upload-float" style="z-index: 100;">
+  <a href="upload.html" class="btn-upload-float" style="z-index: 1000;">
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <line x1="12" y1="5" x2="12" y2="19"></line>
       <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -158,23 +147,29 @@
     let currentCategory = 'all'; 
 
     document.addEventListener("DOMContentLoaded", () => {
+      // Intentamos cargar la categoría inicial
       loadMarket('all');
     });
 
-    // 2. CAMBIAR CATEGORÍA
-    function changeCategory(cat, tabElement) {
-        // console.log("Cambiando a:", cat); // Debug
+    // ============================================
+    // 2. LA SOLUCIÓN: FUNCIÓN GLOBAL (WINDOW)
+    // ============================================
+    window.changeCategory = function(cat, tabElement) {
+        
+        // ALERTA DE DEBUG (Si ves esto, funciona)
+        // alert("Categoría seleccionada: " + cat); 
+
         currentCategory = cat;
         
-        // Efecto Visual de Selección
+        // Efecto Visual
         document.querySelectorAll('.market-tab').forEach(t => t.classList.remove('active'));
         if(tabElement) tabElement.classList.add('active');
         
         loadMarket(cat);
-    }
+    };
 
     // 3. RECARGA MANUAL
-    function forceReload() {
+    window.forceReload = function() {
         const btn = document.getElementById('btnReload');
         const icon = document.getElementById('refreshIcon');
         const text = document.getElementById('refreshText');
@@ -190,20 +185,18 @@
     async function loadMarket(category, isManualReload = false) {
       const container = document.getElementById('productsContainer');
       
-      // Spinner solo si es carga inicial de pestaña
       if (!isManualReload) {
           container.innerHTML = '<div class="loading-spinner"></div>';
       }
 
       try {
-        console.log("Consultando Supabase para:", category);
+        console.log("Supabase Query para:", category);
 
         let query = supabase
             .from('marketplace_items')
             .select('*')
             .order('created_at', { ascending: false });
 
-        // FILTRO: Solo aplicamos si no es "Todo"
         if (category !== 'all') {
             query = query.eq('category', category);
         }
@@ -215,7 +208,7 @@
         allLoadedProducts = data;
         renderItems(data);
 
-        // Restaurar botón de recarga
+        // Restaurar botón
         if (isManualReload) {
             setTimeout(() => {
                 const icon = document.getElementById('refreshIcon');
@@ -237,13 +230,8 @@
         }
 
       } catch (err) {
-        console.error("Error Supabase:", err);
-        container.innerHTML = `
-            <div style="grid-column: 1 / -1; text-align:center; padding:20px; color:#ef4444; background: rgba(239, 68, 68, 0.1); border-radius: 8px;">
-                <p>❌ <b>Error cargando ítems</b></p>
-                <small>${err.message}</small>
-            </div>`;
-            
+        console.error("Error:", err);
+        container.innerHTML = `<p style="text-align:center; padding:20px; color:#ef4444;">Error de carga.</p>`;
         if (isManualReload) {
              document.getElementById('refreshIcon').classList.remove('spin-anim');
              document.getElementById('btnReload').disabled = false;
@@ -264,16 +252,12 @@
       items.forEach(item => {
         const link = document.createElement('a');
         link.href = "#"; 
-        link.onclick = function() { 
-            alert("Ítem: " + item.title + "\nPrecio: " + item.price + " " + item.currency); 
-        };
-
+        link.onclick = function() { alert("Has seleccionado: " + item.title); };
         link.className = `product-card filter-item ${item.category}`;
         link.style.textDecoration = 'none';
 
         let bgStyle = ''; 
         let contentHtml = '';
-
         const isVisual = ['art', 'photo', 'sticker'].includes(item.category);
 
         if (isVisual && item.file_url) {
@@ -288,9 +272,8 @@
 
         const currencyIcon = item.currency === 'STARS' ? '⭐' : '💎';
         const displayPrice = item.price ? `${currencyIcon} ${item.price}` : 'Gratis';
-
         const videoTag = (item.category === 'video' && item.file_url) 
-            ? `<video src="${item.file_url}" style="width:100%; height:100%; object-fit:cover; position:absolute; z-index:0;" muted loop playsinline onmouseover="this.play()" onmouseout="this.pause()"></video>` 
+            ? `<video src="${item.file_url}" style="width:100%; height:100%; object-fit:cover; position:absolute; z-index:0;" muted loop playsinline></video>` 
             : '';
 
         link.innerHTML = `
@@ -311,12 +294,10 @@
             </div>
           </div>
         `;
-
         container.appendChild(link);
       });
     }
 
-    // 6. BÚSQUEDA LOCAL
     function searchLocal() {
       const text = document.getElementById('searchInput').value.toLowerCase();
       const filtered = allLoadedProducts.filter(p => 
@@ -326,6 +307,5 @@
       renderItems(filtered);
     }
   </script>
-
 </body>
 </html>
