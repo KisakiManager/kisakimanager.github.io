@@ -5,8 +5,9 @@
   <title>Marketplace — Kisaki Manager</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
-  
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
   <style>
     /* Estilos extra para las imágenes reales */
@@ -14,6 +15,7 @@
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
+      background-color: #1e293b; /* Color de fondo por si no carga img */
     }
     .video-overlay {
       position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
@@ -31,7 +33,7 @@
 <body>
 
   <div class="page-header" style="height: 140px; background-image: url('fondo-market.jpg');">
-    <a href="index.html" class="back-floating">
+    <a href="javascript:history.back()" class="back-floating">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
     </a>
 
@@ -47,8 +49,8 @@
 
     <div class="market-nav">
       <div class="market-tab active" onclick="loadMarket('all', this)">Todo</div>
-      <div class="market-tab" onclick="loadMarket('art', this)">Ilustraciones</div>
-      <div class="market-tab" onclick="loadMarket('sub', this)">Canales VIP</div>
+      <div class="market-tab" onclick="loadMarket('art', this)">Arte</div>
+      <div class="market-tab" onclick="loadMarket('sub', this)">VIP</div>
       <div class="market-tab" onclick="loadMarket('sticker', this)">Stickers</div>
       <div class="market-tab" onclick="loadMarket('photo', this)">Fotos</div>
       <div class="market-tab" onclick="loadMarket('file', this)">Archivos</div>
@@ -72,12 +74,21 @@
   </a>
 
   <script>
-    // 1. CONEXIÓN A SUPABASE (Tus claves reales)
+    // 1. CONEXIÓN A SUPABASE
     const SUPABASE_URL = 'https://ndkupidhlauzroduvech.supabase.co'; 
     const SUPABASE_KEY = 'sb_publishable_fSQ9uBUx_YTfxr2QL2-kfQ_pdE2cqHv'; 
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    
+    // Inicialización segura
+    let supabase;
+    try {
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // Inicializar Telegram
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+    } catch (e) {
+        alert("Error iniciando librerías: " + e.message);
+    }
 
-    // Variable para guardar los productos cargados y poder buscar en ellos
     let allLoadedProducts = [];
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -86,7 +97,7 @@
 
     // FUNCIÓN PRINCIPAL DE CARGA
     async function loadMarket(category, tabElement) {
-      // 1. UI de Pestañas
+      // Gestión de pestañas activas
       if(tabElement) {
         document.querySelectorAll('.market-tab').forEach(t => t.classList.remove('active'));
         tabElement.classList.add('active');
@@ -96,10 +107,13 @@
       container.innerHTML = '<div class="loading-spinner"></div>';
 
       try {
-        // 2. Consulta a Supabase
-        let query = supabase.from('marketplace_items').select('*').order('created_at', { ascending: false });
-        
-        // Filtro por categoría (si no es 'all')
+        // Consulta a Supabase
+        let query = supabase
+            .from('marketplace_items')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        // Aplicar filtro si no es 'all'
         if (category !== 'all') {
             query = query.eq('category', category);
         }
@@ -108,12 +122,16 @@
 
         if (error) throw error;
 
-        allLoadedProducts = data; // Guardamos para el buscador
+        allLoadedProducts = data; // Guardamos para búsqueda local
         renderItems(data);
 
       } catch (err) {
-        console.error(err);
-        container.innerHTML = `<p style="text-align:center; color:#ef4444;">Error cargando ítems.<br><small>${err.message}</small></p>`;
+        console.error("Error Supabase:", err);
+        container.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align:center; padding:20px; color:#ef4444;">
+                <p>❌ Error cargando ítems</p>
+                <small>${err.message}</small>
+            </div>`;
       }
     }
 
@@ -123,47 +141,54 @@
       container.innerHTML = '';
 
       if (!items || items.length === 0) {
-        container.innerHTML = '<p style="color:#64748b; grid-column: 1 / -1; text-align:center; padding:20px;">No hay ítems en esta categoría.</p>';
+        container.innerHTML = '<p style="color:#64748b; grid-column: 1 / -1; text-align:center; padding:40px;">📭 No hay ítems disponibles en esta categoría.</p>';
         return;
       }
 
       items.forEach(item => {
-        // Crear enlace (Asumiendo que crearemos product.html después, pasamos todos los datos por URL o ID)
-        // Por ahora, si haces clic, va al archivo o a una página de detalle.
         const link = document.createElement('a');
-        link.href = "#"; // Aquí iría `product.html?id=${item.id}`
+        link.href = "#"; 
+        link.onclick = function() { alert("Has tocado el ítem: " + item.title); }; // Placeholder acción
         link.className = `product-card filter-item ${item.category}`;
         link.style.textDecoration = 'none';
 
-        // Determinar icono o imagen de fondo
-        let bgStyle = `background-color: #1e293b;`; 
+        // Lógica visual: Fondo o Icono
+        let bgStyle = ''; 
         let contentHtml = '';
         
-        // Si es foto/arte/sticker y tiene URL, la usamos de fondo
+        // Categorías que usan la imagen de fondo
         const isVisual = ['art', 'photo', 'sticker'].includes(item.category);
+        
+        // Si es visual y tiene URL válida (imagen)
         if (isVisual && item.file_url) {
             bgStyle = `background-image: url('${item.file_url}');`;
-        } else {
-            // Iconos por defecto según categoría
-            if(item.category === 'sub') contentHtml = '<span style="font-size:40px;">🔒</span>';
-            else if(item.category === 'video') contentHtml = '<div class="video-overlay">▶</div>';
+        } 
+        // Si no es visual o no tiene imagen, ponemos iconos
+        else {
+            if(item.category === 'sub') contentHtml = '<span style="font-size:40px;">💎</span>'; // Icono para VIP
+            else if(item.category === 'video') contentHtml = '<div class="video-overlay"><span style="color:white; font-size:20px;">▶</span></div>';
             else if(item.category === 'file') contentHtml = '<span style="font-size:40px;">📁</span>';
-            else contentHtml = '<span style="font-size:40px;">🎨</span>';
+            else contentHtml = '<span style="font-size:40px;">📦</span>';
         }
 
+        // Selección de moneda
+        const currencyIcon = item.currency === 'STARS' ? '⭐' : '💎';
+        const displayPrice = item.price ? `${currencyIcon} ${item.price}` : 'Gratis';
+
         link.innerHTML = `
-          <div class="product-image" style="${bgStyle} display:flex; justify-content:center; align-items:center;">
+          <div class="product-image" style="${bgStyle} height: 140px; display:flex; justify-content:center; align-items:center; position: relative;">
             ${contentHtml}
+            ${item.category === 'video' && item.file_url ? `<video src="${item.file_url}" style="width:100%; height:100%; object-fit:cover; position:absolute; z-index:0;" muted loop onmouseover="this.play()" onmouseout="this.pause()"></video>` : ''}
           </div>
           <div class="product-info">
             <h3 class="product-title">${item.title}</h3>
             <div class="product-seller">
               ${item.seller || '@Anonimo'}
-              <svg class="verified-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+              <svg class="verified-icon" viewBox="0 0 24 24" width="12" height="12" style="fill:#3b82f6;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
             </div>
             <div class="product-price-row">
               <span class="price-tag" style="color:#ccf381; font-weight:700;">
-                💎 ${item.price} ${item.currency || 'TON'}
+                ${displayPrice}
               </span>
             </div>
           </div>
@@ -173,10 +198,13 @@
       });
     }
 
-    // BUSCADOR LOCAL (Filtra lo que ya se descargó de Supabase)
+    // BUSCADOR LOCAL
     function searchLocal() {
       const text = document.getElementById('searchInput').value.toLowerCase();
-      const filtered = allLoadedProducts.filter(p => p.title.toLowerCase().includes(text));
+      const filtered = allLoadedProducts.filter(p => 
+        (p.title && p.title.toLowerCase().includes(text)) || 
+        (p.description && p.description.toLowerCase().includes(text))
+      );
       renderItems(filtered);
     }
   </script>
