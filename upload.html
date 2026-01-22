@@ -18,9 +18,9 @@
     .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #ccf381, #a3e635); border-radius: 10px; transition: width 0.4s ease; }
     .upload-status-text { font-size: 0.85em; color: #94a3b8; text-align: center; margin-top: 8px; display: none; }
 
-    /* ZONA DE CARGA (Contenedor) */
+    /* ZONA DE CARGA */
     .upload-area {
-      position: relative; /* CRUCIAL */
+      position: relative;
       border: 2px dashed #334155; 
       transition: all 0.3s ease;
       padding: 20px;
@@ -32,21 +32,21 @@
       min-height: 100px;
     }
     
+    /* ESTILO CUANDO HAY ARCHIVO (CAMBIO A NARANJA) */
     .upload-area.file-selected {
-      background-color: rgba(204, 243, 129, 0.1);
-      border-color: #ccf381;
+      background-color: #ea580c !important; /* Naranja Vibrante */
+      border-color: #ffffff !important;      /* Borde Blanco */
     }
 
-    /* EL INPUT "FANTASMA" (Modo Diagnóstico ACTIVADO) */
-    /* Lo verás como una capa ROJA. Toca sobre lo rojo. */
+    /* EL INPUT DE SEGURIDAD (ROJO SEMITRANSPARENTE) */
     #realFileInput {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      opacity: 0.3;     /* <--- CAMBIADO A 0.3 PARA QUE LO VEAS (Rojo) */
-      background-color: red; /* <--- COLOR ROJO PARA PRUEBAS */
+      opacity: 0.3;          /* Semitransparente para ver la zona */
+      background-color: red; /* Rojo para identificar el área táctil */
       z-index: 100;     
       cursor: pointer;
     }
@@ -73,7 +73,7 @@
 
         <div class="form-group">
           <label class="form-label">Categoría</label>
-          <select class="form-select" id="categorySelect" onchange="toggleSubFields()">
+          <select class="form-select" id="categorySelect">
             <option value="art">Ilustraciones</option>
             <option value="sub">Suscripción Canal (Requiere Admin)</option>
             <option value="sticker">Stickers</option>
@@ -102,8 +102,7 @@
             <div id="previewContainer" style="display:none; text-align:center; width:100%;"></div>
 
             <input type="file" id="realFileInput" 
-                   accept="image/*,video/*,.zip,.rar,.pdf"
-                   onchange="handleFileSelect(this)"> 
+                   accept="image/*,video/*,.zip,.rar,.pdf"> 
           </div>
 
           <div class="progress-container" id="uploadProgressBox">
@@ -113,14 +112,16 @@
         </div>
 
         <div class="form-group"><label class="form-label">Título</label><input type="text" id="itemTitle" class="form-input" placeholder="Ej: Pack Premium"></div>
+        
         <div class="form-group">
           <label class="form-label">Precio</label>
           <div class="currency-toggle" style="margin-bottom: 10px;">
-            <div class="currency-option active" id="currTON" onclick="selectCurrency('TON')">💎 TON</div>
-            <div class="currency-option" id="currSTARS" onclick="selectCurrency('STARS')">⭐ Stars</div>
+            <div class="currency-option active" id="currTON">💎 TON</div>
+            <div class="currency-option" id="currSTARS">⭐ Stars</div>
           </div>
           <input type="number" id="itemPrice" class="form-input" placeholder="Cantidad">
         </div>
+        
         <div class="form-group"><label class="form-label">Descripción</label><textarea id="itemDesc" class="form-textarea" rows="4"></textarea></div>
 
         <button type="button" class="btn-telegram-cta" id="btnPublish">Publicar Ítem</button>
@@ -129,156 +130,172 @@
   </div>
 
   <script>
-    // 1. INICIALIZACIÓN
-    const SUPABASE_URL = 'https://ndkupidhlauzroduvech.supabase.co'; 
-    const SUPABASE_KEY = 'sb_publishable_fSQ9uBUx_YTfxr2QL2-kfQ_pdE2cqHv'; 
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    // Se ejecuta cuando el HTML ha cargado completamente
+    document.addEventListener('DOMContentLoaded', () => {
 
-    const tg = window.Telegram.WebApp;
-    tg.expand();
-    tg.enableClosingConfirmation(); 
-    
-    let selectedCurrency = 'TON';
+        // 1. CONFIGURACIÓN SUPABASE
+        const SUPABASE_URL = 'https://ndkupidhlauzroduvech.supabase.co'; 
+        const SUPABASE_KEY = 'sb_publishable_fSQ9uBUx_YTfxr2QL2-kfQ_pdE2cqHv'; 
+        let supabase;
+        let tg;
 
-    // 2. FUNCIONES UI
-    function toggleSubFields() {
-      const category = document.getElementById('categorySelect').value;
-      const subFields = document.getElementById('subFields');
-      const fileField = document.getElementById('fileField');
-      if (category === 'sub') { subFields.style.display = 'block'; fileField.style.display = 'none'; } 
-      else { subFields.style.display = 'none'; fileField.style.display = 'block'; }
-    }
+        try {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            tg = window.Telegram.WebApp;
+            tg.expand();
+            tg.enableClosingConfirmation();
+        } catch(e) { console.error("Error init:", e); }
 
-    window.selectCurrency = function(type) {
-      selectedCurrency = type;
-      document.getElementById('currTON').classList.toggle('active', type === 'TON');
-      document.getElementById('currSTARS').classList.toggle('active', type === 'STARS');
-    }
+        let selectedCurrency = 'TON';
 
-    // ====================================================
-    // 3. FUNCIÓN CRÍTICA DE SELECCIÓN DE ARCHIVO
-    // ====================================================
-    // Esta función se llama directamente desde el HTML (onchange)
-    window.handleFileSelect = function(input) {
-      
-      // ALERTA DE DIAGNÓSTICO: Si ves esto, el input funciona.
-      // alert("DEBUG: Archivo detectado. Procesando vista previa..."); 
-
-      if (input.files && input.files.length > 0) {
-        const file = input.files[0];
+        // 2. REFERENCIAS DOM
+        const categorySelect = document.getElementById('categorySelect');
+        const fileInput = document.getElementById('realFileInput');
         const dropZone = document.getElementById('dropZone');
         const visualContent = document.getElementById('visualContent');
         const previewContainer = document.getElementById('previewContainer');
+        const btnTon = document.getElementById('currTON');
+        const btnStars = document.getElementById('currSTARS');
+        const btnPublish = document.getElementById('btnPublish');
 
-        // Mostrar UI de "Seleccionado"
-        dropZone.classList.add('file-selected');
-        visualContent.style.display = 'none';
-        previewContainer.style.display = 'block';
-        
-        // Generar Vista Previa
-        if (file.type.startsWith("image/")) {
-            const reader = new FileReader();
-            reader.onload = e => {
-                previewContainer.innerHTML = `
-                  <img src="${e.target.result}" style="max-height:120px; max-width:100%; border-radius:8px; border:2px solid #ccf381; box-shadow:0 4px 10px rgba(0,0,0,0.3);">
-                  <div style="font-weight:bold; color:#ccf381; margin-top:5px;">✅ ${file.name}</div>
-                `;
-            };
-            reader.readAsDataURL(file);
-        } else {
-            previewContainer.innerHTML = `
-              <div style="font-size:40px;">📄</div>
-              <div style="font-weight:bold; color:#ccf381;">✅ ${file.name}</div>
-              <div style="font-size:0.8em; color:#cbd5e1;">(${(file.size / 1024 / 1024).toFixed(2)} MB)</div>
-            `;
-        }
-      }
-    };
+        // 3. EVENTOS DE CATEGORÍA
+        categorySelect.addEventListener('change', () => {
+            const val = categorySelect.value;
+            const subFields = document.getElementById('subFields');
+            const fileField = document.getElementById('fileField');
+            if (val === 'sub') { subFields.style.display = 'block'; fileField.style.display = 'none'; } 
+            else { subFields.style.display = 'none'; fileField.style.display = 'block'; }
+        });
 
-    // 4. SUBIDA A SUPABASE
-    document.getElementById('btnPublish').addEventListener('click', async () => {
-      const title = document.getElementById('itemTitle').value;
-      const price = document.getElementById('itemPrice').value;
-      const category = document.getElementById('categorySelect').value;
-      const fileInput = document.getElementById('realFileInput');
+        // 4. EVENTOS DE MONEDA (TON / STARS)
+        btnTon.addEventListener('click', () => {
+            selectedCurrency = 'TON';
+            btnTon.classList.add('active');
+            btnStars.classList.remove('active');
+        });
 
-      if(!title || !price) return alert("Falta Título o Precio");
+        btnStars.addEventListener('click', () => {
+            selectedCurrency = 'STARS';
+            btnStars.classList.add('active');
+            btnTon.classList.remove('active');
+        });
 
-      const btn = document.getElementById('btnPublish');
-      const progressBox = document.getElementById('uploadProgressBox');
-      const progressBar = document.getElementById('uploadProgressBar');
-      const statusText = document.getElementById('uploadStatus');
+        // 5. EVENTO DE SELECCIÓN DE ARCHIVO (VISUALIZACIÓN)
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files && fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                
+                // Aplicar estilo NARANJA
+                dropZone.classList.add('file-selected');
+                visualContent.style.display = 'none';
+                previewContainer.style.display = 'block';
 
-      btn.disabled = true;
-      btn.innerText = "Procesando...";
-      progressBox.style.display = 'block';
-      statusText.style.display = 'block';
+                // Configuración de texto BLANCO (#ffffff)
+                if (file.type.startsWith("image/")) {
+                    const reader = new FileReader();
+                    reader.onload = e => {
+                        previewContainer.innerHTML = `
+                          <img src="${e.target.result}" style="max-height:120px; max-width:100%; border-radius:8px; border:2px solid #ffffff; box-shadow:0 4px 10px rgba(0,0,0,0.3);">
+                          <div style="font-weight:bold; color:#ffffff; margin-top:5px; text-shadow: 0 1px 2px rgba(0,0,0,0.5);">✅ ${file.name}</div>`;
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    previewContainer.innerHTML = `
+                      <div style="font-size:40px;">📄</div>
+                      <div style="font-weight:bold; color:#ffffff; text-shadow: 0 1px 2px rgba(0,0,0,0.5);">✅ ${file.name}</div>
+                      <div style="font-size:0.8em; color:#ffffff;">(${(file.size / 1024 / 1024).toFixed(2)} MB)</div>`;
+                }
+            }
+        });
 
-      try {
-        let finalUrl = "";
-        const seller = tg.initDataUnsafe?.user?.username ? '@' + tg.initDataUnsafe.user.username : '@Anonimo';
+        // 6. LOGICA DE SUBIDA (BOTÓN PUBLICAR)
+        btnPublish.addEventListener('click', async () => {
+            const title = document.getElementById('itemTitle').value;
+            const price = document.getElementById('itemPrice').value;
+            const category = categorySelect.value;
+            
+            if(!title || !price) return alert("⚠️ Falta Título o Precio");
 
-        if(category !== 'sub') {
-           if (!fileInput.files || fileInput.files.length === 0) {
-             throw new Error("⚠️ ¡No has seleccionado ningún archivo! Toca la zona roja.");
-           }
-           const file = fileInput.files[0];
+            const progressBox = document.getElementById('uploadProgressBox');
+            const progressBar = document.getElementById('uploadProgressBar');
+            const statusText = document.getElementById('uploadStatus');
 
-           progressBar.style.width = '30%';
-           statusText.innerText = "Subiendo archivo...";
+            btnPublish.disabled = true;
+            btnPublish.innerText = "Procesando...";
+            progressBox.style.display = 'block';
+            statusText.style.display = 'block';
 
-           const fileName = Date.now() + '_' + file.name.replace(/\s+/g, '-');
+            try {
+                let finalUrl = "";
+                const seller = tg.initDataUnsafe?.user?.username ? '@' + tg.initDataUnsafe.user.username : '@Anonimo';
 
-           const { data, error } = await supabase.storage
-             .from('products')
-             .upload(fileName, file, { cacheControl: '3600', upsert: false });
+                // A) Subir Archivo
+                if(category !== 'sub') {
+                   if (!fileInput.files || fileInput.files.length === 0) {
+                     throw new Error("⚠️ Toca la zona roja para seleccionar un archivo.");
+                   }
+                   const file = fileInput.files[0];
 
-           if (error) throw error;
+                   progressBar.style.width = '30%';
+                   statusText.innerText = "Subiendo archivo...";
 
-           progressBar.style.width = '80%';
-           statusText.innerText = "Creando enlace...";
+                   const fileName = Date.now() + '_' + file.name.replace(/\s+/g, '-');
+                   const { data, error } = await supabase.storage
+                     .from('products')
+                     .upload(fileName, file, { cacheControl: '3600', upsert: false });
 
-           const { data: publicData } = supabase.storage
-             .from('products')
-             .getPublicUrl(fileName);
-           finalUrl = publicData.publicUrl;
+                   if (error) throw error;
 
-        } else {
-           finalUrl = document.getElementById('subLinkInput').value;
-           if(!finalUrl) throw new Error("Falta el enlace del canal.");
-        }
+                   progressBar.style.width = '80%';
+                   statusText.innerText = "Creando enlace...";
 
-        statusText.innerText = "Guardando...";
-        progressBar.style.width = '90%';
+                   const { data: publicData } = supabase.storage
+                     .from('products')
+                     .getPublicUrl(fileName);
+                   finalUrl = publicData.publicUrl;
 
-        const { error: dbError } = await supabase
-          .from('marketplace_items')
-          .insert([{ 
-            title: title, 
-            price: price, 
-            currency: selectedCurrency,
-            description: document.getElementById('itemDesc').value,
-            category: category, 
-            file_url: finalUrl,
-            seller: seller
-          }]);
+                } else {
+                   // B) Solo enlace
+                   finalUrl = document.getElementById('subLinkInput').value;
+                   if(!finalUrl) throw new Error("Falta el enlace del canal.");
+                }
 
-        if (dbError) throw dbError;
+                // Guardar en DB
+                statusText.innerText = "Guardando...";
+                progressBar.style.width = '90%';
 
-        fileInput.value = ""; // Limpiar input
+                const { error: dbError } = await supabase
+                  .from('marketplace_items')
+                  .insert([{ 
+                    title: title, 
+                    price: price, 
+                    currency: selectedCurrency,
+                    description: document.getElementById('itemDesc').value,
+                    category: category, 
+                    file_url: finalUrl,
+                    seller: seller
+                  }]);
 
-        progressBar.style.width = '100%';
-        statusText.innerText = "¡Completado!";
-        setTimeout(() => { alert("✅ ¡Publicado!"); window.location.href = "marketplace.html"; }, 500);
+                if (dbError) throw dbError;
 
-      } catch (error) {
-        console.error(error);
-        alert("❌ Error: " + error.message);
-        btn.disabled = false;
-        btn.innerText = "Reintentar";
-        progressBar.style.width = '0%';
-        statusText.innerText = "Error";
-      }
+                progressBar.style.width = '100%';
+                statusText.innerText = "¡Completado!";
+                
+                setTimeout(() => { 
+                    alert("✅ ¡Publicado!"); 
+                    window.location.href = "marketplace.html"; 
+                }, 500);
+
+            } catch (error) {
+                console.error(error);
+                alert("❌ Error: " + error.message);
+                btnPublish.disabled = false;
+                btnPublish.innerText = "Reintentar";
+                progressBar.style.width = '0%';
+                statusText.innerText = "Error";
+            }
+        });
+
     });
   </script>
 </body>
