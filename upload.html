@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -25,7 +25,6 @@
       display: block;
       position: relative; /* Necesario para el truco del input fantasma */
       overflow: hidden;   /* Para que nada se salga de los bordes */
-      transition: all 0.3s ease;
     }
   </style>
 </head>
@@ -76,7 +75,6 @@
 
           <div class="upload-area" id="dropZone">
             <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            
             <p id="fileNameDisplay" style="margin:0; color:#cbd5e1;">Toca para subir o arrastra aquí</p>
 
             <input type="file" id="realFileInput" 
@@ -135,25 +133,21 @@
       document.getElementById('currSTARS').classList.toggle('active', type === 'STARS');
     }
 
-    // 3. LÓGICA DE VISUALIZACIÓN DE ARCHIVO (MEJORADA)
+    // Lógica Visual de Selección de Archivo
     const dropZone = document.getElementById('dropZone');
     const fileInput = document.getElementById('realFileInput');
     const fileNameDisplay = document.getElementById('fileNameDisplay');
 
     fileInput.addEventListener('change', () => {
       if (fileInput.files.length > 0) {
-        // Feedback visual fuerte:
-        // 1. Checkmark ✅
-        // 2. Nombre en Negrita
-        // 3. Borde y Fondo Verde
-        fileNameDisplay.innerHTML = "✅ <b>" + fileInput.files[0].name + "</b>";
+        fileNameDisplay.innerText = "📄 " + fileInput.files[0].name;
         fileNameDisplay.style.color = "#ccf381";
+        fileNameDisplay.style.fontWeight = "bold"; // Negrita para que se note
         dropZone.style.borderColor = "#ccf381";
-        dropZone.style.backgroundColor = "rgba(204, 243, 129, 0.1)"; // Fondo verde sutil
       }
     });
 
-    // 4. SUBIDA
+    // 3. SUBIDA
     document.getElementById('btnPublish').addEventListener('click', async () => {
       const title = document.getElementById('itemTitle').value;
       const price = document.getElementById('itemPrice').value;
