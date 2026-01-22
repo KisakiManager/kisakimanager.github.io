@@ -20,10 +20,9 @@
     .upload-status-text { font-size: 0.85em; color: #94a3b8; text-align: center; margin-top: 8px; display: none; }
 
     /* ZONA DE CARGA (LABEL) */
-    /* Usamos label para que el clic sea nativo */
     .upload-area {
       cursor: pointer;
-      display: block; /* Importante para que se comporte como bloque */
+      display: block;
       position: relative;
       border: 2px dashed #334155;
       transition: all 0.3s ease;
@@ -32,8 +31,20 @@
     
     /* Clase extra para cuando hay archivo seleccionado */
     .upload-area.file-selected {
-      background-color: rgba(204, 243, 129, 0.1); /* Fondo Verde suave */
-      border-color: #ccf381;
+      background-color: rgba(204, 243, 129, 0.1) !important; /* Fondo Verde suave */
+      border-color: #ccf381 !important;
+    }
+    
+    /* Input oculto pero accesible */
+    .input-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0,0,0,0);
+        border: 0;
     }
   </style>
 </head>
@@ -88,7 +99,9 @@
             <p id="fileNameDisplay" style="margin:0; color:#cbd5e1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90%;">Toca para subir o arrastra aquí</p>
 
             <input type="file" id="realFileInput" 
-                   style="display: none;" 
+                   class="input-hidden"
+                   onclick="this.value=null"
+                   onchange="mostrarNombreArchivo()"
                    accept="image/*,video/*,.zip,.rar,.pdf"> 
           </label>
 
@@ -119,12 +132,12 @@
   </div>
 
   <script>
-    // 1. SUPABASE (Configuración Correcta)
+    // 1. SUPABASE
     const SUPABASE_URL = 'https://ndkupidhlauzroduvech.supabase.co'; 
     const SUPABASE_KEY = 'sb_publishable_fSQ9uBUx_YTfxr2QL2-kfQ_pdE2cqHv'; 
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // 2. UI
+    // 2. UI GLOBAL
     const tg = window.Telegram.WebApp;
     tg.expand();
     let selectedCurrency = 'TON';
@@ -144,30 +157,29 @@
     }
 
     // ----------------------------------------------------
-    // 3. LÓGICA DE FEEDBACK VISUAL (Solo para mostrar el nombre)
+    // 3. FUNCIÓN VISUAL (Llamada directa desde el HTML)
     // ----------------------------------------------------
-    // Nota: Ya no necesitamos JS para ABRIR la galería, el <label> lo hace solo.
-    
-    const dropZone = document.getElementById('dropZone');
-    const fileInput = document.getElementById('realFileInput');
-    const fileNameDisplay = document.getElementById('fileNameDisplay');
+    function mostrarNombreArchivo() {
+        const input = document.getElementById('realFileInput');
+        const fileNameDisplay = document.getElementById('fileNameDisplay');
+        const dropZone = document.getElementById('dropZone');
 
-    fileInput.addEventListener('change', function() {
-      if (this.files && this.files.length > 0) {
-        const file = this.files[0];
-        // Feedback Visual
-        fileNameDisplay.innerHTML = `✅ <b>${file.name}</b>`;
-        fileNameDisplay.style.color = "#ccf381"; // Verde neón
-        dropZone.style.borderColor = "#ccf381";
-        dropZone.classList.add('file-selected');
-      }
-    });
+        if (input.files && input.files.length > 0) {
+            const file = input.files[0];
+            // Actualizar texto
+            fileNameDisplay.innerHTML = `✅ <b>${file.name}</b>`;
+            // Cambiar colores
+            fileNameDisplay.style.color = "#ccf381"; 
+            dropZone.classList.add('file-selected');
+        }
+    }
 
     // 4. SUBIDA A SUPABASE
     document.getElementById('btnPublish').addEventListener('click', async () => {
       const title = document.getElementById('itemTitle').value;
       const price = document.getElementById('itemPrice').value;
       const category = document.getElementById('categorySelect').value;
+      const fileInput = document.getElementById('realFileInput'); // Referencia fresca
 
       if(!title || !price) return alert("Por favor completa el Título y el Precio.");
 
@@ -186,8 +198,10 @@
         const seller = tg.initDataUnsafe?.user?.username ? '@' + tg.initDataUnsafe.user.username : '@Anonimo';
 
         if(category !== 'sub') {
+           if (!fileInput.files || fileInput.files.length === 0) {
+               throw new Error("Debes seleccionar un archivo.");
+           }
            const file = fileInput.files[0];
-           if (!file) throw new Error("Debes seleccionar un archivo.");
 
            progressBar.style.width = '30%';
            statusText.innerText = "Subiendo archivo...";
