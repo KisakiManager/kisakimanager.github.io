@@ -11,48 +11,20 @@
 
   <style>
     /* Estilo para el panel de suscripción */
-    .hidden-fields {
-      display: none;
-      background: rgba(59, 130, 246, 0.1);
-      padding: 15px;
-      border-radius: 12px;
-      border: 1px dashed #3b82f6;
-      margin-bottom: 20px;
-      animation: fadeIn 0.3s ease;
-    }
+    .hidden-fields { display: none; background: rgba(59, 130, 246, 0.1); padding: 15px; border-radius: 12px; border: 1px dashed #3b82f6; margin-bottom: 20px; animation: fadeIn 0.3s ease; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
 
     /* ESTILOS DE BARRA DE PROGRESO */
-    .progress-container {
-      width: 100%;
-      background-color: rgba(255, 255, 255, 0.1);
-      border-radius: 10px;
-      margin-top: 15px;
-      height: 10px;
-      overflow: hidden;
-      display: none;
-    }
+    .progress-container { width: 100%; background-color: rgba(255, 255, 255, 0.1); border-radius: 10px; margin-top: 15px; height: 10px; overflow: hidden; display: none; }
+    .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #ccf381, #a3e635); border-radius: 10px; transition: width 0.4s ease; }
+    .upload-status-text { font-size: 0.85em; color: #94a3b8; text-align: center; margin-top: 8px; display: none; }
 
-    .progress-bar {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #ccf381, #a3e635);
-      border-radius: 10px;
-      transition: width 0.4s ease;
-    }
-
-    .upload-status-text {
-      font-size: 0.85em;
-      color: #94a3b8;
-      text-align: center;
-      margin-top: 8px;
-      display: none;
-    }
-
-    /* CURSOR PARA LA ZONA DE CARGA */
+    /* IMPORTANTE: Aseguramos que el área de subida tenga posición relativa */
     .upload-area {
       cursor: pointer;
-      display: block; /* Asegura que el label ocupe el espacio */
+      display: block;
+      position: relative; /* Necesario para el truco del input fantasma */
+      overflow: hidden;   /* Para que nada se salga de los bordes */
     }
   </style>
 </head>
@@ -65,7 +37,6 @@
   </div>
 
   <div class="content-card" style="margin-top: -30px;">
-
     <div class="card-header-inner">
       <div class="page-title">
         <h1>Vender Ítem</h1>
@@ -74,7 +45,6 @@
     </div>
 
     <div class="card-body">
-
       <form id="uploadForm">
 
         <div class="form-group">
@@ -96,30 +66,21 @@
             Configuración de Canal
           </h3>
           <p style="font-size:0.85em; color:#cbd5e1; margin-bottom:15px;">El bot debe ser administrador del canal.</p>
-
-          <div class="form-group">
-            <label class="form-label">Enlace del Canal (Privado)</label>
-            <input type="text" id="subLinkInput" class="form-input" placeholder="https://t.me/+AbCdEfGh...">
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Duración del Acceso</label>
-            <select class="form-select" id="subDurationInput">
-              <option>1 Mes</option>
-              <option>Lifetime</option>
-            </select>
-          </div>
+          <div class="form-group"><label class="form-label">Enlace del Canal</label><input type="text" id="subLinkInput" class="form-input" placeholder="https://t.me/+AbCdEfGh..."></div>
+          <div class="form-group"><label class="form-label">Duración</label><select class="form-select" id="subDurationInput"><option>1 Mes</option><option>Lifetime</option></select></div>
         </div>
 
         <div class="form-group" id="fileField">
           <label class="form-label">Archivo del producto (Zip, PNG, MP4)</label>
 
-          <label class="upload-area" id="dropZone" for="realFileInput">
+          <div class="upload-area" id="dropZone">
             <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
             <p id="fileNameDisplay" style="margin:0; color:#cbd5e1;">Toca para subir o arrastra aquí</p>
-            
-            <input type="file" id="realFileInput" style="display: none;" accept="image/*,video/*,.zip,.rar,.pdf"> 
-          </label>
+
+            <input type="file" id="realFileInput" 
+                   style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 10;" 
+                   accept="image/*,video/*,.zip,.rar,.pdf"> 
+          </div>
 
           <div class="progress-container" id="uploadProgressBox">
             <div class="progress-bar" id="uploadProgressBar"></div>
@@ -127,48 +88,33 @@
           <p class="upload-status-text" id="uploadStatus">Esperando...</p>
         </div>
 
-        <div class="form-group">
-          <label class="form-label">Título del Ítem</label>
-          <input type="text" id="itemTitle" class="form-input" placeholder="Ej: Pack Premium">
-        </div>
-
+        <div class="form-group"><label class="form-label">Título</label><input type="text" id="itemTitle" class="form-input" placeholder="Ej: Pack Premium"></div>
+        
         <div class="form-group">
           <label class="form-label">Precio y Moneda</label>
-
           <div class="currency-toggle" style="margin-bottom: 10px;">
             <div class="currency-option active" id="currTON" onclick="selectCurrency('TON')">💎 TON</div>
             <div class="currency-option" id="currSTARS" onclick="selectCurrency('STARS')">⭐ Stars</div>
           </div>
-
           <input type="number" id="itemPrice" class="form-input" placeholder="Cantidad (Ej: 2.5)">
           <span class="commission-note">ℹ️ Se descontará un 7% de comisión.</span>
         </div>
 
-        <div class="form-group">
-          <label class="form-label">Descripción</label>
-          <textarea id="itemDesc" class="form-textarea" rows="4" placeholder="Describe lo que incluye..."></textarea>
-        </div>
+        <div class="form-group"><label class="form-label">Descripción</label><textarea id="itemDesc" class="form-textarea" rows="4"></textarea></div>
 
-        <button type="button" class="btn-telegram-cta" id="btnPublish">
-          Publicar Ítem
-        </button>
+        <button type="button" class="btn-telegram-cta" id="btnPublish">Publicar Ítem</button>
 
       </form>
-
     </div>
   </div>
 
   <script>
-    // ==========================================
-    // 1. CONFIGURACIÓN SUPABASE (Tus claves reales)
-    // ==========================================
+    // 1. SUPABASE
     const SUPABASE_URL = 'https://ndkupidhlauzroduvech.supabase.co'; 
     const SUPABASE_KEY = 'sb_publishable_fSQ9uBUx_YTfxr2QL2-kfQ_pdE2cqHv'; 
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // ==========================================
-    // 2. LÓGICA DE INTERFAZ
-    // ==========================================
+    // 2. UI
     const tg = window.Telegram.WebApp;
     tg.expand();
     let selectedCurrency = 'TON';
@@ -177,14 +123,8 @@
       const category = document.getElementById('categorySelect').value;
       const subFields = document.getElementById('subFields');
       const fileField = document.getElementById('fileField');
-
-      if (category === 'sub') {
-        subFields.style.display = 'block';
-        fileField.style.display = 'none';
-      } else {
-        subFields.style.display = 'none';
-        fileField.style.display = 'block';
-      }
+      if (category === 'sub') { subFields.style.display = 'block'; fileField.style.display = 'none'; } 
+      else { subFields.style.display = 'none'; fileField.style.display = 'block'; }
     }
 
     window.selectCurrency = function(type) {
@@ -198,28 +138,22 @@
     const fileInput = document.getElementById('realFileInput');
     const fileNameDisplay = document.getElementById('fileNameDisplay');
 
-    // NOTA: Ya no necesitamos el "click listener" porque usamos <label>
-    
     fileInput.addEventListener('change', () => {
       if (fileInput.files.length > 0) {
         fileNameDisplay.innerText = "📄 " + fileInput.files[0].name;
         fileNameDisplay.style.color = "#ccf381";
+        fileNameDisplay.style.fontWeight = "bold"; // Negrita para que se note
         dropZone.style.borderColor = "#ccf381";
       }
     });
 
-    // ==========================================
-    // 3. LÓGICA DE SUBIDA REAL (SUPABASE)
-    // ==========================================
+    // 3. SUBIDA
     document.getElementById('btnPublish').addEventListener('click', async () => {
       const title = document.getElementById('itemTitle').value;
       const price = document.getElementById('itemPrice').value;
       const category = document.getElementById('categorySelect').value;
 
-      // Validaciones básicas
-      if(!title || !price) {
-        return alert("Por favor completa el Título y el Precio.");
-      }
+      if(!title || !price) return alert("Por favor completa el Título y el Precio.");
 
       const btn = document.getElementById('btnPublish');
       const progressBox = document.getElementById('uploadProgressBox');
@@ -235,19 +169,15 @@
         let finalUrl = "";
         const seller = tg.initDataUnsafe?.user?.username ? '@' + tg.initDataUnsafe.user.username : '@Anonimo';
 
-        // A) SUBIDA DE ARCHIVO (Si no es suscripción)
         if(category !== 'sub') {
            const file = fileInput.files[0];
            if (!file) throw new Error("Debes seleccionar un archivo.");
 
-           // Simulación visual de progreso inicial
            progressBar.style.width = '30%';
-           statusText.innerText = "Subiendo archivo a la nube...";
+           statusText.innerText = "Subiendo archivo...";
 
-           // Nombre limpio para evitar errores
            const fileName = Date.now() + '_' + file.name.replace(/\s+/g, '-');
 
-           // Subir a Supabase Storage (Bucket 'products')
            const { data, error } = await supabase.storage
              .from('products')
              .upload(fileName, file, { cacheControl: '3600', upsert: false });
@@ -257,20 +187,17 @@
            progressBar.style.width = '80%';
            statusText.innerText = "Generando enlace...";
 
-           // Obtener URL Pública
            const { data: publicData } = supabase.storage
              .from('products')
              .getPublicUrl(fileName);
            finalUrl = publicData.publicUrl;
 
         } else {
-           // Si es suscripción, usamos el link del input
            finalUrl = document.getElementById('subLinkInput').value;
            if(!finalUrl) throw new Error("Falta el enlace del canal.");
         }
 
-        // B) GUARDAR EN BASE DE DATOS
-        statusText.innerText = "Guardando producto...";
+        statusText.innerText = "Guardando...";
         progressBar.style.width = '90%';
 
         const { error: dbError } = await supabase
@@ -287,26 +214,19 @@
 
         if (dbError) throw dbError;
 
-        // C) FINALIZAR
         progressBar.style.width = '100%';
         statusText.innerText = "¡Completado!";
-        statusText.style.color = "#ccf381";
-
-        setTimeout(() => {
-          alert("✅ ¡Ítem publicado correctamente!");
-          window.location.href = "marketplace.html";
-        }, 500);
+        setTimeout(() => { alert("✅ ¡Ítem publicado!"); window.location.href = "marketplace.html"; }, 500);
 
       } catch (error) {
         console.error(error);
         alert("❌ Error: " + error.message);
         btn.disabled = false;
-        btn.innerText = "Reintentar Publicación";
+        btn.innerText = "Reintentar";
         progressBar.style.width = '0%';
-        statusText.innerText = "Error en la subida";
+        statusText.innerText = "Error";
       }
     });
   </script>
-
 </body>
 </html>
