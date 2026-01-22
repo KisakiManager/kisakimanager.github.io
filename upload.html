@@ -19,16 +19,17 @@
     .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #ccf381, #a3e635); border-radius: 10px; transition: width 0.4s ease; }
     .upload-status-text { font-size: 0.85em; color: #94a3b8; text-align: center; margin-top: 8px; display: none; }
 
-    /* IMPORTANTE: Aseguramos que el área de subida tenga posición relativa */
+    /* ZONA DE CARGA: Estilo limpio y clickable */
     .upload-area {
       cursor: pointer;
       display: block;
-      position: relative; /* Necesario para el truco del input fantasma */
-      overflow: hidden;   /* Para que nada se salga de los bordes */
-      transition: all 0.3s ease; /* Suavizar el cambio de color */
+      position: relative;
+      border: 2px dashed #334155; /* Borde visible para que sepa dónde tocar */
+      transition: all 0.3s ease;
+      padding: 20px; /* Espacio interno para facilitar el toque */
     }
     
-    /* Clase extra para cuando hay archivo seleccionado */
+    /* Clase extra para cuando hay archivo seleccionado (Feedback Visual) */
     .upload-area.file-selected {
       background-color: rgba(204, 243, 129, 0.1); /* Fondo Verde suave */
       border-color: #ccf381;
@@ -86,8 +87,7 @@
             <p id="fileNameDisplay" style="margin:0; color:#cbd5e1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90%;">Toca para subir o arrastra aquí</p>
 
             <input type="file" id="realFileInput" 
-                   onclick="this.value=null;"
-                   style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 10;" 
+                   style="display: none;" 
                    accept="image/*,video/*,.zip,.rar,.pdf"> 
           </div>
 
@@ -143,30 +143,30 @@
     }
 
     // ----------------------------------------------------
-    // 3. LÓGICA CORREGIDA PARA MOSTRAR ARCHIVO SELECCIONADO
+    // 3. LÓGICA DE SELECCIÓN DE ARCHIVO (MÉTODO DIRECTO)
     // ----------------------------------------------------
     const dropZone = document.getElementById('dropZone');
     const fileInput = document.getElementById('realFileInput');
     const fileNameDisplay = document.getElementById('fileNameDisplay');
 
+    // A) La orden directa de JS: Al tocar el DIV, abre el INPUT
+    dropZone.addEventListener('click', () => {
+        fileInput.click(); 
+    });
+
+    // B) Cuando el archivo se selecciona, actualizamos la vista
     fileInput.addEventListener('change', function() {
       if (this.files && this.files.length > 0) {
         const file = this.files[0];
-        
-        // 1. Cambiar Texto: Usamos innerHTML para poner negrita
-        // Nota: Truncamos visualmente con CSS, pero aquí mostramos el nombre
+        // Feedback Visual
         fileNameDisplay.innerHTML = `✅ <b>${file.name}</b>`;
-        
-        // 2. Cambiar Estilos de Texto
-        fileNameDisplay.style.color = "#ccf381"; // Color verde neón
-        
-        // 3. Cambiar Estilos de la Caja (Dropzone)
+        fileNameDisplay.style.color = "#ccf381"; // Verde neón
         dropZone.style.borderColor = "#ccf381";
-        dropZone.classList.add('file-selected'); // Añade fondo verde (definido en CSS)
+        dropZone.classList.add('file-selected');
       }
     });
 
-    // 4. SUBIDA
+    // 4. SUBIDA A SUPABASE
     document.getElementById('btnPublish').addEventListener('click', async () => {
       const title = document.getElementById('itemTitle').value;
       const price = document.getElementById('itemPrice').value;
