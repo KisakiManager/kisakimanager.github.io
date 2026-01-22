@@ -18,31 +18,37 @@
     .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #ccf381, #a3e635); border-radius: 10px; transition: width 0.4s ease; }
     .upload-status-text { font-size: 0.85em; color: #94a3b8; text-align: center; margin-top: 8px; display: none; }
 
-    /* ZONA DE CARGA MEJORADA */
+    /* ZONA DE CARGA (Contenedor) */
     .upload-area {
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      position: relative; /* CRUCIAL */
       border: 2px dashed #334155; 
       transition: all 0.3s ease;
       padding: 20px;
       text-align: center;
-      min-height: 100px; /* Altura mínima para que se vea bien */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100px;
     }
     
-    /* Feedback visual verde */
     .upload-area.file-selected {
       background-color: rgba(204, 243, 129, 0.1);
       border-color: #ccf381;
     }
-    
-    /* Negrita para el nombre del archivo (Mejora CSS recomendada) */
-    .file-name-bold {
-        font-weight: 700;
-        color: #ccf381;
-        word-break: break-all; /* Para que nombres largos no rompan el diseño */
+
+    /* EL INPUT "FANTASMA" (Modo Diagnóstico ACTIVADO) */
+    /* Lo verás como una capa ROJA. Toca sobre lo rojo. */
+    #realFileInput {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.3;     /* <--- CAMBIADO A 0.3 PARA QUE LO VEAS (Rojo) */
+      background-color: red; /* <--- COLOR ROJO PARA PRUEBAS */
+      z-index: 100;     
+      cursor: pointer;
     }
   </style>
 </head>
@@ -80,25 +86,24 @@
 
         <div id="subFields" class="hidden-fields">
           <h3 style="color:#60a5fa; margin-top:0; font-size:1em;">Canal</h3>
-          <p style="font-size:0.85em; color:#cbd5e1; margin-bottom:15px;">El bot debe ser admin.</p>
-          <div class="form-group"><label class="form-label">Enlace</label><input type="text" id="subLinkInput" class="form-input" placeholder="https://t.me/+AbCdEfGh..."></div>
+          <div class="form-group"><label class="form-label">Enlace</label><input type="text" id="subLinkInput" class="form-input" placeholder="https://t.me/..."></div>
           <div class="form-group"><label class="form-label">Duración</label><select class="form-select" id="subDurationInput"><option>1 Mes</option><option>Lifetime</option></select></div>
         </div>
 
         <div class="form-group" id="fileField">
-          <label class="form-label">Archivo del producto (Zip, PNG, MP4)</label>
+          <label class="form-label">Archivo (Toca la zona roja)</label>
 
           <div class="upload-area" id="dropZone">
-            <div id="defaultContent">
+            <div id="visualContent">
                 <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:10px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                <p style="margin:0; color:#cbd5e1;">Toca para subir</p>
+                <p style="margin:0; color:#cbd5e1;">Toca la zona roja para subir</p>
             </div>
             
             <div id="previewContainer" style="display:none; text-align:center; width:100%;"></div>
 
             <input type="file" id="realFileInput" 
-                   style="display: none;" 
-                   accept="image/*,video/*,.zip,.rar,.pdf"> 
+                   accept="image/*,video/*,.zip,.rar,.pdf"
+                   onchange="handleFileSelect(this)"> 
           </div>
 
           <div class="progress-container" id="uploadProgressBox">
@@ -108,39 +113,34 @@
         </div>
 
         <div class="form-group"><label class="form-label">Título</label><input type="text" id="itemTitle" class="form-input" placeholder="Ej: Pack Premium"></div>
-
         <div class="form-group">
-          <label class="form-label">Precio y Moneda</label>
+          <label class="form-label">Precio</label>
           <div class="currency-toggle" style="margin-bottom: 10px;">
             <div class="currency-option active" id="currTON" onclick="selectCurrency('TON')">💎 TON</div>
             <div class="currency-option" id="currSTARS" onclick="selectCurrency('STARS')">⭐ Stars</div>
           </div>
-          <input type="number" id="itemPrice" class="form-input" placeholder="Cantidad (Ej: 2.5)">
-          <span class="commission-note">ℹ️ Se descontará un 7% de comisión.</span>
+          <input type="number" id="itemPrice" class="form-input" placeholder="Cantidad">
         </div>
-
         <div class="form-group"><label class="form-label">Descripción</label><textarea id="itemDesc" class="form-textarea" rows="4"></textarea></div>
 
         <button type="button" class="btn-telegram-cta" id="btnPublish">Publicar Ítem</button>
-
       </form>
     </div>
   </div>
 
   <script>
-    // 1. CONFIGURACIÓN E INICIO
+    // 1. INICIALIZACIÓN
     const SUPABASE_URL = 'https://ndkupidhlauzroduvech.supabase.co'; 
     const SUPABASE_KEY = 'sb_publishable_fSQ9uBUx_YTfxr2QL2-kfQ_pdE2cqHv'; 
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     const tg = window.Telegram.WebApp;
     tg.expand();
-    // Mejora de Telegram: Evitar cierre accidental
     tg.enableClosingConfirmation(); 
     
     let selectedCurrency = 'TON';
 
-    // 2. TOGGLES VISUALES
+    // 2. FUNCIONES UI
     function toggleSubFields() {
       const category = document.getElementById('categorySelect').value;
       const subFields = document.getElementById('subFields');
@@ -155,57 +155,52 @@
       document.getElementById('currSTARS').classList.toggle('active', type === 'STARS');
     }
 
-    // 3. LÓGICA DE ARCHIVOS "PREMIUM" (CON PREVIEW)
-    const dropZone = document.getElementById('dropZone');
-    const fileInput = document.getElementById('realFileInput');
-    const defaultContent = document.getElementById('defaultContent');
-    const previewContainer = document.getElementById('previewContainer');
+    // ====================================================
+    // 3. FUNCIÓN CRÍTICA DE SELECCIÓN DE ARCHIVO
+    // ====================================================
+    // Esta función se llama directamente desde el HTML (onchange)
+    window.handleFileSelect = function(input) {
+      
+      // ALERTA DE DIAGNÓSTICO: Si ves esto, el input funciona.
+      // alert("DEBUG: Archivo detectado. Procesando vista previa..."); 
 
-    // A) CLICK FORZADO (La solución infalible para móviles)
-    dropZone.addEventListener('click', () => {
-        fileInput.click(); 
-    });
+      if (input.files && input.files.length > 0) {
+        const file = input.files[0];
+        const dropZone = document.getElementById('dropZone');
+        const visualContent = document.getElementById('visualContent');
+        const previewContainer = document.getElementById('previewContainer');
 
-    // B) PREVIEW AUTOMÁTICO
-    fileInput.addEventListener('change', () => {
-      if(fileInput.files.length > 0) {
-        const file = fileInput.files[0];
-        
-        // Estilos de éxito
+        // Mostrar UI de "Seleccionado"
         dropZone.classList.add('file-selected');
-        defaultContent.style.display = 'none'; // Ocultar icono por defecto
-        previewContainer.style.display = 'block'; // Mostrar contenedor
-
-        // SI ES IMAGEN -> MUESTRA LA FOTO
+        visualContent.style.display = 'none';
+        previewContainer.style.display = 'block';
+        
+        // Generar Vista Previa
         if (file.type.startsWith("image/")) {
             const reader = new FileReader();
             reader.onload = e => {
                 previewContainer.innerHTML = `
-                  <img src="${e.target.result}" style="max-height:100px; max-width:100%; border-radius:8px; border: 2px solid #ccf381; margin-bottom:8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
-                  <div class="file-name-bold">✅ ${file.name}</div>
+                  <img src="${e.target.result}" style="max-height:120px; max-width:100%; border-radius:8px; border:2px solid #ccf381; box-shadow:0 4px 10px rgba(0,0,0,0.3);">
+                  <div style="font-weight:bold; color:#ccf381; margin-top:5px;">✅ ${file.name}</div>
                 `;
             };
             reader.readAsDataURL(file);
-        } 
-        // SI ES OTRO ARCHIVO -> MUESTRA TEXTO BONITO
-        else {
+        } else {
             previewContainer.innerHTML = `
-              <div style="font-size: 40px;">📄</div>
-              <div class="file-name-bold" style="margin-top:5px;">✅ ${file.name}</div>
-              <div style="font-size: 0.8em; color: #94a3b8;">(${(file.size / 1024 / 1024).toFixed(2)} MB)</div>
+              <div style="font-size:40px;">📄</div>
+              <div style="font-weight:bold; color:#ccf381;">✅ ${file.name}</div>
+              <div style="font-size:0.8em; color:#cbd5e1;">(${(file.size / 1024 / 1024).toFixed(2)} MB)</div>
             `;
         }
-
-        // Haptic Feedback (Vibración ligera al seleccionar)
-        if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
       }
-    });
+    };
 
     // 4. SUBIDA A SUPABASE
     document.getElementById('btnPublish').addEventListener('click', async () => {
       const title = document.getElementById('itemTitle').value;
       const price = document.getElementById('itemPrice').value;
       const category = document.getElementById('categorySelect').value;
+      const fileInput = document.getElementById('realFileInput');
 
       if(!title || !price) return alert("Falta Título o Precio");
 
@@ -224,13 +219,14 @@
         const seller = tg.initDataUnsafe?.user?.username ? '@' + tg.initDataUnsafe.user.username : '@Anonimo';
 
         if(category !== 'sub') {
+           if (!fileInput.files || fileInput.files.length === 0) {
+             throw new Error("⚠️ ¡No has seleccionado ningún archivo! Toca la zona roja.");
+           }
            const file = fileInput.files[0];
-           if (!file) throw new Error("Debes seleccionar un archivo.");
 
            progressBar.style.width = '30%';
            statusText.innerText = "Subiendo archivo...";
 
-           // Nombre único
            const fileName = Date.now() + '_' + file.name.replace(/\s+/g, '-');
 
            const { data, error } = await supabase.storage
@@ -252,7 +248,7 @@
            if(!finalUrl) throw new Error("Falta el enlace del canal.");
         }
 
-        statusText.innerText = "Guardando datos...";
+        statusText.innerText = "Guardando...";
         progressBar.style.width = '90%';
 
         const { error: dbError } = await supabase
@@ -269,8 +265,7 @@
 
         if (dbError) throw dbError;
 
-        // Reset seguro después de éxito
-        fileInput.value = ""; 
+        fileInput.value = ""; // Limpiar input
 
         progressBar.style.width = '100%';
         statusText.innerText = "¡Completado!";
@@ -278,7 +273,7 @@
 
       } catch (error) {
         console.error(error);
-        alert("Error: " + error.message);
+        alert("❌ Error: " + error.message);
         btn.disabled = false;
         btn.innerText = "Reintentar";
         progressBar.style.width = '0%';
