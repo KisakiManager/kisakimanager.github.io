@@ -25,6 +25,13 @@
       display: block;
       position: relative; /* Necesario para el truco del input fantasma */
       overflow: hidden;   /* Para que nada se salga de los bordes */
+      transition: all 0.3s ease; /* Suavizar el cambio de color */
+    }
+    
+    /* Clase extra para cuando hay archivo seleccionado */
+    .upload-area.file-selected {
+      background-color: rgba(204, 243, 129, 0.1); /* Fondo Verde suave */
+      border-color: #ccf381;
     }
   </style>
 </head>
@@ -75,9 +82,11 @@
 
           <div class="upload-area" id="dropZone">
             <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            <p id="fileNameDisplay" style="margin:0; color:#cbd5e1;">Toca para subir o arrastra aquí</p>
+            
+            <p id="fileNameDisplay" style="margin:0; color:#cbd5e1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90%;">Toca para subir o arrastra aquí</p>
 
             <input type="file" id="realFileInput" 
+                   onclick="this.value=null;"
                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 10;" 
                    accept="image/*,video/*,.zip,.rar,.pdf"> 
           </div>
@@ -109,7 +118,7 @@
   </div>
 
   <script>
-    // 1. SUPABASE
+    // 1. SUPABASE (Configuración Correcta)
     const SUPABASE_URL = 'https://ndkupidhlauzroduvech.supabase.co'; 
     const SUPABASE_KEY = 'sb_publishable_fSQ9uBUx_YTfxr2QL2-kfQ_pdE2cqHv'; 
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -133,21 +142,31 @@
       document.getElementById('currSTARS').classList.toggle('active', type === 'STARS');
     }
 
-    // Lógica Visual de Selección de Archivo
+    // ----------------------------------------------------
+    // 3. LÓGICA CORREGIDA PARA MOSTRAR ARCHIVO SELECCIONADO
+    // ----------------------------------------------------
     const dropZone = document.getElementById('dropZone');
     const fileInput = document.getElementById('realFileInput');
     const fileNameDisplay = document.getElementById('fileNameDisplay');
 
-    fileInput.addEventListener('change', () => {
-      if (fileInput.files.length > 0) {
-        fileNameDisplay.innerText = "📄 " + fileInput.files[0].name;
-        fileNameDisplay.style.color = "#ccf381";
-        fileNameDisplay.style.fontWeight = "bold"; // Negrita para que se note
+    fileInput.addEventListener('change', function() {
+      if (this.files && this.files.length > 0) {
+        const file = this.files[0];
+        
+        // 1. Cambiar Texto: Usamos innerHTML para poner negrita
+        // Nota: Truncamos visualmente con CSS, pero aquí mostramos el nombre
+        fileNameDisplay.innerHTML = `✅ <b>${file.name}</b>`;
+        
+        // 2. Cambiar Estilos de Texto
+        fileNameDisplay.style.color = "#ccf381"; // Color verde neón
+        
+        // 3. Cambiar Estilos de la Caja (Dropzone)
         dropZone.style.borderColor = "#ccf381";
+        dropZone.classList.add('file-selected'); // Añade fondo verde (definido en CSS)
       }
     });
 
-    // 3. SUBIDA
+    // 4. SUBIDA
     document.getElementById('btnPublish').addEventListener('click', async () => {
       const title = document.getElementById('itemTitle').value;
       const price = document.getElementById('itemPrice').value;
@@ -176,6 +195,7 @@
            progressBar.style.width = '30%';
            statusText.innerText = "Subiendo archivo...";
 
+           // Nombre limpio
            const fileName = Date.now() + '_' + file.name.replace(/\s+/g, '-');
 
            const { data, error } = await supabase.storage
