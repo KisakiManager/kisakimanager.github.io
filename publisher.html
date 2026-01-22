@@ -20,7 +20,9 @@
     .select-box {
       background: #1e293b; border: 1px solid #334155; color: white;
       padding: 10px; border-radius: 8px; width: 100%; font-size: 0.9em;
+      outline: none;
     }
+    .select-box:disabled { opacity: 0.5; }
 
     /* EDITOR ÁREA */
     .editor-container { padding: 15px; }
@@ -87,8 +89,11 @@
       <option value="">Selecciona un Bot...</option>
     </select>
   </div>
+  
   <div class="selector-row" style="padding-top:0;">
-    <input type="text" id="targetChannel" class="select-box" placeholder="ID del Canal (ej: -100123...)" value="-1003099743186">
+    <select id="targetChannel" class="select-box" disabled>
+      <option value="">Primero selecciona un bot...</option>
+    </select>
   </div>
 
   <div class="editor-container">
@@ -150,7 +155,64 @@
         }
     }
 
-    // 2. ACTUALIZAR PREVIEW EN TIEMPO REAL
+    // 2. CARGAR CANALES (RADAR SYSTEM)
+    async function loadChannels() {
+        const botId = document.getElementById('botSelector').value;
+        const channelSelect = document.getElementById('targetChannel');
+        
+        channelSelect.innerHTML = '<option>Cargando canales...</option>';
+        channelSelect.disabled = true;
+
+        if(!botId) {
+            channelSelect.innerHTML = '<option value="">Primero selecciona un bot...</option>';
+            return;
+        }
+
+        // Consultar canales gestionados por este bot
+        const { data, error } = await supabase
+            .from('managed_channels')
+            .select('*')
+            .eq('bot_id', botId);
+
+        channelSelect.innerHTML = '';
+        
+        if (error || !data || data.length === 0) {
+            channelSelect.innerHTML = '<option value="">No hay canales (Haz admin al bot)</option>';
+        } else {
+            // Rellenar lista
+            data.forEach(ch => {
+                const opt = document.createElement('option');
+                opt.value = ch.telegram_chat_id;
+                opt.text = ch.chat_title || "Canal Sin Nombre";
+                channelSelect.appendChild(opt);
+            });
+        }
+        
+        // Opción manual siempre al final
+        const optManual = document.createElement('option');
+        optManual.value = "manual";
+        optManual.text = "✍️ Ingresar ID Manualmente";
+        channelSelect.appendChild(optManual);
+        
+        channelSelect.disabled = false;
+        
+        // Listener para input manual
+        channelSelect.onchange = function() {
+            if(this.value === 'manual') {
+                const manualID = prompt("Introduce el ID del canal (ej: -100...)");
+                if(manualID) {
+                    const opt = document.createElement('option');
+                    opt.value = manualID;
+                    opt.text = "Manual: " + manualID;
+                    opt.selected = true;
+                    this.appendChild(opt);
+                    this.value = manualID; // Forzar selección
+                }
+            }
+        };
+    }
+
+    // 3. ACTUALIZAR PREVIEW EN TIEMPO REAL
     function updatePreview() {
         const text = document.getElementById('postContent').value;
         const media = document.getElementById('mediaUrl').value;
@@ -192,7 +254,7 @@
         }
     }
 
-    // 3. HERRAMIENTAS EDITOR
+    // 4. HERRAMIENTAS EDITOR
     function insertTag(start, end) {
         const el = document.getElementById('postContent');
         const s = el.selectionStart;
@@ -202,7 +264,7 @@
         updatePreview();
     }
 
-    // 4. ENVIAR A LA COLA (SUPABASE)
+    // 5. ENVIAR A LA COLA
     async function sendPost() {
         const botId = document.getElementById('botSelector').value;
         const chatId = document.getElementById('targetChannel').value;
@@ -210,7 +272,7 @@
         const media = document.getElementById('mediaUrl').value;
         const btnsRaw = document.getElementById('buttonsConfig').value;
 
-        if(!botId || !chatId || !content) return alert("Falta Bot, Canal o Mensaje.");
+        if(!botId || !chatId || chatId === 'manual' || !content) return alert("Falta Bot, Canal o Mensaje.");
 
         // Procesar botones a JSON
         let buttonsJson = [];
@@ -232,7 +294,7 @@
             content: content,
             media_url: media,
             buttons_config: buttonsJson,
-            status: 'pending' // Esto le dice al bot "¡Hay trabajo!"
+            status: 'pending' 
         });
 
         if(error) {
