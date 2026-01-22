@@ -10,41 +10,7 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
   <style>
-    /* 1. ESTILOS DE PESTAÑAS (Faltaban estos para que funcionara la selección visual) */
-    .market-nav {
-      display: flex;
-      gap: 10px;
-      overflow-x: auto;
-      padding-bottom: 5px;
-      margin-bottom: 20px;
-      scrollbar-width: none;
-      /* Aseguramos que esté por encima de otros elementos */
-      position: relative; 
-      z-index: 10; 
-    }
-    .market-nav::-webkit-scrollbar { display: none; }
-
-    .market-tab {
-      padding: 8px 16px;
-      background: rgba(255,255,255,0.05); /* Fondo gris suave */
-      border-radius: 20px;
-      font-size: 0.9em;
-      color: #94a3b8;
-      white-space: nowrap; /* Evita que el texto se rompa */
-      cursor: pointer;
-      border: 1px solid transparent;
-      transition: all 0.2s ease;
-    }
-
-    /* Estilo cuando está seleccionado */
-    .market-tab.active {
-      background: rgba(59, 130, 246, 0.15); /* Azul suave */
-      color: #60a5fa; /* Texto azul brillante */
-      border-color: #3b82f6; /* Borde azul */
-      font-weight: 600;
-    }
-
-    /* 2. ESTILOS DE IMÁGENES Y VIDEO */
+    /* Estilos extra para las imágenes reales */
     .product-image {
       background-size: cover;
       background-position: center;
@@ -57,46 +23,80 @@
       background: rgba(0,0,0,0.6); border-radius: 50%; padding: 10px; display: flex;
     }
     
-    /* 3. BOTÓN DE RECARGA */
-    .btn-refresh-container { text-align: center; margin-bottom: 20px; }
-    
+    /* ESTILO DEL BOTÓN DE RECARGA */
+    .btn-refresh-container {
+      text-align: center;
+      margin-bottom: 20px;
+    }
     .btn-refresh {
-      background: rgba(59, 130, 246, 0.1);
-      color: #3b82f6;
-      border: 1px solid #3b82f6;
-      padding: 10px 20px;
-      border-radius: 20px;
-      font-size: 0.9em;
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      transition: all 0.3s ease;
-      width: 80%;
-      justify-content: center;
+      background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid #3b82f6;
+      padding: 10px 20px; border-radius: 20px; font-size: 0.9em; font-weight: 600;
+      cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+      transition: all 0.3s ease; width: 80%; justify-content: center;
     }
     .btn-refresh:active { transform: scale(0.98); background: #3b82f6; color: white; }
     
-    /* Animaciones */
+    /* Animación de giro */
     .spin-anim { animation: spin 1s linear infinite; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
+    /* Spinner inicial */
     .loading-spinner {
       border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid #3b82f6;
       border-radius: 50%; width: 30px; height: 30px;
       animation: spin 1s linear infinite; margin: 50px auto;
+    }
+    
+    /* --- CORRECCIÓN CLAVE: ESTILOS DE PESTAÑAS --- */
+    .market-nav {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 5px;
+      margin-bottom: 20px;
+      scrollbar-width: none;
+      
+      /* TRUCO DE MAGIA: Forzamos que esté ENCIMA de todo */
+      position: relative; 
+      z-index: 50; 
+    }
+    .market-nav::-webkit-scrollbar { display: none; }
+
+    /* Usamos botones reales ahora */
+    .market-tab {
+      background: rgba(255,255,255,0.05); /* Fondo gris oscuro */
+      color: #94a3b8;
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.9em;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      /* Reset de estilos de botón */
+      font-family: inherit;
+      outline: none;
+      -webkit-tap-highlight-color: transparent; /* Quita el flash azul en Android */
+    }
+
+    /* Estado Activo */
+    .market-tab.active {
+      background: rgba(59, 130, 246, 0.15); /* Azul suave */
+      color: #60a5fa; /* Texto azul */
+      border-color: #3b82f6;
+      font-weight: 600;
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.2);
     }
   </style>
 </head>
 <body>
 
   <div class="page-header" style="height: 140px; background-image: url('fondo-market.jpg');">
-    <a href="index.html" class="back-floating">
+    <a href="index.html" class="back-floating" style="position: relative; z-index: 60;">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
     </a>
 
-    <div style="position: absolute; bottom: 15px; left: 20px; right: 20px;">
+    <div style="position: absolute; bottom: 15px; left: 20px; right: 20px; z-index: 40;">
        <div style="background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); border-radius: 16px; padding: 12px 15px; display: flex; align-items: center; gap: 10px;">
          <svg width="20" height="20" fill="none" stroke="#94a3b8" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
          <input type="text" id="searchInput" placeholder="Buscar ítems..." onkeyup="searchLocal()" style="background: transparent; border: none; color: white; outline: none; width: 100%; font-size: 0.95em;">
@@ -104,17 +104,17 @@
     </div>
   </div>
 
-  <div class="content-card" style="margin-top: -20px; min-height: 80vh; padding-top: 25px; position: relative; z-index: 5;">
+  <div class="content-card" style="margin-top: -20px; min-height: 80vh; padding-top: 25px; position: relative; z-index: 30;">
 
     <div class="market-nav">
-      <div class="market-tab active" onclick="changeCategory('all', this)">Todo</div>
-      <div class="market-tab" onclick="changeCategory('art', this)">Ilustraciones</div>
-      <div class="market-tab" onclick="changeCategory('sub', this)">Suscripciones</div>
-      <div class="market-tab" onclick="changeCategory('sticker', this)">Stickers</div>
-      <div class="market-tab" onclick="changeCategory('photo', this)">Fotos</div>
-      <div class="market-tab" onclick="changeCategory('file', this)">Archivos</div>
-      <div class="market-tab" onclick="changeCategory('video', this)">Videos</div>
-      <div class="market-tab" onclick="changeCategory('other', this)">Otros</div>
+      <button class="market-tab active" onclick="changeCategory('all', this)">Todo</button>
+      <button class="market-tab" onclick="changeCategory('art', this)">Ilustraciones</button>
+      <button class="market-tab" onclick="changeCategory('sub', this)">Suscripciones</button>
+      <button class="market-tab" onclick="changeCategory('sticker', this)">Stickers</button>
+      <button class="market-tab" onclick="changeCategory('photo', this)">Fotos</button>
+      <button class="market-tab" onclick="changeCategory('file', this)">Archivos</button>
+      <button class="market-tab" onclick="changeCategory('video', this)">Videos</button>
+      <button class="market-tab" onclick="changeCategory('other', this)">Otros</button>
     </div>
 
     <div class="btn-refresh-container">
@@ -133,7 +133,7 @@
 
   </div>
 
-  <a href="upload.html" class="btn-upload-float">
+  <a href="upload.html" class="btn-upload-float" style="z-index: 100;">
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <line x1="12" y1="5" x2="12" y2="19"></line>
       <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -163,6 +163,7 @@
 
     // 2. CAMBIAR CATEGORÍA
     function changeCategory(cat, tabElement) {
+        // console.log("Cambiando a:", cat); // Debug
         currentCategory = cat;
         
         // Efecto Visual de Selección
@@ -195,7 +196,7 @@
       }
 
       try {
-        console.log("Cargando categoría:", category);
+        console.log("Consultando Supabase para:", category);
 
         let query = supabase
             .from('marketplace_items')
