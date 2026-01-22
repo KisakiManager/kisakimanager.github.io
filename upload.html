@@ -5,7 +5,7 @@
   <title>Subir Ítem — Kisaki Manager</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
-  
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
@@ -48,6 +48,12 @@
       margin-top: 8px;
       display: none;
     }
+
+    /* CURSOR PARA LA ZONA DE CARGA */
+    .upload-area {
+      cursor: pointer;
+      display: block; /* Asegura que el label ocupe el espacio */
+    }
   </style>
 </head>
 <body>
@@ -78,7 +84,8 @@
             <option value="sub">Suscripción Canal (Requiere Admin)</option>
             <option value="sticker">Stickers</option>
             <option value="photo">Fotografía</option>
-            <option value="file">Archivo Digital</option> <option value="video">Videos</option>
+            <option value="file">Archivo Digital</option> 
+            <option value="video">Videos</option>
             <option value="other">Otros</option>
           </select>
         </div>
@@ -107,11 +114,12 @@
         <div class="form-group" id="fileField">
           <label class="form-label">Archivo del producto (Zip, PNG, MP4)</label>
 
-          <div class="upload-area" id="dropZone">
+          <label class="upload-area" id="dropZone" for="realFileInput">
             <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
             <p id="fileNameDisplay" style="margin:0; color:#cbd5e1;">Toca para subir o arrastra aquí</p>
-            <input type="file" id="realFileInput" style="display: none;"> 
-          </div>
+            
+            <input type="file" id="realFileInput" style="display: none;" accept="image/*,video/*,.zip,.rar,.pdf"> 
+          </label>
 
           <div class="progress-container" id="uploadProgressBox">
             <div class="progress-bar" id="uploadProgressBar"></div>
@@ -185,12 +193,13 @@
       document.getElementById('currSTARS').classList.toggle('active', type === 'STARS');
     }
 
-    // Lógica Drag & Drop y Input File
+    // Lógica Visual de Selección de Archivo
     const dropZone = document.getElementById('dropZone');
     const fileInput = document.getElementById('realFileInput');
     const fileNameDisplay = document.getElementById('fileNameDisplay');
 
-    dropZone.addEventListener('click', () => fileInput.click());
+    // NOTA: Ya no necesitamos el "click listener" porque usamos <label>
+    
     fileInput.addEventListener('change', () => {
       if (fileInput.files.length > 0) {
         fileNameDisplay.innerText = "📄 " + fileInput.files[0].name;
@@ -235,8 +244,9 @@
            progressBar.style.width = '30%';
            statusText.innerText = "Subiendo archivo a la nube...";
 
+           // Nombre limpio para evitar errores
            const fileName = Date.now() + '_' + file.name.replace(/\s+/g, '-');
-           
+
            // Subir a Supabase Storage (Bucket 'products')
            const { data, error } = await supabase.storage
              .from('products')
@@ -252,7 +262,7 @@
              .from('products')
              .getPublicUrl(fileName);
            finalUrl = publicData.publicUrl;
-        
+
         } else {
            // Si es suscripción, usamos el link del input
            finalUrl = document.getElementById('subLinkInput').value;
