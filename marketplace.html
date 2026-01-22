@@ -10,7 +10,41 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
   <style>
-    /* Estilos extra para las imágenes reales */
+    /* 1. ESTILOS DE PESTAÑAS (Faltaban estos para que funcionara la selección visual) */
+    .market-nav {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 5px;
+      margin-bottom: 20px;
+      scrollbar-width: none;
+      /* Aseguramos que esté por encima de otros elementos */
+      position: relative; 
+      z-index: 10; 
+    }
+    .market-nav::-webkit-scrollbar { display: none; }
+
+    .market-tab {
+      padding: 8px 16px;
+      background: rgba(255,255,255,0.05); /* Fondo gris suave */
+      border-radius: 20px;
+      font-size: 0.9em;
+      color: #94a3b8;
+      white-space: nowrap; /* Evita que el texto se rompa */
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+    }
+
+    /* Estilo cuando está seleccionado */
+    .market-tab.active {
+      background: rgba(59, 130, 246, 0.15); /* Azul suave */
+      color: #60a5fa; /* Texto azul brillante */
+      border-color: #3b82f6; /* Borde azul */
+      font-weight: 600;
+    }
+
+    /* 2. ESTILOS DE IMÁGENES Y VIDEO */
     .product-image {
       background-size: cover;
       background-position: center;
@@ -23,11 +57,8 @@
       background: rgba(0,0,0,0.6); border-radius: 50%; padding: 10px; display: flex;
     }
     
-    /* ESTILO DEL BOTÓN DE RECARGA */
-    .btn-refresh-container {
-      text-align: center;
-      margin-bottom: 20px;
-    }
+    /* 3. BOTÓN DE RECARGA */
+    .btn-refresh-container { text-align: center; margin-bottom: 20px; }
     
     .btn-refresh {
       background: rgba(59, 130, 246, 0.1);
@@ -45,34 +76,17 @@
       width: 80%;
       justify-content: center;
     }
-
-    .btn-refresh:active {
-      transform: scale(0.98);
-      background: #3b82f6;
-      color: white;
-    }
+    .btn-refresh:active { transform: scale(0.98); background: #3b82f6; color: white; }
     
-    /* Animación de giro */
+    /* Animaciones */
     .spin-anim { animation: spin 1s linear infinite; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-    /* Spinner inicial */
     .loading-spinner {
       border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid #3b82f6;
       border-radius: 50%; width: 30px; height: 30px;
       animation: spin 1s linear infinite; margin: 50px auto;
     }
-    
-    /* Scroll horizontal para las pestañas si hay muchas */
-    .market-nav {
-      display: flex;
-      gap: 10px;
-      overflow-x: auto;
-      padding-bottom: 5px;
-      margin-bottom: 15px;
-      scrollbar-width: none; /* Ocultar scrollbar Firefox */
-    }
-    .market-nav::-webkit-scrollbar { display: none; /* Ocultar scrollbar Chrome */ }
   </style>
 </head>
 <body>
@@ -90,7 +104,7 @@
     </div>
   </div>
 
-  <div class="content-card" style="margin-top: -20px; min-height: 80vh; padding-top: 25px;">
+  <div class="content-card" style="margin-top: -20px; min-height: 80vh; padding-top: 25px; position: relative; z-index: 5;">
 
     <div class="market-nav">
       <div class="market-tab active" onclick="changeCategory('all', this)">Todo</div>
@@ -144,20 +158,21 @@
     let currentCategory = 'all'; 
 
     document.addEventListener("DOMContentLoaded", () => {
-      loadMarket(currentCategory);
+      loadMarket('all');
     });
 
-    // Cambiar de categoría
+    // 2. CAMBIAR CATEGORÍA
     function changeCategory(cat, tabElement) {
         currentCategory = cat;
-        // Visual
+        
+        // Efecto Visual de Selección
         document.querySelectorAll('.market-tab').forEach(t => t.classList.remove('active'));
         if(tabElement) tabElement.classList.add('active');
         
         loadMarket(cat);
     }
 
-    // Botón de Recarga Manual
+    // 3. RECARGA MANUAL
     function forceReload() {
         const btn = document.getElementById('btnReload');
         const icon = document.getElementById('refreshIcon');
@@ -170,10 +185,11 @@
         loadMarket(currentCategory, true);
     }
 
-    // FUNCIÓN PRINCIPAL DE CARGA
+    // 4. LÓGICA DE CARGA
     async function loadMarket(category, isManualReload = false) {
       const container = document.getElementById('productsContainer');
       
+      // Spinner solo si es carga inicial de pestaña
       if (!isManualReload) {
           container.innerHTML = '<div class="loading-spinner"></div>';
       }
@@ -186,6 +202,7 @@
             .select('*')
             .order('created_at', { ascending: false });
 
+        // FILTRO: Solo aplicamos si no es "Todo"
         if (category !== 'all') {
             query = query.eq('category', category);
         }
@@ -197,6 +214,7 @@
         allLoadedProducts = data;
         renderItems(data);
 
+        // Restaurar botón de recarga
         if (isManualReload) {
             setTimeout(() => {
                 const icon = document.getElementById('refreshIcon');
@@ -232,13 +250,13 @@
       }
     }
 
-    // FUNCIÓN DE RENDERIZADO (Con iconos corregidos)
+    // 5. RENDERIZADO
     function renderItems(items) {
       const container = document.getElementById('productsContainer');
       container.innerHTML = '';
 
       if (!items || items.length === 0) {
-        container.innerHTML = '<p style="color:#64748b; grid-column: 1 / -1; text-align:center; padding:40px;">📭 No hay ítems aquí.</p>';
+        container.innerHTML = '<p style="color:#64748b; grid-column: 1 / -1; text-align:center; padding:40px;">📭 No hay ítems en esta categoría.</p>';
         return;
       }
 
@@ -255,24 +273,21 @@
         let bgStyle = ''; 
         let contentHtml = '';
 
-        // Categorías visuales
         const isVisual = ['art', 'photo', 'sticker'].includes(item.category);
 
         if (isVisual && item.file_url) {
             bgStyle = `background-image: url('${item.file_url}');`;
         } else {
-            // ICONOS SINCRONIZADOS CON UPLOAD.HTML
-            if(item.category === 'sub') contentHtml = '<span style="font-size:40px;">🔒</span>'; // Suscripción
-            else if(item.category === 'video') contentHtml = '<div class="video-overlay"><span style="color:white; font-size:24px;">▶</span></div>'; // Video
-            else if(item.category === 'file') contentHtml = '<span style="font-size:40px;">📁</span>'; // Archivo
-            else if(item.category === 'other') contentHtml = '<span style="font-size:40px;">📦</span>'; // Otros
-            else contentHtml = '<span style="font-size:40px;">🎨</span>'; // Default (Arte sin foto)
+            if(item.category === 'sub') contentHtml = '<span style="font-size:40px;">💎</span>';
+            else if(item.category === 'video') contentHtml = '<div class="video-overlay"><span style="color:white; font-size:24px;">▶</span></div>';
+            else if(item.category === 'file') contentHtml = '<span style="font-size:40px;">📁</span>';
+            else if(item.category === 'other') contentHtml = '<span style="font-size:40px;">📦</span>';
+            else contentHtml = '<span style="font-size:40px;">🎨</span>';
         }
 
         const currencyIcon = item.currency === 'STARS' ? '⭐' : '💎';
         const displayPrice = item.price ? `${currencyIcon} ${item.price}` : 'Gratis';
 
-        // Preview de video si existe
         const videoTag = (item.category === 'video' && item.file_url) 
             ? `<video src="${item.file_url}" style="width:100%; height:100%; object-fit:cover; position:absolute; z-index:0;" muted loop playsinline onmouseover="this.play()" onmouseout="this.pause()"></video>` 
             : '';
@@ -300,6 +315,7 @@
       });
     }
 
+    // 6. BÚSQUEDA LOCAL
     function searchLocal() {
       const text = document.getElementById('searchInput').value.toLowerCase();
       const filtered = allLoadedProducts.filter(p => 
