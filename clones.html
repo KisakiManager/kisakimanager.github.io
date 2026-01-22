@@ -5,7 +5,7 @@
   <title>Kisaki Bot Manager</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
-  
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
@@ -14,7 +14,7 @@
 
     /* Header */
     .page-header { padding: 20px; background: #1e293b; border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 20px; }
-    
+
     /* BOT LIST (RACK STYLE) */
     .bot-rack { padding: 0 15px; display: flex; flex-direction: column; gap: 15px; }
 
@@ -26,8 +26,14 @@
       display: flex; justify-content: space-between; align-items: center;
       position: relative; overflow: hidden;
       transition: all 0.2s ease;
+      /* Cursor de mano para indicar que es clickeable */
+      cursor: pointer; 
     }
     
+    .bot-unit:active {
+        background-color: #334155;
+    }
+
     /* Indicador de estado (Luz led) */
     .status-led { width: 10px; height: 10px; border-radius: 50%; display: inline-block; box-shadow: 0 0 10px currentColor; margin-right: 8px; }
     .led-active { color: #4ade80; background: #4ade80; }
@@ -73,7 +79,7 @@
       outline: none; box-sizing: border-box; /* Fix CSS box model */
     }
     .btn-primary { width: 100%; background: #6366f1; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
-    
+
   </style>
 </head>
 <body>
@@ -103,12 +109,12 @@
       <p style="color:#94a3b8; font-size:0.9em; margin-bottom:20px;">
         Pega el Token del bot obtenido en <a href="#" style="color:#6366f1;">@BotFather</a>.
       </p>
-      
+
       <div class="input-group">
         <label style="font-size:0.8em; color:#cbd5e1; display:block; margin-bottom:5px;">Bot Token</label>
         <input type="text" id="botTokenInput" class="input-field" placeholder="123456:ABC-Def...">
       </div>
-      
+
       <div class="input-group">
         <label style="font-size:0.8em; color:#cbd5e1; display:block; margin-bottom:5px;">Nombre (Etiqueta)</label>
         <input type="text" id="botNameInput" class="input-field" placeholder="@MiNuevoBot">
@@ -137,7 +143,7 @@
     // 1. CARGAR BOTS
     async function loadBots() {
       const container = document.getElementById('botContainer');
-      
+
       const { data, error } = await supabase
         .from('bots')
         .select('*')
@@ -161,13 +167,17 @@
       container.innerHTML = '';
       data.forEach(bot => {
         const ledClass = bot.status === 'active' ? 'led-active' : 'led-paused';
+        
+        // MODIFICACIÓN: Enlace al panel de configuración (bot_settings.html)
+        // Se añade onclick al contenedor y stopPropagation a los botones para evitar conflicto
         container.innerHTML += `
-          <div class="bot-unit">
+          <div class="bot-unit" onclick="window.location.href='bot_settings.html?id=${bot.id}'">
             <div class="bot-info">
               <h3><span class="status-led ${ledClass}"></span> ${bot.bot_username || 'Sin Nombre'}</h3>
               <span>Token: ...${bot.bot_token.substr(-5)}</span>
             </div>
-            <div class="bot-actions">
+            
+            <div class="bot-actions" onclick="event.stopPropagation()">
               <button class="btn-icon" onclick="toggleBot('${bot.id}', '${bot.status}')">
                 ${bot.status === 'active' 
                   ? '<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>' 
