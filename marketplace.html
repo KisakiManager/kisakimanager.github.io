@@ -5,15 +5,28 @@
   <title>Marketplace — Kisaki Manager</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
+  
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
-    /* Estilo para el icono de Play en videos */
+    /* Estilos extra para las imágenes reales */
+    .product-image {
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
     .video-overlay {
       position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
       background: rgba(0,0,0,0.6); border-radius: 50%; padding: 10px; display: flex;
     }
+    /* Animación de carga */
+    .loading-spinner {
+      border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid #3b82f6;
+      border-radius: 50%; width: 30px; height: 30px;
+      animation: spin 1s linear infinite; margin: 50px auto;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
   </style>
-  
-  <script src="items_db.js"></script>
 </head>
 <body>
 
@@ -25,7 +38,7 @@
     <div style="position: absolute; bottom: 15px; left: 20px; right: 20px;">
        <div style="background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); border-radius: 16px; padding: 12px 15px; display: flex; align-items: center; gap: 10px;">
          <svg width="20" height="20" fill="none" stroke="#94a3b8" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-         <input type="text" id="searchInput" placeholder="Buscar ítems, canales..." onkeyup="searchItems()" style="background: transparent; border: none; color: white; outline: none; width: 100%; font-size: 0.95em;">
+         <input type="text" id="searchInput" placeholder="Buscar ítems..." onkeyup="searchLocal()" style="background: transparent; border: none; color: white; outline: none; width: 100%; font-size: 0.95em;">
        </div>
     </div>
   </div>
@@ -33,17 +46,17 @@
   <div class="content-card" style="margin-top: -20px; min-height: 80vh; padding-top: 25px;">
 
     <div class="market-nav">
-      <div class="market-tab active" onclick="renderMarket('all', this)">Todo</div>
-      <div class="market-tab" onclick="renderMarket('art', this)">Ilustraciones</div>
-      <div class="market-tab" onclick="renderMarket('sub', this)">Canales VIP</div>
-      <div class="market-tab" onclick="renderMarket('sticker', this)">Stickers</div>
-      <div class="market-tab" onclick="renderMarket('photo', this)">Fotos</div>
-      <div class="market-tab" onclick="renderMarket('video', this)">Videos</div>
-      <div class="market-tab" onclick="renderMarket('other', this)">Otros</div>
+      <div class="market-tab active" onclick="loadMarket('all', this)">Todo</div>
+      <div class="market-tab" onclick="loadMarket('art', this)">Ilustraciones</div>
+      <div class="market-tab" onclick="loadMarket('sub', this)">Canales VIP</div>
+      <div class="market-tab" onclick="loadMarket('sticker', this)">Stickers</div>
+      <div class="market-tab" onclick="loadMarket('photo', this)">Fotos</div>
+      <div class="market-tab" onclick="loadMarket('file', this)">Archivos</div>
     </div>
 
     <div class="products-grid" id="productsContainer">
-      </div>
+        <div class="loading-spinner"></div>
+    </div>
 
     <div style="margin-top: 40px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; color: #7b8fa6; font-size: 0.85em; padding-bottom: 80px;">
       © Kisaki Manager Market
@@ -59,87 +72,112 @@
   </a>
 
   <script>
+    // 1. CONEXIÓN A SUPABASE (Tus claves reales)
+    const SUPABASE_URL = 'https://ndkupidhlauzroduvech.supabase.co'; 
+    const SUPABASE_KEY = 'sb_publishable_fSQ9uBUx_YTfxr2QL2-kfQ_pdE2cqHv'; 
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // Variable para guardar los productos cargados y poder buscar en ellos
+    let allLoadedProducts = [];
+
     document.addEventListener("DOMContentLoaded", () => {
-      // Cargar todos los productos al inicio
-      renderMarket('all');
+      loadMarket('all');
     });
 
-    function renderMarket(category, tabElement) {
-      // 1. Actualizar Tabs Visuales
+    // FUNCIÓN PRINCIPAL DE CARGA
+    async function loadMarket(category, tabElement) {
+      // 1. UI de Pestañas
       if(tabElement) {
         document.querySelectorAll('.market-tab').forEach(t => t.classList.remove('active'));
         tabElement.classList.add('active');
       }
 
-      // 2. Filtrar productos de la DB
-      // Nota: productsDB viene de items_db.js
-      const filtered = productsDB.filter(item => category === 'all' || item.type === category);
-
-      // 3. Renderizar en el Grid
       const container = document.getElementById('productsContainer');
-      container.innerHTML = ''; // Limpiar
+      container.innerHTML = '<div class="loading-spinner"></div>';
 
-      if(filtered.length === 0) {
+      try {
+        // 2. Consulta a Supabase
+        let query = supabase.from('marketplace_items').select('*').order('created_at', { ascending: false });
+        
+        // Filtro por categoría (si no es 'all')
+        if (category !== 'all') {
+            query = query.eq('category', category);
+        }
+
+        const { data, error } = await query;
+
+        if (error) throw error;
+
+        allLoadedProducts = data; // Guardamos para el buscador
+        renderItems(data);
+
+      } catch (err) {
+        console.error(err);
+        container.innerHTML = `<p style="text-align:center; color:#ef4444;">Error cargando ítems.<br><small>${err.message}</small></p>`;
+      }
+    }
+
+    // FUNCIÓN DE RENDERIZADO
+    function renderItems(items) {
+      const container = document.getElementById('productsContainer');
+      container.innerHTML = '';
+
+      if (!items || items.length === 0) {
         container.innerHTML = '<p style="color:#64748b; grid-column: 1 / -1; text-align:center; padding:20px;">No hay ítems en esta categoría.</p>';
         return;
       }
 
-      filtered.forEach(item => {
-        // Crear enlace a product.html con el ID
+      items.forEach(item => {
+        // Crear enlace (Asumiendo que crearemos product.html después, pasamos todos los datos por URL o ID)
+        // Por ahora, si haces clic, va al archivo o a una página de detalle.
         const link = document.createElement('a');
-        link.href = `product.html?id=${item.id}`; // AQUÍ CONECTAMOS CON LA VISTA DE DETALLE
-        link.className = `product-card filter-item ${item.type}`;
+        link.href = "#"; // Aquí iría `product.html?id=${item.id}`
+        link.className = `product-card filter-item ${item.category}`;
         link.style.textDecoration = 'none';
 
-        // Icono especial si es suscripción
-        let iconHtml = '';
-        if(item.type === 'sub') {
-          iconHtml = '<span style="font-size:40px;">🔒</span>';
-        } else if (item.type === 'video') {
-          iconHtml = '<div class="video-overlay"><svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>';
-        }
-
-        // Lógica de visualización de precio (si hay descuento)
-        let priceDisplay = item.priceTon + ' TON';
-        if(item.discount > 0) {
-           let final = (item.priceTon * (1 - item.discount)).toFixed(1);
-           // Mostrar precio tachado pequeño + precio final
-           priceDisplay = `<span style="text-decoration:line-through; font-size:0.8em; opacity:0.7;">${item.priceTon}</span> ${final} TON`;
+        // Determinar icono o imagen de fondo
+        let bgStyle = `background-color: #1e293b;`; 
+        let contentHtml = '';
+        
+        // Si es foto/arte/sticker y tiene URL, la usamos de fondo
+        const isVisual = ['art', 'photo', 'sticker'].includes(item.category);
+        if (isVisual && item.file_url) {
+            bgStyle = `background-image: url('${item.file_url}');`;
+        } else {
+            // Iconos por defecto según categoría
+            if(item.category === 'sub') contentHtml = '<span style="font-size:40px;">🔒</span>';
+            else if(item.category === 'video') contentHtml = '<div class="video-overlay">▶</div>';
+            else if(item.category === 'file') contentHtml = '<span style="font-size:40px;">📁</span>';
+            else contentHtml = '<span style="font-size:40px;">🎨</span>';
         }
 
         link.innerHTML = `
-          <div class="product-image" style="background-color: ${item.color}; display:flex; justify-content:center; align-items:center;">
-            ${iconHtml}
+          <div class="product-image" style="${bgStyle} display:flex; justify-content:center; align-items:center;">
+            ${contentHtml}
           </div>
           <div class="product-info">
             <h3 class="product-title">${item.title}</h3>
             <div class="product-seller">
-              ${item.seller}
-              ${item.verified ? '<svg class="verified-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>' : ''}
+              ${item.seller || '@Anonimo'}
+              <svg class="verified-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
             </div>
             <div class="product-price-row">
-              <span class="price-tag" style="color:#ccf381; font-weight:700;">💎 ${priceDisplay}</span>
+              <span class="price-tag" style="color:#ccf381; font-weight:700;">
+                💎 ${item.price} ${item.currency || 'TON'}
+              </span>
             </div>
           </div>
         `;
-        
+
         container.appendChild(link);
       });
     }
 
-    // Buscador en tiempo real (sobre lo renderizado)
-    function searchItems() {
-      const input = document.getElementById('searchInput').value.toLowerCase();
-      const cards = document.querySelectorAll('.product-card');
-
-      cards.forEach(card => {
-        const title = card.querySelector('.product-title').innerText.toLowerCase();
-        if(title.includes(input)) {
-          card.style.display = 'block';
-        } else {
-          card.style.display = 'none';
-        }
-      });
+    // BUSCADOR LOCAL (Filtra lo que ya se descargó de Supabase)
+    function searchLocal() {
+      const text = document.getElementById('searchInput').value.toLowerCase();
+      const filtered = allLoadedProducts.filter(p => p.title.toLowerCase().includes(text));
+      renderItems(filtered);
     }
   </script>
 
