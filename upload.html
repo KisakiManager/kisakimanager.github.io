@@ -10,13 +10,16 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
   <style>
+    /* Estilo para el panel de suscripción */
     .hidden-fields { display: none; background: rgba(59, 130, 246, 0.1); padding: 15px; border-radius: 12px; border: 1px dashed #3b82f6; margin-bottom: 20px; animation: fadeIn 0.3s ease; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
 
+    /* ESTILOS DE BARRA DE PROGRESO */
     .progress-container { width: 100%; background-color: rgba(255, 255, 255, 0.1); border-radius: 10px; margin-top: 15px; height: 10px; overflow: hidden; display: none; }
     .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #ccf381, #a3e635); border-radius: 10px; transition: width 0.4s ease; }
     .upload-status-text { font-size: 0.85em; color: #94a3b8; text-align: center; margin-top: 8px; display: none; }
 
+    /* ZONA DE CARGA (LABEL) */
     .upload-area {
       cursor: pointer;
       display: block;
@@ -25,12 +28,14 @@
       transition: all 0.3s ease;
       padding: 20px;
     }
-
+    
+    /* Clase extra para cuando hay archivo seleccionado */
     .upload-area.file-selected {
-      background-color: rgba(204, 243, 129, 0.1) !important;
+      background-color: rgba(204, 243, 129, 0.1) !important; /* Fondo Verde suave */
       border-color: #ccf381 !important;
     }
-
+    
+    /* Input oculto pero accesible */
     .input-hidden {
         position: absolute;
         width: 1px;
@@ -43,219 +48,216 @@
     }
   </style>
 </head>
-
 <body>
 
-<div class="page-header" style="height: 120px; background-image: url('fondo-market.jpg');">
-<a href="marketplace.html" class="back-floating">
-<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3"><path d="M15 18l-6-6 6-6"/></svg>
-</a>
-</div>
+  <div class="page-header" style="height: 120px; background-image: url('fondo-market.jpg');">
+    <a href="marketplace.html" class="back-floating">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </a>
+  </div>
 
-<div class="content-card" style="margin-top: -30px;">
-<div class="card-header-inner">
-<div class="page-title">
-<h1>Vender Ítem</h1>
-<span>Sube tu contenido al Marketplace</span>
-</div>
-</div>
+  <div class="content-card" style="margin-top: -30px;">
+    <div class="card-header-inner">
+      <div class="page-title">
+        <h1>Vender Ítem</h1>
+        <span>Sube tu contenido al Marketplace</span>
+      </div>
+    </div>
 
-<div class="card-body">
-<form id="uploadForm">
+    <div class="card-body">
+      <form id="uploadForm">
 
-<div class="form-group">
-<label class="form-label">Categoría</label>
-<select class="form-select" id="categorySelect" onchange="toggleSubFields()">
-<option value="art">Ilustraciones</option>
-<option value="sub">Suscripción Canal</option>
-<option value="sticker">Stickers</option>
-<option value="photo">Fotografía</option>
-<option value="file">Archivo Digital</option>
-<option value="video">Videos</option>
-<option value="other">Otros</option>
-</select>
-</div>
+        <div class="form-group">
+          <label class="form-label">Categoría</label>
+          <select class="form-select" id="categorySelect" onchange="toggleSubFields()">
+            <option value="art">Ilustraciones</option>
+            <option value="sub">Suscripción Canal (Requiere Admin)</option>
+            <option value="sticker">Stickers</option>
+            <option value="photo">Fotografía</option>
+            <option value="file">Archivo Digital</option> 
+            <option value="video">Videos</option>
+            <option value="other">Otros</option>
+          </select>
+        </div>
 
-<div id="subFields" class="hidden-fields">
-<h3 style="color:#60a5fa;margin-top:0;font-size:1em">Configuración de Canal</h3>
-<div class="form-group">
-<label class="form-label">Enlace del Canal</label>
-<input type="text" id="subLinkInput" class="form-input">
-</div>
-</div>
+        <div id="subFields" class="hidden-fields">
+          <h3 style="color:#60a5fa; margin-top:0; font-size:1em; display:flex; align-items:center; gap:8px;">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            Configuración de Canal
+          </h3>
+          <p style="font-size:0.85em; color:#cbd5e1; margin-bottom:15px;">El bot debe ser administrador del canal.</p>
+          <div class="form-group"><label class="form-label">Enlace del Canal</label><input type="text" id="subLinkInput" class="form-input" placeholder="https://t.me/+AbCdEfGh..."></div>
+          <div class="form-group"><label class="form-label">Duración</label><select class="form-select" id="subDurationInput"><option>1 Mes</option><option>Lifetime</option></select></div>
+        </div>
 
-<div class="form-group" id="fileField">
+        <div class="form-group" id="fileField">
+          <label class="form-label">Archivo del producto (Zip, PNG, MP4)</label>
 
-<label class="form-label">Archivo del producto</label>
+          <label class="upload-area" id="dropZone" for="realFileInput">
+            <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            
+            <p id="fileNameDisplay" style="margin:0; color:#cbd5e1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90%;">Toca para subir o arrastra aquí</p>
 
-<label class="upload-area" id="dropZone">
+            <input type="file" id="realFileInput" 
+                   class="input-hidden"
+                   onclick="this.value=null"
+                   onchange="mostrarNombreArchivo()"
+                   accept="image/*,video/*,.zip,.rar,.pdf"> 
+          </label>
 
-<p id="fileNameDisplay" style="margin:0;color:#cbd5e1">
-Toca para subir o arrastra aquí
-</p>
+          <div class="progress-container" id="uploadProgressBox">
+            <div class="progress-bar" id="uploadProgressBar"></div>
+          </div>
+          <p class="upload-status-text" id="uploadStatus">Esperando...</p>
+        </div>
 
-<!-- FIX: eliminamos onclick reset -->
-<input type="file" id="realFileInput"
-class="input-hidden"
-onchange="mostrarNombreArchivo()"
-accept="image/*,video/*,.zip,.rar,.pdf">
+        <div class="form-group"><label class="form-label">Título</label><input type="text" id="itemTitle" class="form-input" placeholder="Ej: Pack Premium"></div>
 
-</label>
+        <div class="form-group">
+          <label class="form-label">Precio y Moneda</label>
+          <div class="currency-toggle" style="margin-bottom: 10px;">
+            <div class="currency-option active" id="currTON" onclick="selectCurrency('TON')">💎 TON</div>
+            <div class="currency-option" id="currSTARS" onclick="selectCurrency('STARS')">⭐ Stars</div>
+          </div>
+          <input type="number" id="itemPrice" class="form-input" placeholder="Cantidad (Ej: 2.5)">
+          <span class="commission-note">ℹ️ Se descontará un 7% de comisión.</span>
+        </div>
 
-<div class="progress-container" id="uploadProgressBox">
-<div class="progress-bar" id="uploadProgressBar"></div>
-</div>
+        <div class="form-group"><label class="form-label">Descripción</label><textarea id="itemDesc" class="form-textarea" rows="4"></textarea></div>
 
-<p class="upload-status-text" id="uploadStatus">Esperando...</p>
+        <button type="button" class="btn-telegram-cta" id="btnPublish">Publicar Ítem</button>
 
-</div>
+      </form>
+    </div>
+  </div>
 
-<div class="form-group">
-<label class="form-label">Título</label>
-<input type="text" id="itemTitle" class="form-input">
-</div>
+  <script>
+    // 1. SUPABASE
+    const SUPABASE_URL = 'https://ndkupidhlauzroduvech.supabase.co'; 
+    const SUPABASE_KEY = 'sb_publishable_fSQ9uBUx_YTfxr2QL2-kfQ_pdE2cqHv'; 
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-<div class="form-group">
-<label class="form-label">Precio</label>
-<input type="number" id="itemPrice" class="form-input">
-</div>
+    // 2. UI GLOBAL
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+    let selectedCurrency = 'TON';
 
-<div class="form-group">
-<label class="form-label">Descripción</label>
-<textarea id="itemDesc" class="form-textarea"></textarea>
-</div>
+    function toggleSubFields() {
+      const category = document.getElementById('categorySelect').value;
+      const subFields = document.getElementById('subFields');
+      const fileField = document.getElementById('fileField');
+      if (category === 'sub') { subFields.style.display = 'block'; fileField.style.display = 'none'; } 
+      else { subFields.style.display = 'none'; fileField.style.display = 'block'; }
+    }
 
-<button type="button" class="btn-telegram-cta" id="btnPublish">
-Publicar Ítem
-</button>
+    window.selectCurrency = function(type) {
+      selectedCurrency = type;
+      document.getElementById('currTON').classList.toggle('active', type === 'TON');
+      document.getElementById('currSTARS').classList.toggle('active', type === 'STARS');
+    }
 
-</form>
-</div>
-</div>
+    // ----------------------------------------------------
+    // 3. FUNCIÓN VISUAL (Llamada directa desde el HTML)
+    // ----------------------------------------------------
+    function mostrarNombreArchivo() {
+        const input = document.getElementById('realFileInput');
+        const fileNameDisplay = document.getElementById('fileNameDisplay');
+        const dropZone = document.getElementById('dropZone');
 
-<script>
+        if (input.files && input.files.length > 0) {
+            const file = input.files[0];
+            // Actualizar texto
+            fileNameDisplay.innerHTML = `✅ <b>${file.name}</b>`;
+            // Cambiar colores
+            fileNameDisplay.style.color = "#ccf381"; 
+            dropZone.classList.add('file-selected');
+        }
+    }
 
-// ===== TELEGRAM FIX =====
-const tg = window.Telegram.WebApp;
-tg.expand();
-tg.ready(); // FIX
-tg.enableClosingConfirmation(); // FIX
+    // 4. SUBIDA A SUPABASE
+    document.getElementById('btnPublish').addEventListener('click', async () => {
+      const title = document.getElementById('itemTitle').value;
+      const price = document.getElementById('itemPrice').value;
+      const category = document.getElementById('categorySelect').value;
+      const fileInput = document.getElementById('realFileInput'); // Referencia fresca
 
-// ===== SUPABASE =====
-const supabase = window.supabase.createClient(
-'https://ndkupidhlauzroduvech.supabase.co',
-'sb_publishable_fSQ9uBUx_YTfxr2QL2-kfQ_pdE2cqHv'
-);
+      if(!title || !price) return alert("Por favor completa el Título y el Precio.");
 
-// ===== MOBILE CLICK FIX =====
-document.getElementById("dropZone").addEventListener("click", () => {
-document.getElementById("realFileInput").click();
-});
+      const btn = document.getElementById('btnPublish');
+      const progressBox = document.getElementById('uploadProgressBox');
+      const progressBar = document.getElementById('uploadProgressBar');
+      const statusText = document.getElementById('uploadStatus');
 
-// ===== TOGGLE =====
-function toggleSubFields(){
-const cat = categorySelect.value;
-subFields.style.display = cat === 'sub' ? 'block' : 'none';
-fileField.style.display = cat === 'sub' ? 'none' : 'block';
-}
+      btn.disabled = true;
+      btn.innerText = "Procesando...";
+      progressBox.style.display = 'block';
+      statusText.style.display = 'block';
 
-// ===== FILE VISUAL FIX =====
-function mostrarNombreArchivo() {
+      try {
+        let finalUrl = "";
+        const seller = tg.initDataUnsafe?.user?.username ? '@' + tg.initDataUnsafe.user.username : '@Anonimo';
 
-const input = realFileInput;
-const display = fileNameDisplay;
-const dropZone = document.getElementById("dropZone");
+        if(category !== 'sub') {
+           if (!fileInput.files || fileInput.files.length === 0) {
+               throw new Error("Debes seleccionar un archivo.");
+           }
+           const file = fileInput.files[0];
 
-if(!input.files.length) return;
+           progressBar.style.width = '30%';
+           statusText.innerText = "Subiendo archivo...";
 
-const file = input.files[0];
+           // Nombre limpio
+           const fileName = Date.now() + '_' + file.name.replace(/\s+/g, '-');
 
-dropZone.classList.add("file-selected");
-display.style.color = "#ccf381";
+           const { data, error } = await supabase.storage
+             .from('products')
+             .upload(fileName, file, { cacheControl: '3600', upsert: false });
 
-// Preview imagen (solo mejora visual)
-if(file.type.startsWith("image/")){
+           if (error) throw error;
 
-const reader = new FileReader();
-reader.onload = e => {
-display.innerHTML = `
-<img src="${e.target.result}"
-style="max-height:90px;border-radius:10px;margin-bottom:6px;display:block;">
-${file.name}`;
-};
-reader.readAsDataURL(file);
+           progressBar.style.width = '80%';
+           statusText.innerText = "Generando enlace...";
 
-}else{
-display.textContent = "✅ " + file.name; // FIX seguro Telegram
-}
+           const { data: publicData } = supabase.storage
+             .from('products')
+             .getPublicUrl(fileName);
+           finalUrl = publicData.publicUrl;
 
-}
+        } else {
+           finalUrl = document.getElementById('subLinkInput').value;
+           if(!finalUrl) throw new Error("Falta el enlace del canal.");
+        }
 
-// ===== UPLOAD =====
+        statusText.innerText = "Guardando...";
+        progressBar.style.width = '90%';
 
-btnPublish.onclick = async () => {
+        const { error: dbError } = await supabase
+          .from('marketplace_items')
+          .insert([{ 
+            title: title, 
+            price: price, 
+            currency: selectedCurrency,
+            description: document.getElementById('itemDesc').value,
+            category: category, 
+            file_url: finalUrl,
+            seller: seller
+          }]);
 
-if(!itemTitle.value || !itemPrice.value){
-alert("Completa título y precio");
-return;
-}
+        if (dbError) throw dbError;
 
-const file = realFileInput.files[0];
-if(!file && categorySelect.value !== "sub"){
-alert("Selecciona archivo");
-return;
-}
+        progressBar.style.width = '100%';
+        statusText.innerText = "¡Completado!";
+        setTimeout(() => { alert("✅ ¡Ítem publicado!"); window.location.href = "marketplace.html"; }, 500);
 
-uploadProgressBox.style.display="block";
-uploadStatus.style.display="block";
-uploadStatus.innerText="Subiendo...";
-
-btnPublish.disabled=true;
-
-try{
-
-let fileUrl="";
-
-if(categorySelect.value !== "sub"){
-
-const name = Date.now()+"_"+file.name.replace(/\s/g,"-");
-
-await supabase.storage.from("products").upload(name,file);
-
-fileUrl = supabase.storage.from("products").getPublicUrl(name).data.publicUrl;
-
-}else{
-fileUrl = subLinkInput.value;
-}
-
-await supabase.from("marketplace_items").insert([{
-title:itemTitle.value,
-price:itemPrice.value,
-description:itemDesc.value,
-category:categorySelect.value,
-file_url:fileUrl
-}]);
-
-uploadProgressBar.style.width="100%";
-uploadStatus.innerText="Listo ✅";
-
-// FIX: reset input después de subir
-realFileInput.value="";
-
-setTimeout(()=>{
-location.href="marketplace.html";
-},600);
-
-}catch(err){
-
-alert("Error: "+err.message);
-btnPublish.disabled=false;
-
-}
-
-};
-
-</script>
-
+      } catch (error) {
+        console.error(error);
+        alert("❌ Error: " + error.message);
+        btn.disabled = false;
+        btn.innerText = "Reintentar";
+        progressBar.style.width = '0%';
+        statusText.innerText = "Error";
+      }
+    });
+  </script>
 </body>
 </html>
