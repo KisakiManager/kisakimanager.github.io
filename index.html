@@ -28,13 +28,9 @@
 
     <div class="news-card">
       <div class="news-content">
-        <span class="news-badge">🔔 Novedades v1.4.0</span>
-        <h3>Lanzamiento WebApp Oficial</h3>
-        <p>Kisaki Manager ahora funciona como una aplicación nativa. Navega por las secciones usando la barra inferior.</p>
-        <div class="blog-reactions" style="display:flex; gap:10px; margin-top:15px; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
-          <button class="reaction-btn" style="background:rgba(255,255,255,0.1); border:none; border-radius:20px; padding:5px 10px; color:#fff;" onclick="this.style.color='#ccf381'">👍 124</button>
-          <button class="reaction-btn" style="background:rgba(255,255,255,0.1); border:none; border-radius:20px; padding:5px 10px; color:#fff;" onclick="this.style.color='#f87171'">❤️ 45</button>
-        </div>
+        <span class="news-badge">🚀 Roadmap</span>
+        <h3>Enfoque en Analytics</h3>
+        <p>Estamos mejorando el motor de estadísticas para ofrecerte datos precisos de tus canales en tiempo real.</p>
       </div>
     </div>
 
@@ -51,27 +47,8 @@
           </svg>
         </div>
         <h3 style="margin: 0; color: white; font-size: 1.1em;">Analytics</h3>
-        <span style="font-size: 0.7em; background: #ccf381; color: #000; padding: 2px 6px; border-radius: 4px; font-weight: 800; display: inline-block; margin-top: 5px;">PRO</span>
-      </div>
-    </a>
-
-    <a href="clones.html" class="menu-card" style="background: linear-gradient(145deg, #312e81, #1e1b4b); border: 1px solid rgba(99, 102, 241, 0.3); text-decoration: none; border-radius: 16px; padding: 15px; display: flex; align-items: center; gap: 15px; margin-top: 15px;">
-      <div style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 12px; color: #818cf8;">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg>
-      </div>
-      <div>
-        <h3 style="margin: 0; color: white; font-size: 1em;">Mis Bots</h3>
-        <span style="font-size: 0.8em; color: #a5b4fc;">Gestionar Clones</span>
-      </div>
-    </a>
-
-    <a href="publisher.html" class="menu-card" style="background: linear-gradient(145deg, #be185d, #831843); border: 1px solid rgba(244, 114, 182, 0.3); text-decoration: none; border-radius: 16px; padding: 15px; display: flex; align-items: center; gap: 15px; margin-top: 15px;">
-      <div style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 12px; color: #f472b6;">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"></path></svg>
-      </div>
-      <div>
-        <h3 style="margin: 0; color: white; font-size: 1em;">Studio</h3>
-        <span style="font-size: 0.8em; color: #fbcfe8;">Crear y Publicar</span>
+        <p style="margin: 5px 0 0 0; color: #94a3b8; font-size: 0.85em;">Estadísticas de crecimiento y audiencia.</p>
+        <span style="font-size: 0.7em; background: #ccf381; color: #000; padding: 2px 6px; border-radius: 4px; font-weight: 800; display: inline-block; margin-top: 10px;">PRIORIDAD</span>
       </div>
     </a>
 
@@ -93,83 +70,28 @@
 
   </div>
 
-  <div class="search-overlay" id="searchOverlay">
-    <input type="text" class="search-input" id="globalSearchInput" placeholder="Buscar..." onkeyup="handleSearch(event)">
-    <div class="search-results" id="searchResults"></div>
-  </div>
-
   <nav class="bottom-nav" style="padding: 10px 5px; gap: 2px;">
-
     <a href="index.html" class="nav-item active" style="font-size: 0.65em;">
         <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         Inicio
     </a>
-
     <a href="marketplace.html" class="nav-item" style="font-size: 0.65em;">
         <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.38 3.4a2 2 0 0 0-1.79-1.11H5.41a2 2 0 0 0-1.79 1.11L1 9h22l-2.62-5.6z"/><path d="M1 9h22v10a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V9z"/></svg>
         Market
     </a>
-
     <a href="analytics.html" class="nav-item" style="font-size: 0.65em;">
         <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
         Stats
     </a>
-
-    <div class="nav-item" onclick="toggleSearch()" style="min-width: 50px;">
-        <div class="nav-search-btn" style="width: 42px; height: 42px;">
-            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        </div>
-    </div>
-
     <a href="legal.html" class="nav-item" style="font-size: 0.65em;">
         <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
         Legal
     </a>
-
     <a href="profile.html" class="nav-item" style="font-size: 0.65em;">
         <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         Perfil
     </a>
-
   </nav>
-
-  <script>
-    function toggleSearch() {
-      document.getElementById('searchOverlay').classList.toggle('show');
-      if(document.getElementById('searchOverlay').classList.contains('show')) document.getElementById('globalSearchInput').focus();
-    }
-
-    function handleSearch(e) {
-      const input = e.target.value.toLowerCase();
-      const resultsDiv = document.getElementById('searchResults');
-
-      if (e.key === 'Enter') {
-        window.location.href = `search-results.html?q=${encodeURIComponent(input)}`;
-        return;
-      }
-
-      resultsDiv.innerHTML = '';
-      const data = [
-        {t: 'Planes Premium', a: 'upgrade.html'}, // ACTUALIZADO A UPGRADE.HTML
-        {t: 'Marketplace', a: 'marketplace.html'},
-        {t: 'Analíticas', a: 'analytics.html'},
-        {t: 'Mis Bots', a: 'clones.html'},
-        {t: 'Studio Creativo', a: 'publisher.html'},
-        {t: 'Legal', a: 'legal.html'},
-        {t: 'Perfil', a: 'profile.html'}
-      ];
-
-      if(input.length > 1) {
-        resultsDiv.style.display = 'block';
-        const matches = data.filter(d => d.t.toLowerCase().includes(input));
-        if(matches.length > 0) {
-          matches.forEach(m => {
-             resultsDiv.innerHTML += `<a href="${m.a}" class="search-result-item">${m.t}</a>`;
-          });
-        } else { resultsDiv.style.display = 'none'; }
-      } else { resultsDiv.style.display = 'none'; }
-    }
-  </script>
 
 </body>
 </html>
