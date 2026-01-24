@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Kisaki Analytics V4.1 (Stable)</title>
+  <title>Kisaki Analytics V4.1</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
 
@@ -80,15 +80,13 @@
         statusEl.style.color = color;
     }
 
-    let chartInstance = null; // Control para destruir gráficas viejas
-
     async function init() {
       try {
         setStatus("🚀 Cargando librerías...");
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // 1. CREDENCIALES (Lógica Original V4.1 que sí funcionaba)
+        // 1. CREDENCIALES
         const SUPABASE_URL = 'https://ndkupidhlauzroduvech.supabase.co'; 
         const SUPABASE_KEY = 'sb_publishable_fSQ9uBUx_YTfxr2QL2-kfQ_pdE2cqHv'; 
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -121,8 +119,9 @@
 
         // 4. POBLAR SELECTOR
         setStatus(`✅ ${channels.length} canales encontrados`, "#4ade80");
-        select.innerHTML = ''; 
+        select.innerHTML = ''; // Limpiar "Cargando..."
         
+        // Opción por defecto
         const defaultOpt = document.createElement('option');
         defaultOpt.text = "👇 Selecciona un canal";
         defaultOpt.value = "";
@@ -137,13 +136,13 @@
 
         // 5. CARGAR EL PRIMERO AUTOMÁTICAMENTE
         if(channels.length > 0) {
-           select.value = channels[0].telegram_chat_id; 
+           select.value = channels[0].telegram_chat_id; // Forzar selección visual
            loadStats(channels[0].telegram_chat_id);
         }
 
       } catch (e) {
         setStatus(`❌ ERROR CRÍTICO: ${e.message}`, "#ef4444");
-        alert("Error: " + e.message); 
+        alert("Error: " + e.message); // Alerta visual para ti
       }
     }
 
@@ -152,7 +151,6 @@
         setStatus("🔄 Cargando estadísticas...");
         
         try {
-            // Re-instancia segura del cliente para evitar problemas de scope
             const supabase = window.supabase.createClient('https://ndkupidhlauzroduvech.supabase.co', 'sb_publishable_fSQ9uBUx_YTfxr2QL2-kfQ_pdE2cqHv');
             
             const { data: stats, error } = await supabase
@@ -198,31 +196,20 @@
         if(net < 0) iaMsg = `⚠️ <b>Atención:</b> -${Math.abs(net)} usuarios hoy.`;
         document.getElementById('aiText').innerHTML = iaMsg;
 
-        // --- TRUCO VISUAL: RAMPA DE CRECIMIENTO ---
-        // (Esto es lo único nuevo respecto a la V4.1 original)
-        let chartValues = stats.map(d => d.total_subs);
-        let chartLabels = stats.map(d => d.recorded_at.slice(5));
-
-        if (chartValues.length === 1) {
-            chartValues.unshift(0); 
-            chartLabels.unshift("Inicio"); 
-        }
-
-        renderChart(chartLabels, chartValues);
+        renderChart(stats);
     }
 
     function updateUIEmpty() {
         document.getElementById('kpiSubs').innerText = "0";
         document.getElementById('aiText').innerText = "El bot está conectado pero aún no hay actividad hoy.";
-        if(chartInstance) chartInstance.destroy();
         document.getElementById('growthChart').innerHTML = "<div style='text-align:center; padding:20px; color:#64748b'>Esperando datos...</div>";
     }
 
-    function renderChart(labels, data) {
+    function renderChart(data) {
         const options = {
             chart: { type: 'area', height: 200, toolbar: { show: false }, background: 'transparent' },
-            series: [{ name: 'Subs', data: data }],
-            xaxis: { categories: labels, labels: { style: { colors: '#94a3b8' } } },
+            series: [{ name: 'Subs', data: data.map(d => d.total_subs) }],
+            xaxis: { categories: data.map(d => d.recorded_at.slice(5)), labels: { style: { colors: '#94a3b8' } } },
             colors: ['#ccf381'],
             theme: { mode: 'dark' },
             dataLabels: { enabled: false },
@@ -230,11 +217,8 @@
             stroke: { curve: 'smooth', width: 2 },
             fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.0 } }
         };
-        
-        if(chartInstance) chartInstance.destroy();
         document.getElementById('growthChart').innerHTML = "";
-        chartInstance = new ApexCharts(document.querySelector("#growthChart"), options);
-        chartInstance.render();
+        new ApexCharts(document.querySelector("#growthChart"), options).render();
     }
 
     // Arrancar
