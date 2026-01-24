@@ -2,123 +2,281 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Política de Pagos — Kisaki Manager</title>
+  <title>Planes Kisaki</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  
+  <style>
+    /* --- RESET & BASICS --- */
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
+    
+    body {
+      background-color: #050505; /* Fondo casi negro */
+      color: #e5e5e5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    /* --- BOTÓN VOLVER --- */
+    .back-nav {
+      width: 100%; max-width: 800px; display: flex; justify-content: flex-start; margin-bottom: 20px;
+    }
+    .back-btn {
+      color: #a1a1aa; text-decoration: none; font-size: 0.9em; display: flex; align-items: center; gap: 5px;
+      transition: color 0.3s;
+    }
+    .back-btn:hover { color: white; }
+
+    /* --- ENCABEZADO --- */
+    .header { text-align: center; margin-bottom: 40px; max-width: 600px; }
+    .header h1 {
+      font-size: 1.8em;
+      background: linear-gradient(to right, #fff, #a1a1aa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+    }
+    .header p { color: #71717a; font-size: 0.95em; line-height: 1.5; }
+
+    /* --- SELECTOR DE PAGO ÚNICO (Estilo Toggle fijo) --- */
+    .pricing-toggle {
+      background: #18181b;
+      padding: 4px;
+      border-radius: 50px;
+      display: inline-flex;
+      margin-bottom: 40px;
+      border: 1px solid #27272a;
+    }
+    
+    .toggle-opt {
+      padding: 8px 20px;
+      border-radius: 40px;
+      font-size: 0.85em;
+      font-weight: 600;
+      cursor: default;
+    }
+    
+    .toggle-active {
+      background: #fff;
+      color: #000;
+      box-shadow: 0 2px 10px rgba(255,255,255,0.1);
+    }
+    
+    .toggle-inactive {
+      color: #71717a;
+    }
+
+    /* --- GRID DE TARJETAS --- */
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+      width: 100%;
+      max-width: 800px;
+    }
+
+    /* --- ESTILO TARJETA GENERAL --- */
+    .card {
+      background: #09090b; /* Muy oscuro */
+      border: 1px solid #27272a;
+      border-radius: 24px;
+      padding: 30px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.3s, border-color 0.3s;
+      overflow: hidden;
+    }
+
+    .card:hover { transform: translateY(-5px); border-color: #3f3f46; }
+
+    /* ETIQUETA POPULAR */
+    .badge-popular {
+      position: absolute;
+      top: 20px; right: 20px;
+      background: #6366f1; /* Indigo */
+      color: white;
+      font-size: 0.75em;
+      font-weight: bold;
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
+
+    /* TEXTOS TARJETA */
+    .plan-name { font-size: 1.2em; font-weight: 600; color: #fff; margin-bottom: 5px; }
+    .plan-desc { font-size: 0.9em; color: #a1a1aa; margin-bottom: 25px; min-height: 40px; }
+    
+    .price { display: flex; align-items: baseline; margin-bottom: 25px; gap: 5px; }
+    .price-val { font-size: 2.2em; font-weight: 700; color: white; }
+    .price-meta { font-size: 0.9em; color: #71717a; font-weight: 400; }
+
+    /* BOTONES */
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.95em;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+      border: none;
+      margin-bottom: 25px;
+    }
+
+    /* Botón Blanco (Estilo Popular) */
+    .btn-white {
+      background: white;
+      color: black;
+    }
+    .btn-white:hover { background: #e4e4e7; }
+
+    /* Botón Oscuro (Estilo Secundario) */
+    .btn-dark {
+      background: #27272a;
+      color: white;
+      border: 1px solid #3f3f46;
+    }
+    .btn-dark:hover { background: #3f3f46; }
+
+    /* --- LISTA DE CARACTERÍSTICAS --- */
+    .features { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+    .feature-item { display: flex; align-items: center; gap: 10px; font-size: 0.9em; color: #d4d4d8; }
+    
+    .check-icon {
+      width: 18px; height: 18px;
+      background: #27272a;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 0.7em; flex-shrink: 0;
+    }
+    
+    /* Variación Check Brillante para la tarjeta destacada */
+    .card.highlight .check-icon { background: #fff; color: #000; }
+
+    /* --- EFECTO GLOW PARA KISAKI BUSINESS --- */
+    .card.highlight {
+      background: linear-gradient(180deg, #09090b 0%, #111118 100%);
+      border: 1px solid #3f3f46;
+    }
+    /* Luz sutil abajo */
+    .card.highlight::after {
+      content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 40%;
+      background: radial-gradient(circle at center, rgba(99, 102, 241, 0.15), transparent 70%);
+      pointer-events: none;
+    }
+
+    /* Responsive Grid */
+    @media (min-width: 768px) {
+      .pricing-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
 </head>
 <body>
 
-  <div class="page-header" style="background-image: url('lifetime-payments.jpg');">
-
-    <a href="index.html" class="back-floating">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M15 18l-6-6 6-6"/>
-      </svg>
+  <div class="back-nav">
+    <a href="index.html" class="back-btn">
+      <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+      Volver al Inicio
     </a>
-
   </div>
 
-  <div class="content-card">
+  <div class="header">
+    <h1>Potencia y Control Total</h1>
+    <p>Elige la herramienta adecuada para escalar tus canales. Pago único, sin sorpresas mensuales.</p>
+  </div>
 
-    <div class="card-header-inner">
-      <svg class="page-title-icon" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
-      </svg>
+  <div class="pricing-toggle">
+    <span class="toggle-opt toggle-active">Pago Único</span>
+    <span class="toggle-opt toggle-inactive">Sin Suscripciones</span>
+  </div>
 
-      <div class="page-title">
-        <h1>Planes y Precios</h1>
-        <span>Elige la mejor opción para tu comunidad</span>
+  <div class="pricing-grid">
+
+    <div class="card highlight">
+      <div class="badge-popular">Popular</div>
+      
+      <div class="plan-name">Kisaki Business</div>
+      <div class="plan-desc">Maximiza el rendimiento de tus canales existentes con analíticas profundas.</div>
+      
+      <div class="price">
+        <span class="price-val">⭐️ 500</span>
+        <span class="price-meta">/ para siempre</span>
       </div>
+
+      <button class="btn btn-white" onclick="selectPlan('business')">
+        Obtener Business →
+      </button>
+
+      <ul class="features">
+        <li class="feature-item"><span class="check-icon">✓</span> Acceso a todas las Analytics V5</li>
+        <li class="feature-item"><span class="check-icon">✓</span> Gestión Multi-Canal Ilimitada</li>
+        <li class="feature-item"><span class="check-icon">✓</span> Sugerencias IA de Contenido</li>
+        <li class="feature-item"><span class="check-icon">✓</span> Soporte Prioritario 24/7</li>
+        <li class="feature-item"><span class="check-icon">✓</span> Exportación de Datos CSV</li>
+        <li class="feature-item"><span class="check-icon">✓</span> Insignia de Perfil "Business"</li>
+      </ul>
     </div>
 
-    <div class="card-body">
-
-      <h2 style="text-align:center; margin-bottom: 25px; color: #fff;">Elige tu plan</h2>
-
-      <div class="pricing-container">
-
-        <div class="pricing-card" onclick="toggleCard(this)">
-          
-          <div class="pricing-header">
-            <div>
-              <span class="pricing-title">Telegram Business</span>
-              <div class="pricing-price">$10.00 <span class="pricing-sub">/ único</span></div>
-            </div>
-            <span class="pricing-badge">único</span>
-          </div>
-
-          <div class="pricing-content">
-            <ul>
-              <li>
-                <svg class="check-icon" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-                Automatización de respuestas rápidas
-              </li>
-              <li>
-                <svg class="check-icon" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-                Gestión de catálogo de comprás
-              </li>
-              <li>
-                <svg class="check-icon" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-                Etiquetas de chat personalizadas (próximamente...)
-              </li>
-            </ul>
-            <a href="#" class="btn-buy">Adquirir Business</a>
-          </div>
-        </div>
-
-        <div class="pricing-card" onclick="toggleCard(this)">
-          
-          <div class="pricing-header">
-            <div>
-              <span class="pricing-title">Clonar Bot</span>
-              <div class="pricing-price">$10.00 <span class="pricing-sub">/ único</span></div>
-            </div>
-            <span class="pricing-badge" style="background-color: rgba(37, 99, 235, 0.2); color: #60a5fa;">único</span>
-          </div>
-
-          <div class="pricing-content">
-            <ul>
-              <li>
-                <svg class="check-icon" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-                Tu propio bot con tu marca y nombre
-              </li>
-              <li>
-                <svg class="check-icon" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-                Configuración independiente 
-              </li>
-              <li>
-                <svg class="check-icon" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-                Actualizaciones automáticas
-              </li>
-            </ul>
-            <a href="#" class="btn-buy">Clonar Ahora</a>
-          </div>
-        </div>
-
+    <div class="card">
+      <div class="plan-name">BotForge</div>
+      <div class="plan-desc">Crea tu propio imperio. Clona la tecnología de Kisaki con tu propia marca.</div>
+      
+      <div class="price">
+        <span class="price-val">⭐️ 2,500</span>
+        <span class="price-meta">/ licencia única</span>
       </div>
 
-      <div style="margin-top: 40px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; color: #7b8fa6; font-size: 0.85em;">
-        © Kisaki Manager • Dog Geek Labs
-      </div>
+      <button class="btn btn-dark" onclick="selectPlan('forge')">
+        Iniciar Clonación
+      </button>
 
+      <ul class="features">
+        <li class="feature-item"><span class="check-icon">✓</span> Tu Propio Bot (Marca Blanca)</li>
+        <li class="feature-item"><span class="check-icon">✓</span> Instancia Dedicada en Railway</li>
+        <li class="feature-item"><span class="check-icon">✓</span> Sin menciones a Kisaki</li>
+        <li class="feature-item"><span class="check-icon">✓</span> Control total de Usuarios</li>
+        <li class="feature-item"><span class="check-icon">✓</span> Código Base V4.0 Incluido</li>
+        <li class="feature-item"><span class="check-icon">✓</span> Actualizaciones de Seguridad</li>
+      </ul>
     </div>
+
   </div>
 
   <script>
-    function toggleCard(card) {
-      // 1. Si la tarjeta que tocamos ya está activa, la cerramos
-      if (card.classList.contains('active')) {
-        card.classList.remove('active');
-        return;
-      }
+    const tg = window.Telegram.WebApp;
+    tg.expand();
 
-      // 2. Cerramos todas las demás tarjetas primero (efecto acordeón único)
-      document.querySelectorAll('.pricing-card').forEach(c => {
-        c.classList.remove('active');
-      });
-
-      // 3. Abrimos la tarjeta que tocamos
-      card.classList.add('active');
+    // Función para manejar la compra
+    function selectPlan(plan) {
+        if(plan === 'business') {
+            tg.showPopup({
+                title: 'Confirmar Kisaki Business',
+                message: 'Estás a punto de adquirir la licencia Business por 500 Estrellas. ¿Continuar?',
+                buttons: [
+                    {id: 'pay_business', type: 'default', text: 'Pagar Ahora'},
+                    {type: 'cancel'}
+                ]
+            }, function(btnId) {
+                if (btnId === 'pay_business') {
+                    // Aquí iría la lógica de invoice real
+                    tg.sendData(JSON.stringify({action: 'buy_plan', plan: 'business'}));
+                }
+            });
+        } 
+        else if (plan === 'forge') {
+            tg.showPopup({
+                title: 'Acceso BotForge',
+                message: 'El sistema de clonación requiere configuración. ¿Contactar soporte para iniciar?',
+                buttons: [
+                    {id: 'contact_support', type: 'default', text: 'Contactar'},
+                    {type: 'cancel'}
+                ]
+            });
+        }
     }
   </script>
 
