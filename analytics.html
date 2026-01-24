@@ -13,7 +13,7 @@
 
   <style>
     /* ESTILO CYBER DASHBOARD */
-    body { background-color: #0b1120; color: #e2e8f0; padding-bottom: 50px; }
+    body { background-color: #0b1120; color: #e2e8f0; padding-bottom: 50px; font-family: sans-serif; }
 
     .dashboard-header {
       padding: 20px;
@@ -26,13 +26,12 @@
       background: rgba(15, 23, 42, 0.8);
       border: 1px solid #334155;
       color: #ccf381;
-      padding: 5px 10px;
+      padding: 10px;
       border-radius: 8px;
-      font-size: 0.9em;
-      margin-top: 5px;
+      font-size: 0.95em;
+      margin-top: 10px;
       outline: none;
       width: 100%;
-      max-width: 250px;
     }
 
     /* KPI CARDS */
@@ -55,10 +54,10 @@
 
     .kpi-title { font-size: 0.8em; color: #94a3b8; display: block; margin-bottom: 5px; }
     .kpi-value { font-size: 1.4em; font-weight: 700; color: #fff; }
-    .kpi-trend { font-size: 0.75em; display: flex; align-items: center; gap: 4px; margin-top: 5px; }
-    .trend-up { color: #ccf381; } 
-    .trend-down { color: #ef4444; }
-    .trend-neutral { color: #94a3b8; }
+    .kpi-sub { font-size: 0.75em; display: flex; align-items: center; gap: 4px; margin-top: 5px; color: #cbd5e1;}
+    
+    .green-text { color: #4ade80; font-weight: bold; } 
+    .red-text { color: #f87171; font-weight: bold; }
 
     /* SECCIONES DE GRÁFICOS */
     .chart-container {
@@ -92,7 +91,7 @@
       background: rgba(11, 17, 32, 0.8); z-index: 10;
       border-radius: 16px;
     }
-    
+
     .loading-spinner { text-align: center; color: #94a3b8; font-size: 0.9em; padding: 20px; }
   </style>
 </head>
@@ -103,10 +102,10 @@
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
       Volver
     </a>
-    <h1 style="margin: 10px 0 5px 0; font-size: 1.5em;">Panel de Control</h1>
-    
+    <h1 style="margin: 10px 0 5px 0; font-size: 1.5em;">Kisaki Analytics</h1>
+
     <select id="channelSelector" class="channel-select" onchange="loadChannelStats(this.value)">
-      <option value="">Cargando canales...</option>
+      <option value="">Cargando tus canales...</option>
     </select>
   </div>
 
@@ -114,22 +113,29 @@
     <div class="kpi-card">
       <span class="kpi-title">Suscriptores</span>
       <div class="kpi-value" id="kpiSubs">...</div>
-      <div class="kpi-trend" id="kpiSubsTrend">-</div>
+      <div class="kpi-sub" id="kpiNetGrowth">Calculando...</div>
     </div>
+    
     <div class="kpi-card">
-      <span class="kpi-title">Vistas (Est.)</span>
-      <div class="kpi-value" id="kpiViews">...</div>
-      <div class="kpi-trend trend-neutral">~ Calculado</div>
+      <span class="kpi-title">Actividad Hoy</span>
+      <div class="kpi-value" id="kpiActivity">0</div>
+      <div class="kpi-sub">
+        <span class="green-text">⬆ <span id="joinedToday">0</span></span>
+        <span style="margin:0 5px; opacity:0.3">|</span>
+        <span class="red-text">⬇ <span id="leftToday">0</span></span>
+      </div>
     </div>
+
     <div class="kpi-card">
       <span class="kpi-title">Engagement</span>
       <div class="kpi-value">N/A</div>
-      <div class="kpi-trend trend-neutral">Requiere Posts</div>
+      <div class="kpi-sub">Requiere más posts</div>
     </div>
+
     <div class="kpi-card">
       <span class="kpi-title">Valor (Stars)</span>
       <div class="kpi-value" id="kpiValue">0</div>
-      <div class="kpi-trend trend-up">Est. Mensual</div>
+      <div class="kpi-sub green-text">Potencial Mes</div>
     </div>
   </div>
 
@@ -139,14 +145,14 @@
       Kisaki AI Insight
     </div>
     <p id="aiInsightText" style="font-size: 0.9em; line-height: 1.4; color: #cbd5e1; margin: 0;">
-      Recopilando datos para generar predicciones... Vuelve mañana.
+      Selecciona un canal para generar un diagnóstico...
     </p>
   </div>
 
   <div class="chart-container">
     <div class="section-title">
       Crecimiento Real
-      <span style="font-size:0.7em; background:#334155; padding:2px 6px; border-radius:4px;">Histórico</span>
+      <span style="font-size:0.7em; background:#334155; padding:2px 6px; border-radius:4px;">Últimos 14 Días</span>
     </div>
     <div id="growthChart"></div>
   </div>
@@ -174,102 +180,125 @@
 
     let chartInstance = null;
 
-    // 1. INICIALIZAR Y CARGAR CANALES
+    // Obtener ID del usuario actual (para filtrar SUS canales)
+    const user = tg.initDataUnsafe?.user;
+    // Fallback ID para pruebas en navegador (Tu ID)
+    const CURRENT_USER_ID = user ? user.id : 1298554649; 
+
+    // 1. INICIALIZAR: CARGAR SOLO LOS CANALES DEL USUARIO
     async function initDashboard() {
         const selector = document.getElementById('channelSelector');
-        
-        // Obtener canales de la tabla 'managed_channels' (El Radar)
+
+        // Consulta a 'managed_channels' filtrando por user_id
         const { data: channels, error } = await supabase
             .from('managed_channels')
-            .select('*');
+            .select('*')
+            .eq('user_id', CURRENT_USER_ID) // FILTRO DE SEGURIDAD
+            .eq('is_active', true);
 
         selector.innerHTML = '';
-        
+
         if (!channels || channels.length === 0) {
-            selector.innerHTML = '<option>No hay canales registrados</option>';
-            document.getElementById('aiInsightText').innerText = "Añade al bot como Admin en un canal para empezar.";
+            selector.innerHTML = '<option>No tienes canales vinculados</option>';
+            document.getElementById('aiInsightText').innerText = "💡 Añade a @KisakiManagerBot como admin en tu canal para ver sus estadísticas aquí.";
             return;
         }
 
         // Poblar el select
-        channels.forEach((ch, index) => {
+        channels.forEach((ch) => {
             const opt = document.createElement('option');
             opt.value = ch.telegram_chat_id;
             opt.text = ch.chat_title || "Canal Sin Nombre";
             selector.appendChild(opt);
         });
 
-        // Cargar datos del primer canal por defecto
+        // Cargar datos del primer canal automáticamente
         if(channels.length > 0) {
             loadChannelStats(channels[0].telegram_chat_id);
         }
     }
 
-    // 2. CARGAR ESTADÍSTICAS DEL CANAL SELECCIONADO
+    // 2. CARGAR ESTADÍSTICAS DIARIAS (daily_channel_stats)
     async function loadChannelStats(chatId) {
-        // Consultar historial en 'channel_stats'
+        if(!chatId) return;
+
+        // Consultar historial diario
         const { data: stats, error } = await supabase
-            .from('channel_stats')
+            .from('daily_channel_stats')
             .select('*')
-            .eq('telegram_chat_id', chatId)
-            .order('recorded_at', { ascending: true }); // Ordenar cronológicamente para la gráfica
+            .eq('channel_id', chatId)
+            .order('recorded_at', { ascending: true })
+            .limit(14); // Últimos 14 días
 
         if (!stats || stats.length === 0) {
             updateUI_Empty();
             return;
         }
 
-        // Procesar datos para la gráfica y KPIs
-        const latest = stats[stats.length - 1]; // El último registro
-        const previous = stats.length > 1 ? stats[stats.length - 2] : latest;
+        // Datos más recientes (Hoy)
+        const latest = stats[stats.length - 1]; 
         
-        // --- ACTUALIZAR KPIs ---
-        
-        // A. Suscriptores
-        const subDiff = latest.total_subs - previous.total_subs;
-        const trendEl = document.getElementById('kpiSubsTrend');
-        
+        // --- ACTUALIZAR TARJETAS KPI ---
+
+        // A. Suscriptores Totales
         document.getElementById('kpiSubs').innerText = latest.total_subs.toLocaleString();
+
+        // B. Actividad de Hoy (Joined vs Left)
+        const joined = latest.joined_today || 0;
+        const left = latest.left_today || 0;
+        const netGrowth = joined - left;
+
+        document.getElementById('joinedToday').innerText = joined;
+        document.getElementById('leftToday').innerText = left;
         
-        if(subDiff > 0) {
-            trendEl.innerHTML = `▲ +${subDiff}`;
-            trendEl.className = 'kpi-trend trend-up';
-        } else if (subDiff < 0) {
-            trendEl.innerHTML = `▼ ${subDiff}`;
-            trendEl.className = 'kpi-trend trend-down';
+        const activityEl = document.getElementById('kpiActivity');
+        activityEl.innerText = (netGrowth > 0 ? "+" : "") + netGrowth;
+        activityEl.style.color = netGrowth >= 0 ? '#4ade80' : '#f87171';
+
+        // C. Crecimiento Neto Texto
+        const netEl = document.getElementById('kpiNetGrowth');
+        if(netGrowth > 0) {
+            netEl.innerHTML = `<span class="green-text">▲ Creciendo</span>`;
+        } else if (netGrowth < 0) {
+            netEl.innerHTML = `<span class="red-text">▼ Perdiendo</span>`;
         } else {
-            trendEl.innerHTML = `= Sin cambios`;
-            trendEl.className = 'kpi-trend trend-neutral';
+            netEl.innerHTML = `<span style="color:#94a3b8">= Estable</span>`;
         }
 
-        // B. Vistas Estimadas (Heurística: 20% de subs son vistas promedio)
-        const estViews = Math.floor(latest.total_subs * 0.2);
-        document.getElementById('kpiViews').innerText = estViews.toLocaleString();
-
-        // C. Valor Estimado (Ej: 0.01 stars por sub)
+        // D. Valor Estimado (Ej: 0.01 stars por sub)
         const estValue = Math.floor(latest.total_subs * 0.01);
         document.getElementById('kpiValue').innerText = estValue;
 
-        // --- ACTUALIZAR GRÁFICA ---
-        const dates = stats.map(s => new Date(s.recorded_at).toLocaleDateString(undefined, {weekday:'short'}));
+        // --- RENDERIZAR GRÁFICA ---
+        const dates = stats.map(s => new Date(s.recorded_at).toLocaleDateString(undefined, {month:'short', day:'numeric'}));
         const values = stats.map(s => s.total_subs);
 
         renderGrowthChart(dates, values);
 
-        // --- AI INSIGHT SIMULADO ---
-        if(subDiff > 0) {
-            document.getElementById('aiInsightText').innerHTML = `¡Tendencia Positiva! Tu canal ha ganado <b>${subDiff}</b> suscriptores desde la última medición. Continúa con la estrategia actual.`;
+        // --- GENERAR ANÁLISIS IA (Lógica Local) ---
+        generateAIAnalysis(netGrowth, joined, left);
+    }
+
+    function generateAIAnalysis(net, joined, left) {
+        let text = "";
+        const aiBox = document.getElementById('aiInsightText');
+        
+        if (net > 0) {
+            text = `🚀 <b>Tendencia Positiva:</b> Hoy has ganado <b>${net}</b> suscriptores netos. Las entradas (${joined}) superan a las salidas (${left}). Es un excelente momento para publicar contenido importante.`;
+        } else if (net < 0) {
+            text = `⚠️ <b>Alerta de Retención:</b> Hoy estás perdiendo audiencia (<b>${net}</b>). Han salido ${left} usuarios. Revisa si tu última publicación causó rechazo o si la frecuencia es muy alta.`;
         } else {
-            document.getElementById('aiInsightText').innerHTML = `El crecimiento está estancado. Considera publicar contenido interactivo (Encuestas) para reactivar la audiencia.`;
+            text = `⚖️ <b>Estabilidad:</b> El flujo de usuarios está equilibrado. Intenta una dinámica de interacción (encuestas o preguntas) para romper la inercia.`;
         }
+        aiBox.innerHTML = text;
     }
 
     function updateUI_Empty() {
         document.getElementById('kpiSubs').innerText = "0";
-        document.getElementById('growthChart').innerHTML = "<div class='loading-spinner'>Esperando datos del Bot (24h)...</div>";
+        document.getElementById('growthChart').innerHTML = "<div class='loading-spinner'>Esperando datos... (Añade al bot y espera actividad)</div>";
     }
 
-    // 3. RENDERIZAR APEXCHART
+    // 3. RENDERIZAR GRÁFICA (APEXCHARTS)
     function renderGrowthChart(categories, data) {
         const options = {
             series: [{ name: 'Subs', data: data }],
