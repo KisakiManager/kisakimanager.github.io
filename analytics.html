@@ -38,7 +38,9 @@
       <h2 style="margin:0;">Estadísticas</h2>
       <a href="index.html" style="color:white; text-decoration:none; font-size:1.2em;">✕</a>
     </div>
+    
     <div id="appStatus">Iniciando sistema...</div>
+
     <select id="channelSelector" class="channel-select" onchange="loadStats(this.value)">
       <option value="">Cargando lista...</option>
     </select>
@@ -76,6 +78,7 @@
         statusEl.style.color = color;
     }
 
+    // Variable global para controlar la gráfica y evitar superposiciones
     let chartInstance = null;
 
     async function init() {
@@ -84,14 +87,20 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
+        // 1. CREDENCIALES
         const SUPABASE_URL = 'https://ndkupidhlauzroduvech.supabase.co'; 
         const SUPABASE_KEY = 'sb_publishable_fSQ9uBUx_YTfxr2QL2-kfQ_pdE2cqHv'; 
+        // Usamos window.supabaseClient para evitar conflictos de redeclaración
         window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        // 2. OBTENER ID USUARIO
         const user = tg.initDataUnsafe?.user;
         const USER_ID = user ? user.id : 1298554649; 
         
-        setStatus(`👤 ID: ${USER_ID} | 📡 Buscando canales...`);
+        setStatus(`👤 Usuario ID: ${USER_ID}`);
+
+        // 3. CARGAR CANALES
+        setStatus("📡 Buscando canales...");
         const select = document.getElementById('channelSelector');
 
         const { data: channels, error } = await window.supabaseClient
@@ -99,15 +108,26 @@
             .select('*')
             .eq('user_id', USER_ID);
 
-        if (error) throw new Error(error.message);
+        if (error) {
+            throw new Error(`Error DB: ${error.message}`);
+        }
+
         if (!channels || channels.length === 0) {
-            setStatus("⚠️ Sin canales vinculados", "#f87171");
+            setStatus("⚠️ No tienes canales vinculados", "#f87171");
             select.innerHTML = '<option>Sin canales</option>';
+            document.getElementById('aiText').innerText = "Añade al bot como admin a un canal para empezar.";
             return;
         }
 
-        setStatus(`✅ ${channels.length} canales listos`, "#4ade80");
-        select.innerHTML = '';
+        // 4. POBLAR SELECTOR
+        setStatus(`✅ ${channels.length} canales encontrados`, "#4ade80");
+        select.innerHTML = ''; 
+        
+        const defaultOpt = document.createElement('option');
+        defaultOpt.text = "👇 Selecciona un canal";
+        defaultOpt.value = "";
+        select.appendChild(defaultOpt);
+
         channels.forEach(ch => {
             const opt = document.createElement('option');
             opt.value = ch.telegram_chat_id;
@@ -115,16 +135,22 @@
             select.appendChild(opt);
         });
 
-        if(channels.length > 0) loadStats(channels[0].telegram_chat_id);
+        // 5. CARGAR EL PRIMERO AUTOMÁTICAMENTE
+        if(channels.length > 0) {
+           select.value = channels[0].telegram_chat_id;
+           loadStats(channels[0].telegram_chat_id);
+        }
 
       } catch (e) {
-        setStatus(`❌ ERROR: ${e.message}`, "#ef4444");
+        setStatus(`❌ ERROR CRÍTICO: ${e.message}`, "#ef4444");
+        alert("Error: " + e.message); 
       }
     }
 
     async function loadStats(chatId) {
         if(!chatId) return;
-        setStatus("🔄 Cargando datos...");
+        setStatus("🔄 Cargando estadísticas...");
+        
         try {
             const { data: stats, error } = await window.supabaseClient
                 .from('daily_channel_stats')
@@ -134,69 +160,109 @@
                 .limit(14);
 
             if(error) throw error;
+
             if (!stats || stats.length === 0) {
-                setStatus("ℹ️ Sin datos aún", "#facc15");
-                updateUIEmpty(); return;
+                setStatus("ℹ️ Sin datos recientes", "#facc15");
+                updateUIEmpty();
+                return;
             }
-            setStatus("✅ Datos actualizados", "#4ade80");
+
+            setStatus("✅ Estadísticas actualizadas", "#4ade80");
             updateUI(stats);
-        } catch (e) { setStatus(`⚠️ Error Stats: ${e.message}`, "#f87171"); }
+            
+        } catch (e) {
+            setStatus(`⚠️ Error Stats: ${e.message}`, "#f87171");
+        }
     }
 
     function updateUI(stats) {
         const latest = stats[stats.length - 1];
+        
+        // Actualizar KPIs (Tarjetas)
         document.getElementById('kpiSubs').innerText = latest.total_subs.toLocaleString();
-        const net = (latest.joined_today || 0) - (latest.left_today || 0);
-        document.getElementById('kpiActivity').innerHTML = 
-            `<span class="${net >= 0 ? 'green' : 'red'}">${net > 0 ? "+" : ""}${net}</span>`;
         document.getElementById('joined').innerText = latest.joined_today || 0;
         document.getElementById('left').innerText = latest.left_today || 0;
-        document.getElementById('netGrowth').innerText = net >= 0 ? "▲ Creciendo" : "▼ Decreciendo";
         
-        let iaMsg = net > 0 ? `🚀 <b>Positivo:</b> +${net} usuarios hoy.` : (net < 0 ? `⚠️ <b>Atención:</b> ${net} usuarios hoy.` : "⚖️ Flujo estable.");
+        const net = (latest.joined_today || 0) - (latest.left_today || 0);
+        const actEl = document.getElementById('kpiActivity');
+        actEl.innerText = (net > 0 ? "+" : "") + net;
+        actEl.style.color = net >= 0 ? '#4ade80' : '#f87171';
+        
+        document.getElementById('netGrowth').innerText = net >= 0 ? "▲ Creciendo" : "▼ Decreciendo";
+
+        // IA Texto
+        let iaMsg = "📊 Flujo estable.";
+        if(net > 0) iaMsg = `🚀 <b>Bien hecho:</b> +${net} usuarios hoy.`;
+        if(net < 0) iaMsg = `⚠️ <b>Atención:</b> -${Math.abs(net)} usuarios hoy.`;
         document.getElementById('aiText').innerHTML = iaMsg;
 
-        // --- TRUCO VISUAL PARA GRÁFICA DE 1 DÍA ---
-        let chartData = stats.map(d => d.total_subs);
-        let chartLabels = stats.map(d => d.recorded_at.slice(5));
+        // --- PREPARAR DATOS PARA LA GRÁFICA ---
+        let chartLabels = stats.map(d => d.recorded_at.slice(5)); // Mes-Día
+        let chartValues = stats.map(d => d.total_subs);
 
-        // Si solo hay 1 punto, añadimos un punto "0" ayer para crear la rampa visual
-        if (chartData.length === 1) {
-            chartData.unshift(0); // Añadir 0 al inicio
-            // Calcular fecha de ayer simple para la etiqueta
-            let today parts = stats[0].recorded_at.split('-');
-            let yesterdayDay = parseInt(parts[2]) - 1;
-            chartLabels.unshift(`${parts[1]}-${yesterdayDay.toString().padStart(2, '0')}`);
+        // --- TRUCO VISUAL: RAMPA DE CRECIMIENTO ---
+        // Si solo hay 1 dato, añadimos un "0" ayer para que se vea la subida verde
+        if (chartValues.length === 1) {
+            chartValues.unshift(0); // Añadir 0 al inicio
+            
+            // Calcular etiqueta "Ayer" de forma simple para la visualización
+            chartLabels.unshift("Inicio"); 
         }
 
-        renderChart(chartLabels, chartData);
+        renderChart(chartLabels, chartValues);
     }
 
     function updateUIEmpty() {
         document.getElementById('kpiSubs').innerText = "0";
+        document.getElementById('aiText').innerText = "El bot está conectado pero aún no hay actividad hoy.";
+        // Limpiar gráfica si existe
         if(chartInstance) chartInstance.destroy();
-        document.getElementById('growthChart').innerHTML = "<div style='text-align:center;padding:20px;color:#64748b'>Esperando actividad...</div>";
+        document.getElementById('growthChart').innerHTML = "<div style='text-align:center; padding:20px; color:#64748b'>Esperando datos...</div>";
     }
 
     function renderChart(labels, data) {
         const options = {
-            chart: { type: 'area', height: 200, toolbar: { show: false }, background: 'transparent', animations: { enabled: true } },
+            chart: { 
+                type: 'area', 
+                height: 200, 
+                toolbar: { show: false }, 
+                background: 'transparent',
+                animations: { enabled: true }
+            },
             series: [{ name: 'Suscriptores', data: data }],
-            xaxis: { categories: labels, labels: { style: { colors: '#94a3b8' } } },
-            colors: ['#ccf381'], // Tu color verde lima
+            xaxis: { 
+                categories: labels, 
+                labels: { style: { colors: '#94a3b8' } },
+                tooltip: { enabled: false }
+            },
+            colors: ['#ccf381'], // Tu color verde original
             theme: { mode: 'dark' },
             dataLabels: { enabled: false },
             grid: { borderColor: '#334155', strokeDashArray: 4 },
             stroke: { curve: 'smooth', width: 3 },
-            // El gradiente que ya tenías configurado
-            fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.5, opacityTo: 0.1, stops: [0, 100] } }
+            fill: { 
+                type: 'gradient', 
+                gradient: { 
+                    shadeIntensity: 1, 
+                    opacityFrom: 0.6, 
+                    opacityTo: 0.1, 
+                    stops: [0, 100] 
+                } 
+            }
         };
+        
+        document.getElementById('growthChart').innerHTML = ""; // Limpiar contenedor
+        
+        // Destruir instancia anterior para evitar bugs visuales
+        if(chartInstance) {
+            chartInstance.destroy();
+        }
 
-        if(chartInstance) { chartInstance.destroy(); }
         chartInstance = new ApexCharts(document.querySelector("#growthChart"), options);
         chartInstance.render();
     }
 
+    // Arrancar
     init();
   </script>
 </body>
