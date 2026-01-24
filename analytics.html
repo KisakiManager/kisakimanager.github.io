@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Kisaki Analytics V4.0</title>
+  <title>Kisaki Analytics V4.1</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
 
@@ -19,6 +19,9 @@
       padding: 12px; border-radius: 8px; margin-top: 15px; width: 100%; font-size: 1em; outline: none;
     }
 
+    /* Bitácora de estado visible */
+    #appStatus { font-size: 0.8em; color: #94a3b8; margin-top: 5px; font-family: monospace; }
+
     .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
     .kpi-card { background: rgba(30, 41, 59, 0.7); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); }
     .kpi-val { font-size: 1.4em; font-weight: bold; color: white; margin-top: 5px; }
@@ -27,9 +30,6 @@
     
     .chart-box { margin: 15px; padding: 15px; background: #162032; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); }
     .ai-box { margin: 15px; padding: 15px; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.3); border-radius: 12px; font-size: 0.9em; line-height: 1.4; color: #cbd5e1; }
-    
-    /* Indicador de carga */
-    #loadingMsg { text-align:center; color:#94a3b8; font-size:0.9em; margin-top:10px; }
   </style>
 </head>
 <body>
@@ -40,10 +40,10 @@
       <a href="index.html" style="color:white; text-decoration:none; font-size:1.2em;">✕</a>
     </div>
     
-    <div id="loadingMsg">Conectando con tus canales...</div>
+    <div id="appStatus">Iniciando sistema...</div>
 
-    <select id="channelSelector" class="channel-select" onchange="loadStats(this.value)" disabled>
-      <option value="">Cargando...</option>
+    <select id="channelSelector" class="channel-select" onchange="loadStats(this.value)">
+      <option value="">Cargando lista...</option>
     </select>
   </div>
 
@@ -64,7 +64,7 @@
   </div>
 
   <div class="ai-box" id="aiText">
-    🤖 Kisaki AI está lista. Selecciona un canal arriba.
+    🤖 Esperando selección...
   </div>
 
   <div class="chart-box">
@@ -73,39 +73,59 @@
   </div>
 
   <script>
-    const tg = window.Telegram.WebApp;
-    tg.expand();
-
-    // 1. CREDENCIALES
-    const SUPABASE_URL = 'https://ndkupidhlauzroduvech.supabase.co'; 
-    const SUPABASE_KEY = 'sb_publishable_fSQ9uBUx_YTfxr2QL2-kfQ_pdE2cqHv'; 
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    // 2. OBTENER ID USUARIO
-    const user = tg.initDataUnsafe?.user;
-    const USER_ID = user ? user.id : 1298554649; // Fallback probado en diagnóstico
+    // Función segura para actualizar estado en pantalla
+    const statusEl = document.getElementById('appStatus');
+    function setStatus(msg, color = '#94a3b8') {
+        statusEl.innerHTML = msg;
+        statusEl.style.color = color;
+    }
 
     async function init() {
-        const loadingEl = document.getElementById('loadingMsg');
+      try {
+        setStatus("🚀 Cargando librerías...");
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        // 1. CREDENCIALES
+        const SUPABASE_URL = 'https://ndkupidhlauzroduvech.supabase.co'; 
+        const SUPABASE_KEY = 'sb_publishable_fSQ9uBUx_YTfxr2QL2-kfQ_pdE2cqHv'; 
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // 2. OBTENER ID USUARIO
+        const user = tg.initDataUnsafe?.user;
+        const USER_ID = user ? user.id : 1298554649; 
+        
+        setStatus(`👤 Usuario ID: ${USER_ID}`);
+
+        // 3. CARGAR CANALES
+        setStatus("📡 Buscando canales...");
         const select = document.getElementById('channelSelector');
 
-        // --- CARGAR CANALES (Igual que en el diagnóstico) ---
         const { data: channels, error } = await supabase
             .from('managed_channels')
             .select('*')
             .eq('user_id', USER_ID);
 
-        if (error || !channels || channels.length === 0) {
-            loadingEl.innerText = "No se encontraron canales vinculados.";
-            loadingEl.style.color = "#f87171";
+        if (error) {
+            throw new Error(`Error DB: ${error.message}`);
+        }
+
+        if (!channels || channels.length === 0) {
+            setStatus("⚠️ No tienes canales vinculados", "#f87171");
             select.innerHTML = '<option>Sin canales</option>';
+            document.getElementById('aiText').innerText = "Añade al bot como admin a un canal para empezar.";
             return;
         }
 
-        // Éxito cargando canales
-        loadingEl.style.display = 'none';
-        select.disabled = false;
-        select.innerHTML = ''; // Limpiar
+        // 4. POBLAR SELECTOR
+        setStatus(`✅ ${channels.length} canales encontrados`, "#4ade80");
+        select.innerHTML = ''; // Limpiar "Cargando..."
+        
+        // Opción por defecto
+        const defaultOpt = document.createElement('option');
+        defaultOpt.text = "👇 Selecciona un canal";
+        defaultOpt.value = "";
+        select.appendChild(defaultOpt);
 
         channels.forEach(ch => {
             const opt = document.createElement('option');
@@ -114,33 +134,51 @@
             select.appendChild(opt);
         });
 
-        // Cargar el primero automáticamente
-        loadStats(channels[0].telegram_chat_id);
+        // 5. CARGAR EL PRIMERO AUTOMÁTICAMENTE
+        if(channels.length > 0) {
+           select.value = channels[0].telegram_chat_id; // Forzar selección visual
+           loadStats(channels[0].telegram_chat_id);
+        }
+
+      } catch (e) {
+        setStatus(`❌ ERROR CRÍTICO: ${e.message}`, "#ef4444");
+        alert("Error: " + e.message); // Alerta visual para ti
+      }
     }
 
     async function loadStats(chatId) {
         if(!chatId) return;
+        setStatus("🔄 Cargando estadísticas...");
         
-        // --- CARGAR DATOS (Tabla Nueva: daily_channel_stats) ---
-        // Nota: Si acabas de migrar, esta tabla puede tener pocos datos hoy.
-        const { data: stats } = await supabase
-            .from('daily_channel_stats')
-            .select('*')
-            .eq('channel_id', chatId)
-            .order('recorded_at', { ascending: true })
-            .limit(14);
+        try {
+            const supabase = window.supabase.createClient('https://ndkupidhlauzroduvech.supabase.co', 'sb_publishable_fSQ9uBUx_YTfxr2QL2-kfQ_pdE2cqHv');
+            
+            const { data: stats, error } = await supabase
+                .from('daily_channel_stats')
+                .select('*')
+                .eq('channel_id', chatId)
+                .order('recorded_at', { ascending: true })
+                .limit(14);
 
-        if (!stats || stats.length === 0) {
-            // Caso: Canal nuevo o tabla vacía
-            document.getElementById('kpiSubs').innerText = "Sin datos";
-            document.getElementById('aiText').innerText = "💡 El bot acaba de conectarse. Espera a que recopile datos hoy.";
-            document.getElementById('growthChart').innerHTML = "<div style='text-align:center; padding:20px; color:#64748b'>Gráfica vacía (Esperando actividad)</div>";
-            return;
+            if(error) throw error;
+
+            if (!stats || stats.length === 0) {
+                setStatus("ℹ️ Sin datos recientes", "#facc15");
+                updateUIEmpty();
+                return;
+            }
+
+            setStatus("✅ Estadísticas actualizadas", "#4ade80");
+            updateUI(stats);
+            
+        } catch (e) {
+            setStatus(`⚠️ Error Stats: ${e.message}`, "#f87171");
         }
+    }
 
+    function updateUI(stats) {
         const latest = stats[stats.length - 1];
         
-        // KPIs
         document.getElementById('kpiSubs').innerText = latest.total_subs.toLocaleString();
         document.getElementById('joined').innerText = latest.joined_today || 0;
         document.getElementById('left').innerText = latest.left_today || 0;
@@ -152,14 +190,19 @@
         
         document.getElementById('netGrowth').innerText = net >= 0 ? "▲ Creciendo" : "▼ Decreciendo";
 
-        // IA SIMPLE
+        // IA Texto
         let iaMsg = "📊 Flujo estable.";
-        if(net > 0) iaMsg = `🚀 <b>Tendencia Positiva:</b> Has ganado ${net} usuarios hoy.`;
-        if(net < 0) iaMsg = `⚠️ <b>Alerta:</b> Hoy salieron ${latest.left_today} usuarios.`;
+        if(net > 0) iaMsg = `🚀 <b>Bien hecho:</b> +${net} usuarios hoy.`;
+        if(net < 0) iaMsg = `⚠️ <b>Atención:</b> -${Math.abs(net)} usuarios hoy.`;
         document.getElementById('aiText').innerHTML = iaMsg;
 
-        // GRÁFICA
         renderChart(stats);
+    }
+
+    function updateUIEmpty() {
+        document.getElementById('kpiSubs').innerText = "0";
+        document.getElementById('aiText').innerText = "El bot está conectado pero aún no hay actividad hoy.";
+        document.getElementById('growthChart').innerHTML = "<div style='text-align:center; padding:20px; color:#64748b'>Esperando datos...</div>";
     }
 
     function renderChart(data) {
@@ -178,6 +221,7 @@
         new ApexCharts(document.querySelector("#growthChart"), options).render();
     }
 
+    // Arrancar
     init();
   </script>
 </body>
