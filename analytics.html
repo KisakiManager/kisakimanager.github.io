@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Kisaki Analytics V4.1</title>
+  <title>Kisaki Analytics V5.0</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
 
@@ -11,15 +11,15 @@
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
   <style>
-    body { background-color: #0b1120; color: #e2e8f0; font-family: sans-serif; padding-bottom: 50px; }
+    /* --- ESTILOS GENERALES --- */
+    body { background-color: #0b1120; color: #e2e8f0; font-family: sans-serif; padding-bottom: 80px; }
     .dashboard-header { padding: 20px; background: linear-gradient(to bottom, #1e293b, transparent); border-bottom: 1px solid rgba(255,255,255,0.05); }
-    
+
     .channel-select {
       background: rgba(15, 23, 42, 0.8); border: 1px solid #334155; color: #ccf381;
       padding: 12px; border-radius: 8px; margin-top: 15px; width: 100%; font-size: 1em; outline: none;
     }
 
-    /* Bitácora de estado visible */
     #appStatus { font-size: 0.8em; color: #94a3b8; margin-top: 5px; font-family: monospace; }
 
     .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
@@ -27,9 +27,58 @@
     .kpi-val { font-size: 1.4em; font-weight: bold; color: white; margin-top: 5px; }
     .kpi-sub { font-size: 0.8em; color: #cbd5e1; margin-top: 5px; }
     .green { color: #4ade80; } .red { color: #f87171; }
-    
+
     .chart-box { margin: 15px; padding: 15px; background: #162032; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); }
     .ai-box { margin: 15px; padding: 15px; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.3); border-radius: 12px; font-size: 0.9em; line-height: 1.4; color: #cbd5e1; }
+
+    /* --- NUEVO: ESTILOS CALENDARIO (Spline Dark Replica) --- */
+    .calendar-container {
+      margin: 15px;
+      padding: 20px;
+      background: #162032; /* Fondo oscuro igual a las gráficas */
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.05);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .cal-header {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
+    }
+    .cal-title { font-weight: 600; font-size: 1.1em; color: white; }
+    
+    .cal-badge {
+      background: #1e293b; padding: 5px 12px; border-radius: 10px; 
+      font-size: 0.85em; color: #94a3b8; border: 1px solid #334155;
+    }
+
+    .cal-grid {
+      display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center;
+    }
+    
+    .cal-day-name {
+      font-size: 0.75em; color: #64748b; font-weight: bold; margin-bottom: 5px;
+    }
+    
+    .cal-day {
+      height: 36px; width: 100%; display: flex; align-items: center; justify-content: center;
+      border-radius: 10px; font-size: 0.9em; color: #cbd5e1; 
+      transition: background 0.2s;
+    }
+    
+    .cal-day.active {
+      background: #3b82f6; /* Azul brillante (Estilo de la imagen) */
+      color: white; font-weight: bold;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    }
+
+    .cal-day:hover:not(.active):not(.empty) { background: rgba(255,255,255,0.05); }
+    .cal-day.empty { pointer-events: none; }
+
+    /* Botones decorativos del calendario */
+    .cal-actions { display: flex; gap: 10px; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; }
+    .btn-cal { flex: 1; padding: 10px; border-radius: 10px; border: none; font-size: 0.85em; cursor: pointer; font-weight: 600;}
+    .btn-cal-primary { background: #3b82f6; color: white; }
+    .btn-cal-secondary { background: transparent; color: #94a3b8; }
   </style>
 </head>
 <body>
@@ -39,7 +88,7 @@
       <h2 style="margin:0;">Estadísticas</h2>
       <a href="index.html" style="color:white; text-decoration:none; font-size:1.2em;">✕</a>
     </div>
-    
+
     <div id="appStatus">Iniciando sistema...</div>
 
     <select id="channelSelector" class="channel-select" onchange="loadStats(this.value)">
@@ -72,6 +121,21 @@
     <div id="growthChart"></div>
   </div>
 
+  <div class="calendar-container">
+    <div class="cal-header">
+      <div class="cal-title">Calendario</div>
+      <div class="cal-badge" id="currentMonthYear">Cargando...</div>
+    </div>
+    
+    <div class="cal-grid" id="calendarGrid">
+      </div>
+
+    <div class="cal-actions">
+      <button class="btn-cal btn-cal-primary">Ver Reporte</button>
+      <button class="btn-cal btn-cal-secondary">Cancelar</button>
+    </div>
+  </div>
+
   <script>
     // Función segura para actualizar estado en pantalla
     const statusEl = document.getElementById('appStatus');
@@ -86,6 +150,9 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
+        // 0. INICIAR CALENDARIO (Independiente)
+        initCalendar();
+
         // 1. CREDENCIALES
         const SUPABASE_URL = 'https://ndkupidhlauzroduvech.supabase.co'; 
         const SUPABASE_KEY = 'sb_publishable_fSQ9uBUx_YTfxr2QL2-kfQ_pdE2cqHv'; 
@@ -94,7 +161,7 @@
         // 2. OBTENER ID USUARIO
         const user = tg.initDataUnsafe?.user;
         const USER_ID = user ? user.id : 1298554649; 
-        
+
         setStatus(`👤 Usuario ID: ${USER_ID}`);
 
         // 3. CARGAR CANALES
@@ -120,7 +187,7 @@
         // 4. POBLAR SELECTOR
         setStatus(`✅ ${channels.length} canales encontrados`, "#4ade80");
         select.innerHTML = ''; // Limpiar "Cargando..."
-        
+
         // Opción por defecto
         const defaultOpt = document.createElement('option');
         defaultOpt.text = "👇 Selecciona un canal";
@@ -146,13 +213,51 @@
       }
     }
 
+    // --- LÓGICA DEL CALENDARIO (SIN INTERFERIR) ---
+    function initCalendar() {
+        const date = new Date();
+        const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        const currentMonth = date.getMonth();
+        const currentYear = date.getFullYear();
+        
+        // Actualizar título
+        document.getElementById('currentMonthYear').innerText = `${monthNames[currentMonth]} ${currentYear}`;
+        
+        const grid = document.getElementById('calendarGrid');
+        grid.innerHTML = ''; // Limpiar
+
+        // Nombres de días
+        const days = ["DO", "LU", "MA", "MI", "JU", "VI", "SA"];
+        days.forEach(d => {
+            grid.innerHTML += `<div class="cal-day-name">${d}</div>`;
+        });
+
+        // Calcular días
+        const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
+        const lastDay = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+        // Días vacíos previos
+        for (let i = 0; i < firstDayIndex; i++) {
+            grid.innerHTML += `<div class="cal-day empty"></div>`;
+        }
+
+        // Días reales
+        for (let i = 1; i <= lastDay; i++) {
+            let className = "cal-day";
+            if (i === date.getDate()) {
+                className += " active"; // Hoy
+            }
+            grid.innerHTML += `<div class="${className}">${i}</div>`;
+        }
+    }
+
     async function loadStats(chatId) {
         if(!chatId) return;
         setStatus("🔄 Cargando estadísticas...");
-        
+
         try {
             const supabase = window.supabase.createClient('https://ndkupidhlauzroduvech.supabase.co', 'sb_publishable_fSQ9uBUx_YTfxr2QL2-kfQ_pdE2cqHv');
-            
+
             const { data: stats, error } = await supabase
                 .from('daily_channel_stats')
                 .select('*')
@@ -170,7 +275,7 @@
 
             setStatus("✅ Estadísticas actualizadas", "#4ade80");
             updateUI(stats);
-            
+
         } catch (e) {
             setStatus(`⚠️ Error Stats: ${e.message}`, "#f87171");
         }
@@ -178,16 +283,16 @@
 
     function updateUI(stats) {
         const latest = stats[stats.length - 1];
-        
+
         document.getElementById('kpiSubs').innerText = latest.total_subs.toLocaleString();
         document.getElementById('joined').innerText = latest.joined_today || 0;
         document.getElementById('left').innerText = latest.left_today || 0;
-        
+
         const net = (latest.joined_today || 0) - (latest.left_today || 0);
         const actEl = document.getElementById('kpiActivity');
         actEl.innerText = (net > 0 ? "+" : "") + net;
         actEl.style.color = net >= 0 ? '#4ade80' : '#f87171';
-        
+
         document.getElementById('netGrowth').innerText = net >= 0 ? "▲ Creciendo" : "▼ Decreciendo";
 
         // IA Texto
