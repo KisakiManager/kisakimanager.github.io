@@ -2,117 +2,183 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Kisaki Analytics - DEBUG</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kisaki Analytics V3.0</title> <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
   <style>
     body { background-color: #0b1120; color: #e2e8f0; font-family: sans-serif; padding-bottom: 50px; }
-    .dashboard-header { padding: 20px; background: #1e293b; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .dashboard-header { padding: 20px; background: linear-gradient(to bottom, #1e293b, transparent); border-bottom: 1px solid rgba(255,255,255,0.05); }
     
-    /* CAJA DE DEBUG ROJA */
-    #debugConsole {
-      background: #450a0a; border: 2px solid #ef4444; color: #fecaca;
-      padding: 15px; margin: 15px; border-radius: 8px; font-family: monospace; font-size: 0.85em;
-      white-space: pre-wrap; word-wrap: break-word;
+    .channel-select {
+      background: rgba(15, 23, 42, 0.8); border: 1px solid #334155; color: #ccf381;
+      padding: 10px; border-radius: 8px; margin-top: 10px; width: 100%; font-size: 1em;
     }
+
+    /* STATUS BAR (Para saber qué pasa) */
+    #statusMsg { font-size: 0.8em; color: #94a3b8; margin-top: 5px; min-height: 20px;}
+
+    .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
+    .kpi-card { background: rgba(30, 41, 59, 0.7); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); }
+    .kpi-val { font-size: 1.4em; font-weight: bold; color: white; }
+    .kpi-sub { font-size: 0.8em; color: #cbd5e1; margin-top: 5px; }
+    .green { color: #4ade80; } .red { color: #f87171; }
     
-    .channel-select { width: 100%; padding: 12px; margin-top: 10px; background: #0f172a; color: white; border: 1px solid #334155; border-radius: 8px; }
-    /* Ocultamos el resto para centrarnos en el error */
-    .kpi-grid, .chart-container, .ai-box { opacity: 0.5; pointer-events: none; }
+    .chart-box { margin: 15px; padding: 15px; background: #162032; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); }
+    .ai-box { margin: 15px; padding: 15px; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.3); border-radius: 12px; font-size: 0.9em; line-height: 1.4; color: #cbd5e1; }
   </style>
 </head>
 <body>
 
   <div class="dashboard-header">
-    <h1>Modo Diagnóstico</h1>
-    <select id="channelSelector" class="channel-select">
-      <option value="">Esperando diagnóstico...</option>
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <h2 style="margin:0;">Kisaki V3.0</h2> <a href="index.html" style="color:white; text-decoration:none;">✕</a>
+    </div>
+    
+    <div id="statusMsg">Conectando...</div>
+
+    <select id="channelSelector" class="channel-select" onchange="loadStats(this.value)">
+      <option value="">Cargando lista...</option>
     </select>
   </div>
 
-  <div id="debugConsole">Iniciando pruebas de conexión...</div>
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div>Suscriptores</div>
+      <div class="kpi-val" id="kpiSubs">-</div>
+      <div class="kpi-sub" id="netGrowth">...</div>
+    </div>
+    <div class="kpi-card">
+      <div>Actividad Hoy</div>
+      <div class="kpi-val" id="kpiActivity">-</div>
+      <div class="kpi-sub">
+        <span class="green">⬆ <span id="joined">0</span></span> 
+        <span class="red">⬇ <span id="left">0</span></span>
+      </div>
+    </div>
+  </div>
 
-  <div class="kpi-grid"></div>
+  <div class="ai-box" id="aiText">🤖 Selecciona un canal para analizar.</div>
+
+  <div class="chart-box">
+    <h4 style="margin:0 0 10px 0;">Crecimiento (14 Días)</h4>
+    <div id="growthChart"></div>
+  </div>
 
   <script>
     const tg = window.Telegram.WebApp;
     tg.expand();
 
-    // 1. CREDENCIALES
+    // CREDENCIALES
     const SUPABASE_URL = 'https://ndkupidhlauzroduvech.supabase.co'; 
     const SUPABASE_KEY = 'sb_publishable_fSQ9uBUx_YTfxr2QL2-kfQ_pdE2cqHv'; 
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    const consoleDiv = document.getElementById('debugConsole');
-    function log(msg, isError = false) {
-        const line = document.createElement('div');
-        line.innerHTML = (isError ? "❌ " : "ℹ️ ") + msg;
-        if(isError) line.style.color = "#ff5555";
-        consoleDiv.appendChild(line);
-    }
+    const statusEl = document.getElementById('statusMsg');
+    
+    // ID USUARIO (Prioridad: Telegram > Fallback Tuyo)
+    const user = tg.initDataUnsafe?.user;
+    const USER_ID = user ? user.id : 1298554649; 
 
-    async function runDiagnostics() {
-        consoleDiv.innerHTML = "<b>--- INFORME DE ESTADO ---</b><br>";
+    async function init() {
+        statusEl.innerText = `Buscando canales para ID: ${USER_ID}`;
         
-        // PASO 1: Identificar Usuario
-        const user = tg.initDataUnsafe?.user;
-        // FORZAMOS TU ID REAL SI FALLA LA DETECCIÓN (Para descartar error de Telegram)
-        const TARGET_ID = user ? user.id : 1298554649; 
-        
-        log(`ID detectado por WebApp: <b>${user ? user.id : "No detectado (Usando Fallback)"}</b>`);
-        log(`ID que usaremos para buscar: <b>${TARGET_ID}</b>`);
-
-        // PASO 2: Prueba de Conexión a managed_channels
-        log("Consultando tabla 'managed_channels'...");
-        
-        // Consulta simple SIN filtros extraños para ver qué devuelve
-        const { data, error } = await supabase
+        // 1. OBTENER CANALES
+        const { data: channels, error } = await supabase
             .from('managed_channels')
             .select('*')
-            .eq('user_id', TARGET_ID);
+            .eq('user_id', USER_ID)
+            .eq('is_active', true);
 
-        // PASO 3: Análisis de Resultados
+        const select = document.getElementById('channelSelector');
+        select.innerHTML = '';
+
         if (error) {
-            log(`ERROR FATAL DE SUPABASE:`, true);
-            log(JSON.stringify(error, null, 2), true);
-            log("POSIBLE CAUSA: Row Level Security (RLS) está activo y bloqueando.");
+            statusEl.innerText = "Error Supabase: " + error.message;
+            statusEl.style.color = "#f87171";
             return;
         }
 
-        if (!data) {
-            log("Respuesta vacía (data is null).");
+        if (!channels || channels.length === 0) {
+            statusEl.innerText = "No se encontraron canales vinculados.";
+            select.innerHTML = '<option>Sin canales</option>';
+            document.getElementById('aiText').innerText = "💡 Añade al bot @KisakiManagerBot como admin en tu canal y espera el mensaje de confirmación.";
             return;
         }
 
-        if (data.length === 0) {
-            log(`Conexión exitosa, PERO array vacío.`, true);
-            log(`Significa: No hay filas en 'managed_channels' donde user_id sea ${TARGET_ID}.`);
-            log("Solución: Revisa que el ID en la base de datos sea EXACTAMENTE ese número.");
-            return;
-        }
+        statusEl.innerText = `✅ ${channels.length} canales encontrados.`;
+        statusEl.style.color = "#4ade80";
 
-        // ÉXITO
-        log(`✅ ¡ÉXITO! Encontrados ${data.length} canales.`, false);
-        consoleDiv.style.background = "#064e3b"; // Verde
-        consoleDiv.style.borderColor = "#34d399";
-        
-        // Rellenar selector
-        const selector = document.getElementById('channelSelector');
-        selector.innerHTML = "";
-        data.forEach(ch => {
-            log(`-> Canal encontrado: ${ch.chat_title} (ID: ${ch.telegram_chat_id})`);
+        channels.forEach(ch => {
             const opt = document.createElement('option');
             opt.value = ch.telegram_chat_id;
-            opt.text = ch.chat_title;
-            selector.appendChild(opt);
+            opt.innerText = ch.chat_title;
+            select.appendChild(opt);
         });
+
+        // Cargar primero
+        loadStats(channels[0].telegram_chat_id);
     }
 
-    runDiagnostics();
+    async function loadStats(chatId) {
+        if(!chatId) return;
+        
+        // 2. OBTENER ESTADÍSTICAS
+        const { data: stats } = await supabase
+            .from('daily_channel_stats')
+            .select('*')
+            .eq('channel_id', chatId)
+            .order('recorded_at', { ascending: true })
+            .limit(14);
+
+        if (!stats || stats.length === 0) {
+            document.getElementById('kpiSubs').innerText = "0";
+            document.getElementById('aiText').innerText = "Esperando primeros datos del bot...";
+            return;
+        }
+
+        const latest = stats[stats.length - 1];
+        
+        // KPIs
+        document.getElementById('kpiSubs').innerText = latest.total_subs.toLocaleString();
+        document.getElementById('joined').innerText = latest.joined_today || 0;
+        document.getElementById('left').innerText = latest.left_today || 0;
+        
+        const net = (latest.joined_today || 0) - (latest.left_today || 0);
+        const actEl = document.getElementById('kpiActivity');
+        actEl.innerText = (net > 0 ? "+" : "") + net;
+        actEl.style.color = net >= 0 ? '#4ade80' : '#f87171';
+        
+        document.getElementById('netGrowth').innerText = net >= 0 ? "▲ Creciendo" : "▼ Decreciendo";
+
+        // IA
+        let iaMsg = "📊 Flujo estable.";
+        if(net > 0) iaMsg = `🚀 <b>¡Bien hecho!</b> Has ganado ${net} usuarios hoy.`;
+        if(net < 0) iaMsg = `⚠️ <b>Atención:</b> Hoy han salido ${latest.left_today} usuarios.`;
+        document.getElementById('aiText').innerHTML = iaMsg;
+
+        // GRÁFICA
+        renderChart(stats);
+    }
+
+    function renderChart(data) {
+        const options = {
+            chart: { type: 'area', height: 180, toolbar: { show: false }, background: 'transparent' },
+            series: [{ name: 'Subs', data: data.map(d => d.total_subs) }],
+            xaxis: { categories: data.map(d => d.recorded_at.slice(5)), labels: { style: { colors: '#94a3b8' } } },
+            colors: ['#ccf381'],
+            theme: { mode: 'dark' },
+            dataLabels: { enabled: false },
+            grid: { borderColor: '#334155' }
+        };
+        document.getElementById('growthChart').innerHTML = "";
+        new ApexCharts(document.querySelector("#growthChart"), options).render();
+    }
+
+    init();
   </script>
 </body>
 </html>
