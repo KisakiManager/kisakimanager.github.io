@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Kisaki Analytics V4.2</title>
+  <title>Kisaki Analytics V4.1 (Stable)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
 
@@ -19,6 +19,7 @@
       padding: 12px; border-radius: 8px; margin-top: 15px; width: 100%; font-size: 1em; outline: none;
     }
 
+    /* Bitácora de estado visible */
     #appStatus { font-size: 0.8em; color: #94a3b8; margin-top: 5px; font-family: monospace; }
 
     .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
@@ -72,14 +73,14 @@
   </div>
 
   <script>
+    // Función segura para actualizar estado en pantalla
     const statusEl = document.getElementById('appStatus');
     function setStatus(msg, color = '#94a3b8') {
         statusEl.innerHTML = msg;
         statusEl.style.color = color;
     }
 
-    // Variable global para controlar la gráfica y evitar superposiciones
-    let chartInstance = null;
+    let chartInstance = null; // Control para destruir gráficas viejas
 
     async function init() {
       try {
@@ -87,11 +88,10 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // 1. CREDENCIALES
+        // 1. CREDENCIALES (Lógica Original V4.1 que sí funcionaba)
         const SUPABASE_URL = 'https://ndkupidhlauzroduvech.supabase.co'; 
         const SUPABASE_KEY = 'sb_publishable_fSQ9uBUx_YTfxr2QL2-kfQ_pdE2cqHv'; 
-        // Usamos window.supabaseClient para evitar conflictos de redeclaración
-        window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // 2. OBTENER ID USUARIO
         const user = tg.initDataUnsafe?.user;
@@ -103,7 +103,7 @@
         setStatus("📡 Buscando canales...");
         const select = document.getElementById('channelSelector');
 
-        const { data: channels, error } = await window.supabaseClient
+        const { data: channels, error } = await supabase
             .from('managed_channels')
             .select('*')
             .eq('user_id', USER_ID);
@@ -137,7 +137,7 @@
 
         // 5. CARGAR EL PRIMERO AUTOMÁTICAMENTE
         if(channels.length > 0) {
-           select.value = channels[0].telegram_chat_id;
+           select.value = channels[0].telegram_chat_id; 
            loadStats(channels[0].telegram_chat_id);
         }
 
@@ -152,7 +152,10 @@
         setStatus("🔄 Cargando estadísticas...");
         
         try {
-            const { data: stats, error } = await window.supabaseClient
+            // Re-instancia segura del cliente para evitar problemas de scope
+            const supabase = window.supabase.createClient('https://ndkupidhlauzroduvech.supabase.co', 'sb_publishable_fSQ9uBUx_YTfxr2QL2-kfQ_pdE2cqHv');
+            
+            const { data: stats, error } = await supabase
                 .from('daily_channel_stats')
                 .select('*')
                 .eq('channel_id', chatId)
@@ -178,7 +181,6 @@
     function updateUI(stats) {
         const latest = stats[stats.length - 1];
         
-        // Actualizar KPIs (Tarjetas)
         document.getElementById('kpiSubs').innerText = latest.total_subs.toLocaleString();
         document.getElementById('joined').innerText = latest.joined_today || 0;
         document.getElementById('left').innerText = latest.left_today || 0;
@@ -196,16 +198,13 @@
         if(net < 0) iaMsg = `⚠️ <b>Atención:</b> -${Math.abs(net)} usuarios hoy.`;
         document.getElementById('aiText').innerHTML = iaMsg;
 
-        // --- PREPARAR DATOS PARA LA GRÁFICA ---
-        let chartLabels = stats.map(d => d.recorded_at.slice(5)); // Mes-Día
-        let chartValues = stats.map(d => d.total_subs);
-
         // --- TRUCO VISUAL: RAMPA DE CRECIMIENTO ---
-        // Si solo hay 1 dato, añadimos un "0" ayer para que se vea la subida verde
+        // (Esto es lo único nuevo respecto a la V4.1 original)
+        let chartValues = stats.map(d => d.total_subs);
+        let chartLabels = stats.map(d => d.recorded_at.slice(5));
+
         if (chartValues.length === 1) {
-            chartValues.unshift(0); // Añadir 0 al inicio
-            
-            // Calcular etiqueta "Ayer" de forma simple para la visualización
+            chartValues.unshift(0); 
             chartLabels.unshift("Inicio"); 
         }
 
@@ -215,49 +214,25 @@
     function updateUIEmpty() {
         document.getElementById('kpiSubs').innerText = "0";
         document.getElementById('aiText').innerText = "El bot está conectado pero aún no hay actividad hoy.";
-        // Limpiar gráfica si existe
         if(chartInstance) chartInstance.destroy();
         document.getElementById('growthChart').innerHTML = "<div style='text-align:center; padding:20px; color:#64748b'>Esperando datos...</div>";
     }
 
     function renderChart(labels, data) {
         const options = {
-            chart: { 
-                type: 'area', 
-                height: 200, 
-                toolbar: { show: false }, 
-                background: 'transparent',
-                animations: { enabled: true }
-            },
-            series: [{ name: 'Suscriptores', data: data }],
-            xaxis: { 
-                categories: labels, 
-                labels: { style: { colors: '#94a3b8' } },
-                tooltip: { enabled: false }
-            },
-            colors: ['#ccf381'], // Tu color verde original
+            chart: { type: 'area', height: 200, toolbar: { show: false }, background: 'transparent' },
+            series: [{ name: 'Subs', data: data }],
+            xaxis: { categories: labels, labels: { style: { colors: '#94a3b8' } } },
+            colors: ['#ccf381'],
             theme: { mode: 'dark' },
             dataLabels: { enabled: false },
             grid: { borderColor: '#334155', strokeDashArray: 4 },
-            stroke: { curve: 'smooth', width: 3 },
-            fill: { 
-                type: 'gradient', 
-                gradient: { 
-                    shadeIntensity: 1, 
-                    opacityFrom: 0.6, 
-                    opacityTo: 0.1, 
-                    stops: [0, 100] 
-                } 
-            }
+            stroke: { curve: 'smooth', width: 2 },
+            fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.0 } }
         };
         
-        document.getElementById('growthChart').innerHTML = ""; // Limpiar contenedor
-        
-        // Destruir instancia anterior para evitar bugs visuales
-        if(chartInstance) {
-            chartInstance.destroy();
-        }
-
+        if(chartInstance) chartInstance.destroy();
+        document.getElementById('growthChart').innerHTML = "";
         chartInstance = new ApexCharts(document.querySelector("#growthChart"), options);
         chartInstance.render();
     }
