@@ -2,98 +2,183 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Diagnóstico Supabase</title>
+  <title>Kisaki Analytics V4.0</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
   <style>
-    body { background: #000; color: #0f0; font-family: monospace; padding: 20px; font-size: 12px; }
-    .log-entry { margin-bottom: 5px; border-bottom: 1px solid #333; padding-bottom: 2px; word-break: break-all; }
-    .error { color: #f00; font-weight: bold; }
-    .success { color: #0f0; }
-    .warn { color: #ff0; }
+    body { background-color: #0b1120; color: #e2e8f0; font-family: sans-serif; padding-bottom: 50px; }
+    .dashboard-header { padding: 20px; background: linear-gradient(to bottom, #1e293b, transparent); border-bottom: 1px solid rgba(255,255,255,0.05); }
+    
+    .channel-select {
+      background: rgba(15, 23, 42, 0.8); border: 1px solid #334155; color: #ccf381;
+      padding: 12px; border-radius: 8px; margin-top: 15px; width: 100%; font-size: 1em; outline: none;
+    }
+
+    .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
+    .kpi-card { background: rgba(30, 41, 59, 0.7); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); }
+    .kpi-val { font-size: 1.4em; font-weight: bold; color: white; margin-top: 5px; }
+    .kpi-sub { font-size: 0.8em; color: #cbd5e1; margin-top: 5px; }
+    .green { color: #4ade80; } .red { color: #f87171; }
+    
+    .chart-box { margin: 15px; padding: 15px; background: #162032; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); }
+    .ai-box { margin: 15px; padding: 15px; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.3); border-radius: 12px; font-size: 0.9em; line-height: 1.4; color: #cbd5e1; }
+    
+    /* Indicador de carga */
+    #loadingMsg { text-align:center; color:#94a3b8; font-size:0.9em; margin-top:10px; }
   </style>
 </head>
 <body>
-  <h3>🕵️‍♂️ MODO DIAGNÓSTICO</h3>
-  <div id="console">Iniciando pruebas...<br></div>
+
+  <div class="dashboard-header">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <h2 style="margin:0;">Estadísticas</h2>
+      <a href="index.html" style="color:white; text-decoration:none; font-size:1.2em;">✕</a>
+    </div>
+    
+    <div id="loadingMsg">Conectando con tus canales...</div>
+
+    <select id="channelSelector" class="channel-select" onchange="loadStats(this.value)" disabled>
+      <option value="">Cargando...</option>
+    </select>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div>Suscriptores</div>
+      <div class="kpi-val" id="kpiSubs">-</div>
+      <div class="kpi-sub" id="netGrowth">...</div>
+    </div>
+    <div class="kpi-card">
+      <div>Flujo Hoy</div>
+      <div class="kpi-val" id="kpiActivity">-</div>
+      <div class="kpi-sub">
+        <span class="green">⬆ <span id="joined">0</span></span> 
+        <span class="red">⬇ <span id="left">0</span></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="ai-box" id="aiText">
+    🤖 Kisaki AI está lista. Selecciona un canal arriba.
+  </div>
+
+  <div class="chart-box">
+    <h4 style="margin:0 0 10px 0;">Tendencia (14 Días)</h4>
+    <div id="growthChart"></div>
+  </div>
 
   <script>
-    // 1. CONFIGURACIÓN
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+
+    // 1. CREDENCIALES
     const SUPABASE_URL = 'https://ndkupidhlauzroduvech.supabase.co'; 
-    const SUPABASE_KEY = 'sb_publishable_fSQ9uBUx_YTfxr2QL2-kfQ_pdE2cqHv'; // Asegúrate que esta sea tu ANON KEY
-    
-    // Función de log en pantalla
-    const consoleDiv = document.getElementById('console');
-    function log(msg, type = 'info') {
-      const div = document.createElement('div');
-      div.className = 'log-entry ' + type;
-      div.innerHTML = `> ${msg}`;
-      consoleDiv.appendChild(div);
+    const SUPABASE_KEY = 'sb_publishable_fSQ9uBUx_YTfxr2QL2-kfQ_pdE2cqHv'; 
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // 2. OBTENER ID USUARIO
+    const user = tg.initDataUnsafe?.user;
+    const USER_ID = user ? user.id : 1298554649; // Fallback probado en diagnóstico
+
+    async function init() {
+        const loadingEl = document.getElementById('loadingMsg');
+        const select = document.getElementById('channelSelector');
+
+        // --- CARGAR CANALES (Igual que en el diagnóstico) ---
+        const { data: channels, error } = await supabase
+            .from('managed_channels')
+            .select('*')
+            .eq('user_id', USER_ID);
+
+        if (error || !channels || channels.length === 0) {
+            loadingEl.innerText = "No se encontraron canales vinculados.";
+            loadingEl.style.color = "#f87171";
+            select.innerHTML = '<option>Sin canales</option>';
+            return;
+        }
+
+        // Éxito cargando canales
+        loadingEl.style.display = 'none';
+        select.disabled = false;
+        select.innerHTML = ''; // Limpiar
+
+        channels.forEach(ch => {
+            const opt = document.createElement('option');
+            opt.value = ch.telegram_chat_id;
+            opt.innerText = ch.chat_title;
+            select.appendChild(opt);
+        });
+
+        // Cargar el primero automáticamente
+        loadStats(channels[0].telegram_chat_id);
     }
 
-    async function runTests() {
-      try {
-        const tg = window.Telegram.WebApp;
-        tg.expand();
+    async function loadStats(chatId) {
+        if(!chatId) return;
         
-        // --- PRUEBA 0: DATOS DE TELEGRAM ---
-        const user = tg.initDataUnsafe?.user;
-        const userId = user ? user.id : 1298554649; // Fallback
-        log(`ID Usuario (Telegram): ${userId} (Tipo: ${typeof userId})`);
+        // --- CARGAR DATOS (Tabla Nueva: daily_channel_stats) ---
+        // Nota: Si acabas de migrar, esta tabla puede tener pocos datos hoy.
+        const { data: stats } = await supabase
+            .from('daily_channel_stats')
+            .select('*')
+            .eq('channel_id', chatId)
+            .order('recorded_at', { ascending: true })
+            .limit(14);
 
-        // --- PRUEBA 1: CONEXIÓN BÁSICA ---
-        log("Intentando conectar con Supabase...");
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        
-        if (!supabase) {
-          log("❌ Error fatal: No se pudo iniciar el cliente Supabase.", "error");
-          return;
-        }
-        log("Cliente iniciado. Probando lectura pública...");
-
-        // --- PRUEBA 2: LEER TABLA 'users' (Sin filtros) ---
-        // Esto verifica si la conexión funciona y si RLS bloquea todo
-        const test1 = await supabase.from('users').select('*').limit(1);
-        
-        if (test1.error) {
-          log(`❌ ERROR CONEXIÓN: ${test1.error.message}`, "error");
-          log(`Código: ${test1.error.code} | Hint: ${test1.error.hint}`, "error");
-          log("⚠️ CAUSA PROBABLE: Row Level Security (RLS) está activo y no hay políticas.", "warn");
-        } else {
-          log(`✅ Conexión exitosa a 'users'. Filas: ${test1.data.length}`, "success");
+        if (!stats || stats.length === 0) {
+            // Caso: Canal nuevo o tabla vacía
+            document.getElementById('kpiSubs').innerText = "Sin datos";
+            document.getElementById('aiText').innerText = "💡 El bot acaba de conectarse. Espera a que recopile datos hoy.";
+            document.getElementById('growthChart').innerHTML = "<div style='text-align:center; padding:20px; color:#64748b'>Gráfica vacía (Esperando actividad)</div>";
+            return;
         }
 
-        // --- PRUEBA 3: BUSCAR TUS CANALES ---
-        log(`Buscando canales para user_id: ${userId}...`);
+        const latest = stats[stats.length - 1];
         
-        const test2 = await supabase
-          .from('managed_channels')
-          .select('*')
-          .eq('user_id', userId);
+        // KPIs
+        document.getElementById('kpiSubs').innerText = latest.total_subs.toLocaleString();
+        document.getElementById('joined').innerText = latest.joined_today || 0;
+        document.getElementById('left').innerText = latest.left_today || 0;
+        
+        const net = (latest.joined_today || 0) - (latest.left_today || 0);
+        const actEl = document.getElementById('kpiActivity');
+        actEl.innerText = (net > 0 ? "+" : "") + net;
+        actEl.style.color = net >= 0 ? '#4ade80' : '#f87171';
+        
+        document.getElementById('netGrowth').innerText = net >= 0 ? "▲ Creciendo" : "▼ Decreciendo";
 
-        if (test2.error) {
-           log(`❌ Error buscando canales: ${test2.error.message}`, "error");
-        } else if (test2.data.length === 0) {
-           log(`⚠️ Array vacío. No se encontraron canales.`, "warn");
-           log(`Verifica en Supabase -> managed_channels si user_id es ${userId}`, "warn");
-           
-           // Intento desesperado: Ver si hay ALGÚN canal
-           const test3 = await supabase.from('managed_channels').select('*').limit(1);
-           if(test3.data && test3.data.length > 0) {
-             log(`DATO CURIOSO: Hay canales en la DB (ej: user_id ${test3.data[0].user_id}), pero no coinciden con el tuyo.`, "warn");
-           }
-        } else {
-           log(`✅ ¡ÉXITO TOTAL! Se encontraron ${test2.data.length} canales.`, "success");
-           test2.data.forEach(c => log(`- ${c.chat_title} (ID: ${c.telegram_chat_id})`));
-        }
+        // IA SIMPLE
+        let iaMsg = "📊 Flujo estable.";
+        if(net > 0) iaMsg = `🚀 <b>Tendencia Positiva:</b> Has ganado ${net} usuarios hoy.`;
+        if(net < 0) iaMsg = `⚠️ <b>Alerta:</b> Hoy salieron ${latest.left_today} usuarios.`;
+        document.getElementById('aiText').innerHTML = iaMsg;
 
-      } catch (e) {
-        log(`❌ CRASH JS: ${e.message}`, "error");
-      }
+        // GRÁFICA
+        renderChart(stats);
     }
 
-    runTests();
+    function renderChart(data) {
+        const options = {
+            chart: { type: 'area', height: 200, toolbar: { show: false }, background: 'transparent' },
+            series: [{ name: 'Subs', data: data.map(d => d.total_subs) }],
+            xaxis: { categories: data.map(d => d.recorded_at.slice(5)), labels: { style: { colors: '#94a3b8' } } },
+            colors: ['#ccf381'],
+            theme: { mode: 'dark' },
+            dataLabels: { enabled: false },
+            grid: { borderColor: '#334155', strokeDashArray: 4 },
+            stroke: { curve: 'smooth', width: 2 },
+            fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.0 } }
+        };
+        document.getElementById('growthChart').innerHTML = "";
+        new ApexCharts(document.querySelector("#growthChart"), options).render();
+    }
+
+    init();
   </script>
 </body>
 </html>
