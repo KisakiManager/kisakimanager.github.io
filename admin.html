@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Channel Admin Panel</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    /* --- ESTILOS BASE (Tailwind Translation) --- */
+    :root {
+      --color-amoled: #000000;
+      --color-panel: #0B0F14;
+      --color-neon: #22D3EE;     /* Cyan Neon */
+      --color-danger: #EF4444;   /* Rojo */
+      --color-success: #22C55E;  /* Verde */
+      --text-gray: #9CA3AF;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
+
+    body {
+      background-color: var(--color-amoled);
+      color: white;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    /* --- HEADER COMPONENT --- */
+    .header-card {
+      background-color: var(--color-panel);
+      border-radius: 16px; /* rounded-2xl */
+      padding: 20px;
+      margin-bottom: 24px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      animation: slideDown 0.5s ease-out;
+    }
+
+    .header-title h2 { font-size: 1.1em; font-weight: 700; margin-bottom: 4px; }
+    .header-subtitle { color: var(--text-gray); font-size: 0.85em; display: flex; align-items: center; gap: 6px; }
+
+    .btn-sync {
+      background-color: var(--color-neon);
+      color: black;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.9em;
+      transition: transform 0.2s, opacity 0.2s;
+    }
+    .btn-sync:active { transform: scale(0.95); opacity: 0.8; }
+
+    /* --- ADMIN LIST COMPONENT --- */
+    .list-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .list-title { font-weight: 600; font-size: 1.1em; }
+    
+    .btn-invite {
+      background-color: #2563EB; /* Blue-600 */
+      color: white;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 0.9em;
+      cursor: pointer;
+    }
+
+    /* --- ADMIN CARD COMPONENT --- */
+    .admin-grid { display: flex; flex-direction: column; gap: 12px; }
+
+    .admin-card {
+      background-color: rgba(0,0,0,0.4);
+      border: 1px solid #1F2937; /* Gray-800 */
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .admin-card:hover { transform: scale(1.01); border-color: var(--color-neon); }
+
+    .admin-info p { font-weight: 500; font-size: 1em; color: #F3F4F6; }
+    .admin-last-seen { font-size: 0.75em; color: var(--text-gray); }
+
+    .admin-actions { display: flex; align-items: center; gap: 10px; }
+    
+    .role-badge {
+      background-color: #1F2937;
+      color: #D1D5DB;
+      font-size: 0.75em;
+      padding: 4px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-delete {
+      background: none; border: none; color: var(--color-danger);
+      cursor: pointer; font-size: 1.2em; padding: 4px;
+    }
+
+    /* --- MODAL COMPONENT --- */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(4px);
+      display: none; /* Oculto por defecto */
+      align-items: center; justify-content: center;
+      z-index: 100;
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .modal-overlay.open { display: flex; opacity: 1; }
+
+    .modal-box {
+      background: var(--color-panel);
+      width: 90%; max-width: 320px;
+      padding: 20px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.1);
+      transform: scale(0.9); transition: transform 0.3s;
+    }
+    .modal-overlay.open .modal-box { transform: scale(1); }
+
+    .input-field {
+      width: 100%;
+      background: #000;
+      border: 1px solid #374151;
+      color: white;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      outline: none;
+    }
+    .input-field:focus { border-color: var(--color-neon); }
+
+    .modal-actions { display: flex; justify-content: space-between; margin-top: 15px; }
+    .btn-cancel { color: var(--text-gray); background: none; border: none; cursor: pointer; }
+    .btn-send { background: var(--color-neon); color: black; border: none; padding: 8px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+
+    /* Animación */
+    @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+
+  <div class="header-card">
+    <div class="header-title">
+      <h2>Panel Admin</h2>
+      <div class="header-subtitle">
+        <span style="width:8px; height:8px; background:var(--color-success); border-radius:50%;"></span>
+        Kisaki System
+      </div>
+    </div>
+    <button class="btn-sync" onclick="syncData()">Sync</button>
+  </div>
+
+  <div class="list-header">
+    <h2 class="list-title">Administradores</h2>
+    <button class="btn-invite" onclick="toggleModal(true)">+ Invitar</button>
+  </div>
+
+  <div id="adminListContainer" class="admin-grid">
+    <div style="text-align:center; color:#555; padding:20px;">Cargando admins...</div>
+  </div>
+
+  <div id="inviteModal" class="modal-overlay">
+    <div class="modal-box">
+      <h3 style="margin-bottom:15px; font-weight:600;">Invitar Admin</h3>
+      
+      <label style="font-size:0.8em; color:#aaa;">Username</label>
+      <input type="text" id="newUsername" placeholder="@usuario" class="input-field">
+      
+      <label style="font-size:0.8em; color:#aaa;">Rol</label>
+      <select id="newRole" class="input-field">
+        <option value="Editor">Editor</option>
+        <option value="Moderator">Moderador</option>
+        <option value="Viewer">Observador</option>
+      </select>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="toggleModal(false)">Cancelar</button>
+        <button class="btn-send" onclick="sendInvite()">Enviar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+    tg.enableClosingConfirmation();
+
+    // DATOS DE EJEMPLO (Mock Data traducida del código React)
+    let admins = [
+      { id: 1, name: 'Vicente', role: 'Owner', last: 'En línea' },
+      { id: 2, name: 'KisakiBot', role: 'System', last: 'Hace 1m' },
+      { id: 3, name: 'ModeradorX', role: 'Moderator', last: 'Hace 1h' }
+    ];
+
+    // --- RENDERIZADO DE LISTA ---
+    function renderAdmins() {
+      const container = document.getElementById('adminListContainer');
+      container.innerHTML = ''; // Limpiar
+
+      admins.forEach(admin => {
+        // Crear tarjeta HTML
+        const card = document.createElement('div');
+        card.className = 'admin-card';
+        card.innerHTML = `
+          <div class="admin-info">
+            <p>@${admin.name}</p>
+            <span class="admin-last-seen">${admin.last}</span>
+          </div>
+          <div class="admin-actions">
+            <span class="role-badge">${admin.role}</span>
+            ${admin.role !== 'Owner' ? `<button class="btn-delete" onclick="removeAdmin(${admin.id})">✕</button>` : ''}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // --- LÓGICA DEL MODAL ---
+    function toggleModal(show) {
+      const modal = document.getElementById('inviteModal');
+      if (show) {
+        modal.classList.add('open');
+        tg.HapticFeedback.impactOccurred('light'); // Vibración táctil
+      } else {
+        modal.classList.remove('open');
+      }
+    }
+
+    function sendInvite() {
+      const username = document.getElementById('newUsername').value;
+      const role = document.getElementById('newRole').value;
+
+      if(!username) return tg.showAlert("Por favor escribe un usuario");
+
+      // Simulación de envío
+      tg.showAlert(`Invitación enviada a ${username} como ${role}`);
+      
+      // Agregar visualmente (opcional)
+      admins.push({ id: Date.now(), name: username.replace('@',''), role: role, last: 'Pendiente' });
+      renderAdmins();
+      
+      // Limpiar y cerrar
+      document.getElementById('newUsername').value = '';
+      toggleModal(false);
+    }
+
+    // --- ACCIONES ---
+    function removeAdmin(id) {
+      tg.showConfirm("¿Eliminar a este administrador?", (confirmed) => {
+        if(confirmed) {
+          admins = admins.filter(a => a.id !== id);
+          renderAdmins();
+          tg.HapticFeedback.notificationOccurred('success');
+        }
+      });
+    }
+
+    function syncData() {
+      tg.HapticFeedback.impactOccurred('medium');
+      // Aquí conectarías con Supabase en el futuro
+      const btn = document.querySelector('.btn-sync');
+      btn.innerText = "Syncing...";
+      setTimeout(() => {
+        btn.innerText = "Sync";
+        tg.showAlert("Datos sincronizados con el canal.");
+      }, 1000);
+    }
+
+    // INICIAR
+    renderAdmins();
+
+  </script>
+</body>
+</html>
