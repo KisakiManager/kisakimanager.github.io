@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Kisaki Admin Console V2</title>
+  <title>Kisaki Admin Console V3</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -16,13 +16,14 @@
       --text-main: #ffffff;
       --text-sec: #94a3b8;
       
-      /* COLORES SOLICITADOS */
-      --accent-yellow: #FACC15; /* Amarillo Task */
-      --accent-yellow-glow: rgba(250, 204, 21, 0.3);
+      /* PALETA DE COLORES ACTUALIZADA */
       --accent-blue: #3b82f6;
+      --accent-green: #10b981; /* Para Joins */
+      --accent-red: #ef4444;   /* Para Leves */
+      --accent-purple: #8b5cf6; /* Para Enlaces de Aprobación */
       
       --grad-navy: #0f172a;
-      --grad-cobalt: #e0e7ff;
+      --glass-border: rgba(255,255,255,0.08);
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'SF Pro Display', 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -36,75 +37,84 @@
     }
 
     /* --- HEADER --- */
-    .header { margin-bottom: 25px; }
+    .header { margin-bottom: 20px; }
     .header h1 { font-size: 1.6em; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 5px;}
     .header p { color: var(--text-sec); font-size: 0.9em; }
 
-    /* --- CARRUSEL DE CANALES --- */
+    /* --- CARRUSEL CANALES --- */
     .channel-scroll {
-      display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 30px;
+      display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 20px;
       scroll-behavior: smooth;
     }
     .channel-scroll::-webkit-scrollbar { display: none; }
 
     .channel-card {
       min-width: 140px; height: 160px;
-      background: #121212;
-      border-radius: 20px;
-      padding: 15px;
+      background: #121212; border-radius: 20px; padding: 15px;
       display: flex; flex-direction: column; justify-content: space-between;
-      border: 1px solid rgba(255,255,255,0.1);
-      transition: all 0.3s;
+      border: 1px solid var(--glass-border); transition: all 0.3s;
       position: relative; overflow: hidden;
     }
-    
     .channel-card.active {
       background: linear-gradient(145deg, #1e1e24, #000);
       border-color: var(--accent-blue);
       box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
     }
-
-    .ch-icon {
-      width: 40px; height: 40px; border-radius: 12px; background: #222;
-      display: flex; align-items: center; justify-content: center; font-size: 1.2em;
-    }
+    .ch-icon { width: 40px; height: 40px; border-radius: 12px; background: #222; display: flex; align-items: center; justify-content: center; font-size: 1.2em; }
     .channel-card.active .ch-icon { background: var(--accent-blue); color: white; }
-
     .ch-name { font-weight: 600; font-size: 0.9em; line-height: 1.3; }
     .ch-subs { font-size: 0.75em; color: var(--text-sec); }
 
-    /* --- LISTA DE ADMINS (Leaderboard Style) --- */
-    .section-title { font-size: 1.1em; margin-bottom: 15px; font-weight: 700; color: white; }
-    .admin-list { display: flex; flex-direction: column; gap: 12px; }
+    /* --- PESTAÑAS (SEGMENTED CONTROL) --- */
+    .segmented-control {
+      display: flex; background: #18181b; padding: 4px; border-radius: 14px;
+      margin-bottom: 25px; border: 1px solid var(--glass-border);
+    }
+    .segment-btn {
+      flex: 1; padding: 10px; border-radius: 10px; border: none; background: transparent;
+      color: var(--text-sec); font-weight: 600; font-size: 0.9em; cursor: pointer; transition: all 0.2s;
+    }
+    .segment-btn.active { background: #333; color: white; shadow: 0 2px 10px rgba(0,0,0,0.2); }
 
+    /* --- LISTAS COMUNES --- */
+    .list-container { display: flex; flex-direction: column; gap: 12px; animation: fadeIn 0.4s ease-out; }
+    
+    /* TARJETA ADMIN (Estilo Anterior) */
     .admin-card {
-      position: relative;
       background: linear-gradient(90deg, #0f172a 0%, #050505 100%);
-      padding: 12px 16px;
-      border-radius: 16px;
-      display: flex; align-items: center; justify-content: space-between;
-      border: 1px solid rgba(255,255,255,0.08);
+      padding: 12px 16px; border-radius: 16px; display: flex; align-items: center; justify-content: space-between;
+      border: 1px solid var(--glass-border);
+    }
+    .admin-card::before { content: ''; position: absolute; left: 0; width: 4px; height: 100%; background: var(--accent-blue); border-radius: 4px 0 0 4px; }
+    
+    /* TARJETA ENLACE (NUEVO ESTILO) */
+    .link-card {
+      background: #0f0f0f; border: 1px solid var(--glass-border);
+      border-radius: 18px; padding: 16px; display: flex; align-items: center; justify-content: space-between;
       transition: transform 0.2s;
     }
-    .admin-card:active { transform: scale(0.98); }
+    .link-card:active { transform: scale(0.98); background: #161616; }
 
-    /* Borde gradiente azul/cobalto a la izquierda */
-    .admin-card::before {
-      content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
-      background: linear-gradient(to bottom, #2563eb, #e0e7ff);
-      border-radius: 4px 0 0 4px;
+    .link-info { display: flex; align-items: center; gap: 14px; }
+    
+    /* Icono dinámico según tipo */
+    .link-icon-box {
+      width: 42px; height: 42px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center; font-size: 1.2em;
     }
+    .link-type-request { background: rgba(139, 92, 246, 0.15); color: var(--accent-purple); } /* Morado */
+    .link-type-direct { background: rgba(16, 185, 129, 0.15); color: var(--accent-green); } /* Verde */
 
-    .user-info { display: flex; align-items: center; gap: 12px; }
-    .avatar {
-      width: 40px; height: 40px; border-radius: 50%;
-      background: #1e293b; border: 2px solid #000;
-      display: flex; align-items: center; justify-content: center; font-weight: bold;
-    }
-    .details h3 { font-size: 0.95em; font-weight: 600; }
-    .details p { font-size: 0.75em; color: var(--text-sec); }
+    .link-meta h3 { font-size: 0.95em; font-weight: 600; color: white; margin-bottom: 2px;}
+    .link-meta p { font-size: 0.75em; color: var(--text-sec); display: flex; align-items: center; gap: 6px; }
+    
+    .creator-badge { background: #222; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; color: #ccc; }
 
-    /* --- MODAL DETALLE (SHEET) --- */
+    .link-stats { text-align: right; }
+    .stat-big { font-size: 1.1em; font-weight: 700; color: white; }
+    .stat-label { font-size: 0.7em; color: var(--text-sec); text-transform: uppercase; }
+
+    /* --- MODAL DASHBOARD (SHEET) --- */
     .modal-overlay {
       position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100;
       opacity: 0; pointer-events: none; transition: opacity 0.3s;
@@ -113,95 +123,103 @@
     .modal-overlay.open { opacity: 1; pointer-events: auto; }
 
     .sheet {
-      width: 100%; height: 90vh; /* Casi pantalla completa */
-      background: #080808;
+      width: 100%; height: 92vh; background: #080808;
       border-top-left-radius: 30px; border-top-right-radius: 30px;
-      padding: 25px;
-      border-top: 1px solid rgba(255,255,255,0.1);
-      overflow-y: auto;
-      transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+      padding: 25px; border-top: 1px solid rgba(255,255,255,0.1);
+      overflow-y: auto; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
     .modal-overlay.open .sheet { transform: translateY(0); }
 
     .sheet-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .close-btn { background: #222; border: none; color: white; width: 30px; height: 30px; border-radius: 50%; cursor: pointer;}
+    .sheet-title { font-size: 1.2em; font-weight: 700; }
+    .close-btn { background: #222; border: none; color: white; width: 32px; height: 32px; border-radius: 50%; cursor: pointer;}
 
-    /* --- GRÁFICAS --- */
-    .chart-container {
-      background: #111;
-      border-radius: 20px;
-      padding: 15px;
-      margin-bottom: 20px;
-      border: 1px solid rgba(255,255,255,0.05);
+    /* GRID DE MÉTRICAS (Estilo Img 4020) */
+    .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 25px; }
+    .metric-card {
+      background: #111; padding: 15px; border-radius: 16px; border: 1px solid var(--glass-border);
+      display: flex; flex-direction: column; gap: 8px;
     }
-    .chart-header { display: flex; justify-content: space-between; margin-bottom: 10px; align-items: center; }
-    .chart-title { font-size: 0.9em; font-weight: 600; color: #ccc; }
-    .chart-value { font-size: 1.4em; font-weight: 800; color: white; }
+    .m-icon { font-size: 1.2em; }
+    .m-val { font-size: 1.4em; font-weight: 700; color: white; }
+    .m-label { font-size: 0.8em; color: var(--text-sec); }
 
-    /* Estilo Específico Gráfica 1 (Amarilla) */
-    .chart-yellow .chart-value { color: var(--accent-yellow); text-shadow: 0 0 10px var(--accent-yellow-glow); }
-    
-    /* --- PERMISOS GRANULARES --- */
-    .perm-list { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; padding-bottom: 50px;}
-    .perm-item {
-      display: flex; align-items: center; gap: 15px; padding: 12px;
-      background: #0f0f0f; border-radius: 12px;
-    }
-    .custom-check {
-      width: 22px; height: 22px; border: 2px solid #333; border-radius: 6px;
-      display: flex; align-items: center; justify-content: center; transition: 0.2s;
-    }
-    .custom-check.checked { background: var(--accent-blue); border-color: var(--accent-blue); }
-    .custom-check svg { display: none; width: 14px; stroke: white; stroke-width: 3; }
-    .custom-check.checked svg { display: block; }
+    /* GRÁFICAS */
+    .chart-box { background: #111; border-radius: 20px; padding: 15px; margin-bottom: 20px; border: 1px solid var(--glass-border); }
+    .chart-head { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.9em; font-weight: 600; color: #ccc; }
 
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   </style>
 </head>
 <body>
 
   <div class="header">
-    <h1>Gestión de Canales</h1>
-    <p>Selecciona un canal para gestionar su equipo.</p>
+    <h1>Centro de Comando</h1>
+    <p>Gestión avanzada de canales y accesos.</p>
   </div>
 
   <div class="channel-scroll" id="channelList">
     </div>
 
-  <div id="adminSection" style="display:none; animation: fadeIn 0.5s;">
-    <div class="section-title">Administradores del Canal</div>
-    <div class="admin-list" id="adminListContainer">
-      </div>
+  <div class="segmented-control" id="tabsControl" style="display:none;">
+    <button class="segment-btn active" onclick="switchTab('admins')">👥 Equipo</button>
+    <button class="segment-btn" onclick="switchTab('links')">🔗 Enlaces</button>
   </div>
 
-  <div id="detailModal" class="modal-overlay">
+  <div id="sectionAdmins" class="list-container" style="display:none;">
+    </div>
+
+  <div id="sectionLinks" class="list-container" style="display:none;">
+    </div>
+
+  <div id="linkDetailModal" class="modal-overlay">
     <div class="sheet">
       <div class="sheet-header">
         <div>
-          <h2 style="font-size:1.2em;" id="modalAdminName">Admin</h2>
-          <span style="font-size:0.8em; color:#888;">Reporte de rendimiento</span>
+          <div class="sheet-title" id="modalLinkName">Campaña Twitter</div>
+          <span style="font-size:0.8em; color:#888;">Creado por: <span id="modalCreator" style="color:white;">Vicente</span></span>
         </div>
-        <button class="close-btn" onclick="closeModal()">✕</button>
+        <button class="close-btn" onclick="closeLinkModal()">✕</button>
       </div>
 
-      <div class="chart-container chart-yellow">
-        <div class="chart-header">
-          <span class="chart-title">Actividad (Posts)</span>
-          <span class="chart-value">142</span>
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <span class="m-icon">👆</span>
+          <span class="m-val" id="mClicks">1.2k</span>
+          <span class="m-label">Total Clicks</span>
         </div>
-        <div id="activityChart"></div>
+        <div class="metric-card">
+          <span class="m-icon">✅</span>
+          <span class="m-val" style="color:var(--accent-green);" id="mJoins">850</span>
+          <span class="m-label">Uniones</span>
+        </div>
+        <div class="metric-card">
+          <span class="m-icon">🚪</span>
+          <span class="m-val" style="color:var(--accent-red);" id="mLeaves">45</span>
+          <span class="m-label">Salidas</span>
+        </div>
+        <div class="metric-card">
+          <span class="m-icon">🛡️</span>
+          <span class="m-val" style="color:var(--accent-purple);" id="mRate">85%</span>
+          <span class="m-label">Tasa Aprobación</span>
+        </div>
       </div>
 
-      <div class="chart-container">
-        <div class="chart-header">
-          <span class="chart-title">Impacto (Reacciones)</span>
-          <span class="chart-value">8.5k</span>
+      <div class="chart-box">
+        <div class="chart-head">
+          <span>Crecimiento Neto</span>
+          <span style="color:var(--accent-green);">+12% esta semana</span>
         </div>
-        <div id="reactionChart"></div>
+        <div id="growthChart"></div>
       </div>
 
-      <div class="section-title" style="margin-top:30px;">Permisos Activos</div>
-      <div class="perm-list" id="permList">
+      <div class="chart-box">
+        <div class="chart-head">
+          <span>Actividad Diaria</span>
         </div>
+        <div id="dailyChart"></div>
+      </div>
+
     </div>
   </div>
 
@@ -209,147 +227,162 @@
     const tg = window.Telegram.WebApp;
     tg.expand();
 
-    // DATOS FICTICIOS (MOCK DATA)
+    // DATOS MOCK
     const channels = [
       { id: 101, name: "Kisaki Updates", subs: "12.5k", icon: "📢" },
-      { id: 102, name: "Trading Signals", subs: "4.2k", icon: "📈" },
-      { id: 103, name: "Dev Team", subs: "150", icon: "💻" },
-      { id: 104, name: "Meme Central", subs: "80k", icon: "🐸" }
+      { id: 102, name: "Trading VIP", subs: "4.2k", icon: "💎" }
     ];
 
-    const adminsDB = {
-      101: [
-        { name: "Vicente", role: "Owner", posts: 142, impact: "High" },
-        { name: "Kisaki Bot", role: "Automation", posts: 2500, impact: "Max" },
-        { name: "Elena", role: "Editor", posts: 45, impact: "Med" }
-      ],
-      102: [
-        { name: "CryptoKing", role: "Analyst", posts: 20, impact: "High" }
-      ]
+    const dataDB = {
+      101: {
+        admins: [
+          { name: "Vicente", role: "Owner" },
+          { name: "Kisaki Bot", role: "System" }
+        ],
+        links: [
+          { id: 1, name: "Twitter Promo", type: "direct", creator: "Vicente", clicks: 1200, joins: 850, leaves: 45 },
+          { id: 2, name: "Acceso VIP", type: "request", creator: "Elena", clicks: 500, joins: 120, leaves: 5 }
+        ]
+      }
     };
 
-    // 1. RENDERIZAR CANALES
-    const channelContainer = document.getElementById('channelList');
-    
-    channels.forEach((ch, index) => {
+    let currentChannelId = null;
+
+    // INICIALIZAR
+    const chContainer = document.getElementById('channelList');
+    channels.forEach((ch, idx) => {
       const card = document.createElement('div');
-      card.className = `channel-card ${index === 0 ? '' : ''}`; // Ninguno activo al inicio
+      card.className = 'channel-card';
       card.onclick = () => selectChannel(ch.id, card);
-      card.innerHTML = `
-        <div class="ch-icon">${ch.icon}</div>
-        <div>
-          <div class="ch-name">${ch.name}</div>
-          <div class="ch-subs">${ch.subs} subs</div>
-        </div>
-      `;
-      channelContainer.appendChild(card);
+      card.innerHTML = `<div class="ch-icon">${ch.icon}</div><div><div class="ch-name">${ch.name}</div><div class="ch-subs">${ch.subs}</div></div>`;
+      chContainer.appendChild(card);
+      // Seleccionar primero por defecto
+      if(idx===0) setTimeout(()=> selectChannel(ch.id, card), 100);
     });
 
-    // 2. SELECCIONAR CANAL
-    function selectChannel(id, element) {
-      // Estilos
+    function selectChannel(id, el) {
       document.querySelectorAll('.channel-card').forEach(c => c.classList.remove('active'));
-      element.classList.add('active');
+      el.classList.add('active');
       tg.HapticFeedback.selectionChanged();
+      
+      currentChannelId = id;
+      document.getElementById('tabsControl').style.display = 'flex';
+      
+      // Cargar vista por defecto (Admins)
+      switchTab('admins'); 
+    }
 
-      // Cargar Admins
-      const section = document.getElementById('adminSection');
-      const list = document.getElementById('adminListContainer');
-      section.style.display = 'block';
-      list.innerHTML = '';
+    function switchTab(tab) {
+      document.querySelectorAll('.segment-btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active'); // Ojo: en prod usar referencia mejor
 
-      const admins = adminsDB[id] || [];
-      if(admins.length === 0) list.innerHTML = '<div style="color:#555; text-align:center;">Sin admins extra</div>';
+      const adminsDiv = document.getElementById('sectionAdmins');
+      const linksDiv = document.getElementById('sectionLinks');
+      
+      if(tab === 'admins') {
+        linksDiv.style.display = 'none';
+        adminsDiv.style.display = 'flex';
+        renderAdmins();
+      } else {
+        adminsDiv.style.display = 'none';
+        linksDiv.style.display = 'flex';
+        renderLinks();
+      }
+    }
 
-      admins.forEach(admin => {
-        const item = document.createElement('div');
-        item.className = 'admin-card';
-        item.onclick = () => openAdminStats(admin);
-        item.innerHTML = `
-          <div class="user-info">
-            <div class="avatar">${admin.name[0]}</div>
-            <div class="details">
-              <h3>${admin.name}</h3>
-              <p>${admin.role} • ${admin.posts} posts</p>
+    function renderAdmins() {
+      const container = document.getElementById('sectionAdmins');
+      container.innerHTML = '';
+      const list = dataDB[currentChannelId]?.admins || [];
+      list.forEach(a => {
+        container.innerHTML += `
+          <div class="admin-card">
+            <div style="display:flex; gap:10px; align-items:center;">
+              <div style="width:35px; height:35px; background:#222; border-radius:50%; display:flex; align-items:center; justify-content:center;">${a.name[0]}</div>
+              <div><h3 style="font-size:0.95em;">${a.name}</h3><p style="font-size:0.8em; color:#888;">${a.role}</p></div>
             </div>
-          </div>
-          <div style="color:#2563eb;">⚙️</div>
-        `;
-        list.appendChild(item);
+          </div>`;
       });
     }
 
-    // 3. ABRIR MODAL CON GRÁFICAS
-    let chart1, chart2; // Variables para destruir gráficas viejas
+    function renderLinks() {
+      const container = document.getElementById('sectionLinks');
+      container.innerHTML = '';
+      const list = dataDB[currentChannelId]?.links || [];
+      
+      list.forEach(l => {
+        const icon = l.type === 'request' ? '🔒' : '⚡';
+        const typeClass = l.type === 'request' ? 'link-type-request' : 'link-type-direct';
+        const typeLabel = l.type === 'request' ? 'Solicitud' : 'Directo';
+        
+        const el = document.createElement('div');
+        el.className = 'link-card';
+        el.onclick = () => openLinkDetail(l);
+        el.innerHTML = `
+          <div class="link-info">
+            <div class="link-icon-box ${typeClass}">${icon}</div>
+            <div class="link-meta">
+              <h3>${l.name}</h3>
+              <p><span class="creator-badge">${l.creator}</span> • ${typeLabel}</p>
+            </div>
+          </div>
+          <div class="link-stats">
+            <div class="stat-big">${l.joins}</div>
+            <div class="stat-label">Uniones</div>
+          </div>
+        `;
+        container.appendChild(el);
+      });
+    }
 
-    function openAdminStats(admin) {
-      document.getElementById('modalAdminName').innerText = admin.name;
-      document.getElementById('detailModal').classList.add('open');
+    // --- GRÁFICAS DEL MODAL ---
+    let chartGrowth, chartDaily;
+
+    function openLinkDetail(link) {
+      document.getElementById('modalLinkName').innerText = link.name;
+      document.getElementById('modalCreator').innerText = link.creator;
+      document.getElementById('mClicks').innerText = link.clicks;
+      document.getElementById('mJoins').innerText = link.joins;
+      document.getElementById('mLeaves').innerText = link.leaves;
+      
+      document.getElementById('linkDetailModal').classList.add('open');
       tg.HapticFeedback.impactOccurred('medium');
 
-      // RENDERIZAR GRÁFICA 1: Actividad (Amarillo - Area)
-      if(chart1) chart1.destroy();
-      const options1 = {
-        series: [{ name: 'Posts', data: [10, 41, 35, 51, 49, 62, 69, 91, 148] }],
-        chart: { type: 'area', height: 120, toolbar: {show:false}, background: 'transparent' },
-        colors: ['#FACC15'], // AMARILLO SOLICITADO
-        stroke: { curve: 'smooth', width: 3 },
-        fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.7, opacityTo: 0.0 } },
+      // GRÁFICA 1: CRECIMIENTO (Area Verde)
+      if(chartGrowth) chartGrowth.destroy();
+      const opt1 = {
+        series: [{ name: 'Uniones', data: [10, 40, 25, 50, 49, 90, 120] }],
+        chart: { type: 'area', height: 140, toolbar:{show:false}, background:'transparent' },
+        colors: ['#10b981'], // Verde Esmeralda
+        stroke: { curve: 'smooth', width: 2 },
+        fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.6, opacityTo: 0.1 } },
         dataLabels: { enabled: false },
         grid: { show: false },
         xaxis: { labels: { show: false }, axisBorder: {show:false}, axisTicks: {show:false} },
         yaxis: { show: false }
       };
-      chart1 = new ApexCharts(document.querySelector("#activityChart"), options1);
-      chart1.render();
+      chartGrowth = new ApexCharts(document.querySelector("#growthChart"), opt1);
+      chartGrowth.render();
 
-      // RENDERIZAR GRÁFICA 2: Reacciones (Barras - Azul/Blanco)
-      if(chart2) chart2.destroy();
-      const options2 = {
-        series: [{ name: 'Likes', data: [40, 80, 20, 50, 90, 10, 60] }],
-        chart: { type: 'bar', height: 120, toolbar: {show:false}, background: 'transparent' },
-        colors: ['#3b82f6'], // Azul
-        plotOptions: { bar: { borderRadius: 6, columnWidth: '50%' } }, // Barras redondeadas como la imagen
+      // GRÁFICA 2: BARRAS DIARIAS
+      if(chartDaily) chartDaily.destroy();
+      const opt2 = {
+        series: [{ name: 'Actividad', data: [20, 15, 30, 40, 35, 50, 60] }],
+        chart: { type: 'bar', height: 140, toolbar:{show:false}, background:'transparent' },
+        colors: ['#3b82f6'],
+        plotOptions: { bar: { borderRadius: 4, columnWidth: '40%' } },
         dataLabels: { enabled: false },
-        grid: { show: false },
-        xaxis: { categories: ['L', 'M', 'X', 'J', 'V', 'S', 'D'], labels: { style: { colors: '#666' } } },
+        grid: { borderColor: '#333', strokeDashArray: 4, xaxis: { lines: { show: false } } },
+        xaxis: { categories: ['L','M','X','J','V','S','D'], labels: { style: { colors: '#666' } } },
         yaxis: { show: false }
       };
-      chart2 = new ApexCharts(document.querySelector("#reactionChart"), options2);
-      chart2.render();
-
-      // RENDERIZAR PERMISOS
-      renderPermissions();
+      chartDaily = new ApexCharts(document.querySelector("#dailyChart"), opt2);
+      chartDaily.render();
     }
 
-    function closeModal() {
-      document.getElementById('detailModal').classList.remove('open');
+    function closeLinkModal() {
+      document.getElementById('linkDetailModal').classList.remove('open');
     }
-
-    function renderPermissions() {
-      const perms = [
-        "Cambiar Información del Canal", "Publicar Mensajes", "Editar Mensajes", "Borrar Mensajes", "Añadir Usuarios", "Gestionar Chats de Voz"
-      ];
-      const container = document.getElementById('permList');
-      container.innerHTML = '';
-
-      perms.forEach(p => {
-        container.innerHTML += `
-          <div class="perm-item" onclick="toggleCheck(this)">
-            <div class="custom-check ${Math.random() > 0.3 ? 'checked' : ''}">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"></polyline></svg>
-            </div>
-            <div style="font-size:0.9em;">${p}</div>
-          </div>
-        `;
-      });
-    }
-
-    function toggleCheck(el) {
-      el.querySelector('.custom-check').classList.toggle('checked');
-      tg.HapticFeedback.selectionChanged();
-    }
-
   </script>
 </body>
 </html>
