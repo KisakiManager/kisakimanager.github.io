@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Kisaki Admin Console V3</title>
+  <title>Kisaki Admin V4</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -11,378 +11,489 @@
   <style>
     /* --- VARIABLES & RESET --- */
     :root {
-      --bg-amoled: #000000;
-      --bg-card: #09090b;
-      --text-main: #ffffff;
+      --bg-core: #020617; /* Fondo Azul Muy Oscuro (Casi negro) */
+      --card-bg: #0f172a;
+      --text-main: #f8fafc;
       --text-sec: #94a3b8;
       
-      /* PALETA DE COLORES ACTUALIZADA */
-      --accent-blue: #3b82f6;
-      --accent-green: #10b981; /* Para Joins */
-      --accent-red: #ef4444;   /* Para Leves */
-      --accent-purple: #8b5cf6; /* Para Enlaces de Aprobación */
+      /* GRADIENTES PREMIUM (Estilo Image 4057) */
+      --grad-ocean: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+      --grad-electric: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%);
+      --grad-royal: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%);
       
-      --grad-navy: #0f172a;
-      --glass-border: rgba(255,255,255,0.08);
+      --border-glass: rgba(255,255,255,0.08);
+      --shadow-glow: 0 10px 30px -10px rgba(37, 99, 235, 0.3);
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'SF Pro Display', 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
 
     body {
-      background-color: var(--bg-amoled);
+      background-color: var(--bg-core);
       color: var(--text-main);
-      padding: 20px;
-      padding-bottom: 100px;
       min-height: 100vh;
+      display: flex; flex-direction: column;
+      overflow-x: hidden;
     }
 
-    /* --- HEADER --- */
-    .header { margin-bottom: 20px; }
-    .header h1 { font-size: 1.6em; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 5px;}
-    .header p { color: var(--text-sec); font-size: 0.9em; }
-
-    /* --- CARRUSEL CANALES --- */
-    .channel-scroll {
-      display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 20px;
-      scroll-behavior: smooth;
+    /* --- LAYOUT GENERAL --- */
+    .view-container {
+      padding: 24px;
+      animation: fadeScale 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+      display: none; /* Se controla con JS */
     }
-    .channel-scroll::-webkit-scrollbar { display: none; }
+    .view-container.active { display: block; }
 
-    .channel-card {
-      min-width: 140px; height: 160px;
-      background: #121212; border-radius: 20px; padding: 15px;
-      display: flex; flex-direction: column; justify-content: space-between;
-      border: 1px solid var(--glass-border); transition: all 0.3s;
+    /* --- HEADER DE NAVEGACIÓN --- */
+    .nav-header {
+      display: flex; align-items: center; gap: 15px; margin-bottom: 30px;
+    }
+    .btn-back {
+      width: 40px; height: 40px; border-radius: 12px;
+      background: rgba(255,255,255,0.05); border: 1px solid var(--border-glass);
+      display: flex; align-items: center; justify-content: center;
+      color: white; cursor: pointer; transition: 0.2s;
+    }
+    .btn-back:active { transform: scale(0.9); background: rgba(255,255,255,0.1); }
+    
+    .view-title h1 { font-size: 1.4em; font-weight: 700; letter-spacing: -0.5px; }
+    .view-title p { font-size: 0.85em; color: var(--text-sec); }
+
+    /* --- VIEW 1: HOME (TARJETAS GRANDES) --- */
+    .menu-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+
+    .menu-card {
+      background: var(--card-bg);
+      border-radius: 24px;
+      padding: 25px;
+      border: 1px solid var(--border-glass);
       position: relative; overflow: hidden;
+      cursor: pointer; transition: transform 0.2s;
+      height: 160px; display: flex; flex-direction: column; justify-content: flex-end;
     }
-    .channel-card.active {
-      background: linear-gradient(145deg, #1e1e24, #000);
-      border-color: var(--accent-blue);
-      box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
-    }
-    .ch-icon { width: 40px; height: 40px; border-radius: 12px; background: #222; display: flex; align-items: center; justify-content: center; font-size: 1.2em; }
-    .channel-card.active .ch-icon { background: var(--accent-blue); color: white; }
-    .ch-name { font-weight: 600; font-size: 0.9em; line-height: 1.3; }
-    .ch-subs { font-size: 0.75em; color: var(--text-sec); }
-
-    /* --- PESTAÑAS (SEGMENTED CONTROL) --- */
-    .segmented-control {
-      display: flex; background: #18181b; padding: 4px; border-radius: 14px;
-      margin-bottom: 25px; border: 1px solid var(--glass-border);
-    }
-    .segment-btn {
-      flex: 1; padding: 10px; border-radius: 10px; border: none; background: transparent;
-      color: var(--text-sec); font-weight: 600; font-size: 0.9em; cursor: pointer; transition: all 0.2s;
-    }
-    .segment-btn.active { background: #333; color: white; shadow: 0 2px 10px rgba(0,0,0,0.2); }
-
-    /* --- LISTAS COMUNES --- */
-    .list-container { display: flex; flex-direction: column; gap: 12px; animation: fadeIn 0.4s ease-out; }
+    .menu-card:active { transform: scale(0.98); }
     
-    /* TARJETA ADMIN (Estilo Anterior) */
-    .admin-card {
-      background: linear-gradient(90deg, #0f172a 0%, #050505 100%);
-      padding: 12px 16px; border-radius: 16px; display: flex; align-items: center; justify-content: space-between;
-      border: 1px solid var(--glass-border);
+    /* Gradientes Específicos */
+    .menu-admins { background: var(--grad-ocean); }
+    .menu-links { background: radial-gradient(circle at top right, #1e1b4b, #0f172a); }
+
+    .menu-card::before {
+      content: ''; position: absolute; top: -50px; right: -50px; width: 150px; height: 150px;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      filter: blur(20px);
     }
-    .admin-card::before { content: ''; position: absolute; left: 0; width: 4px; height: 100%; background: var(--accent-blue); border-radius: 4px 0 0 4px; }
+
+    .icon-box {
+      position: absolute; top: 20px; left: 20px;
+      width: 50px; height: 50px; border-radius: 16px;
+      background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);
+      display: flex; align-items: center; justify-content: center;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .icon-box svg { width: 24px; height: 24px; stroke: white; stroke-width: 2; }
+
+    .card-label h2 { font-size: 1.3em; font-weight: 700; margin-bottom: 5px; }
+    .card-label p { font-size: 0.85em; color: rgba(255,255,255,0.6); }
+
+    /* --- VIEW 2: SELECTOR DE CANALES --- */
+    .channel-list { display: flex; flex-direction: column; gap: 12px; }
     
-    /* TARJETA ENLACE (NUEVO ESTILO) */
-    .link-card {
-      background: #0f0f0f; border: 1px solid var(--glass-border);
-      border-radius: 18px; padding: 16px; display: flex; align-items: center; justify-content: space-between;
-      transition: transform 0.2s;
+    .channel-item {
+      background: #0f172a; padding: 16px; border-radius: 18px;
+      display: flex; align-items: center; justify-content: space-between;
+      border: 1px solid var(--border-glass);
     }
-    .link-card:active { transform: scale(0.98); background: #161616; }
+    .channel-info { display: flex; align-items: center; gap: 15px; }
+    .ch-avatar { 
+      width: 44px; height: 44px; border-radius: 14px; background: #1e293b;
+      display: flex; align-items: center; justify-content: center; font-weight: bold; color: #64748b;
+    }
+    .ch-avatar.gradient { background: var(--grad-electric); color: white; }
 
-    .link-info { display: flex; align-items: center; gap: 14px; }
+    /* --- VIEW 3: LISTAS (ADMINS / LINKS) --- */
+    .list-item {
+      background: linear-gradient(90deg, #0f172a 0%, #020617 100%);
+      padding: 14px; border-radius: 18px; margin-bottom: 12px;
+      display: flex; align-items: center; justify-content: space-between;
+      border: 1px solid var(--border-glass); position: relative;
+    }
+    /* Borde lateral indicativo */
+    .list-item::after {
+      content: ''; position: absolute; left: 0; top: 15%; height: 70%; width: 4px;
+      background: var(--grad-electric); border-radius: 0 4px 4px 0;
+    }
+
+    .item-meta { display: flex; flex-direction: column; }
+    .item-title { font-weight: 600; font-size: 1em; }
+    .item-sub { font-size: 0.8em; color: var(--text-sec); display: flex; align-items: center; gap: 5px; }
     
-    /* Icono dinámico según tipo */
-    .link-icon-box {
-      width: 42px; height: 42px; border-radius: 12px;
-      display: flex; align-items: center; justify-content: center; font-size: 1.2em;
-    }
-    .link-type-request { background: rgba(139, 92, 246, 0.15); color: var(--accent-purple); } /* Morado */
-    .link-type-direct { background: rgba(16, 185, 129, 0.15); color: var(--accent-green); } /* Verde */
+    .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.7em; font-weight: 700; text-transform: uppercase; }
+    .badge-blue { background: rgba(37, 99, 235, 0.2); color: #60a5fa; }
+    .badge-purple { background: rgba(147, 51, 234, 0.2); color: #c084fc; }
 
-    .link-meta h3 { font-size: 0.95em; font-weight: 600; color: white; margin-bottom: 2px;}
-    .link-meta p { font-size: 0.75em; color: var(--text-sec); display: flex; align-items: center; gap: 6px; }
+    /* --- VIEW 4: DASHBOARD (ESTADÍSTICAS) --- */
+    .stats-container { padding-bottom: 40px; }
     
-    .creator-badge { background: #222; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; color: #ccc; }
-
-    .link-stats { text-align: right; }
-    .stat-big { font-size: 1.1em; font-weight: 700; color: white; }
-    .stat-label { font-size: 0.7em; color: var(--text-sec); text-transform: uppercase; }
-
-    /* --- MODAL DASHBOARD (SHEET) --- */
-    .modal-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100;
-      opacity: 0; pointer-events: none; transition: opacity 0.3s;
-      display: flex; align-items: flex-end;
+    .stats-header {
+      background: var(--card-bg); padding: 20px; border-radius: 24px;
+      margin-bottom: 20px; border: 1px solid var(--border-glass); text-align: center;
     }
-    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .main-stat-val { font-size: 2.2em; font-weight: 800; background: var(--grad-electric); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .main-stat-lbl { font-size: 0.9em; color: var(--text-sec); text-transform: uppercase; letter-spacing: 1px; }
 
-    .sheet {
-      width: 100%; height: 92vh; background: #080808;
-      border-top-left-radius: 30px; border-top-right-radius: 30px;
-      padding: 25px; border-top: 1px solid rgba(255,255,255,0.1);
-      overflow-y: auto; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    /* Grid de Métricas Pequeñas */
+    .metrics-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+    .metric-box {
+      background: rgba(255,255,255,0.03); padding: 15px; border-radius: 16px;
+      display: flex; flex-direction: column; gap: 5px; border: 1px solid var(--border-glass);
     }
-    .modal-overlay.open .sheet { transform: translateY(0); }
+    .mb-icon { width: 20px; height: 20px; margin-bottom: 5px; }
+    .mb-val { font-size: 1.1em; font-weight: 700; }
+    .mb-lbl { font-size: 0.75em; color: var(--text-sec); }
 
-    .sheet-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .sheet-title { font-size: 1.2em; font-weight: 700; }
-    .close-btn { background: #222; border: none; color: white; width: 32px; height: 32px; border-radius: 50%; cursor: pointer;}
-
-    /* GRID DE MÉTRICAS (Estilo Img 4020) */
-    .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 25px; }
-    .metric-card {
-      background: #111; padding: 15px; border-radius: 16px; border: 1px solid var(--glass-border);
-      display: flex; flex-direction: column; gap: 8px;
+    /* Gráficas */
+    .chart-wrapper {
+      background: #0f172a; border-radius: 20px; padding: 15px; margin-bottom: 20px;
+      border: 1px solid var(--border-glass);
     }
-    .m-icon { font-size: 1.2em; }
-    .m-val { font-size: 1.4em; font-weight: 700; color: white; }
-    .m-label { font-size: 0.8em; color: var(--text-sec); }
+    .cw-header { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.9em; color: #cbd5e1; font-weight: 600; }
 
-    /* GRÁFICAS */
-    .chart-box { background: #111; border-radius: 20px; padding: 15px; margin-bottom: 20px; border: 1px solid var(--glass-border); }
-    .chart-head { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.9em; font-weight: 600; color: #ccc; }
-
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    /* Animaciones */
+    @keyframes fadeScale { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
   </style>
 </head>
 <body>
 
-  <div class="header">
-    <h1>Centro de Comando</h1>
-    <p>Gestión avanzada de canales y accesos.</p>
+  <div id="viewHome" class="view-container active">
+    <div style="margin: 20px 0 40px 0;">
+      <h1 style="font-size: 2em; font-weight: 800;">Panel Kisaki</h1>
+      <p style="color: var(--text-sec);">Selecciona una herramienta de gestión</p>
+    </div>
+
+    <div class="menu-grid">
+      <div class="menu-card menu-admins" onclick="goToChannels('admins')">
+        <div class="icon-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        </div>
+        <div class="card-label">
+          <h2>Gestión de Admins</h2>
+          <p>Permisos, actividad y rendimiento.</p>
+        </div>
+      </div>
+
+      <div class="menu-card menu-links" onclick="goToChannels('links')">
+        <div class="icon-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+        </div>
+        <div class="card-label">
+          <h2>Gestión de Enlaces</h2>
+          <p>Tráfico, uniones y conversiones.</p>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div class="channel-scroll" id="channelList">
+  <div id="viewChannels" class="view-container">
+    <div class="nav-header">
+      <div class="btn-back" onclick="goBack()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </div>
+      <div class="view-title">
+        <h1>Seleccionar Canal</h1>
+        <p id="contextTitle">...</p>
+      </div>
     </div>
 
-  <div class="segmented-control" id="tabsControl" style="display:none;">
-    <button class="segment-btn active" onclick="switchTab('admins')">👥 Equipo</button>
-    <button class="segment-btn" onclick="switchTab('links')">🔗 Enlaces</button>
+    <div class="channel-list" id="channelListContainer">
+      </div>
   </div>
 
-  <div id="sectionAdmins" class="list-container" style="display:none;">
+  <div id="viewList" class="view-container">
+    <div class="nav-header">
+      <div class="btn-back" onclick="goBack()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </div>
+      <div class="view-title">
+        <h1 id="listTitle">Lista</h1>
+        <p id="listSubtitle">Detalle del canal</p>
+      </div>
     </div>
 
-  <div id="sectionLinks" class="list-container" style="display:none;">
+    <div id="listContent">
+      </div>
+  </div>
+
+  <div id="viewDashboard" class="view-container">
+    <div class="nav-header">
+      <div class="btn-back" onclick="goBack()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </div>
+      <div class="view-title">
+        <h1 id="dashTitle">Estadísticas</h1>
+        <p id="dashSubtitle">Reporte detallado</p>
+      </div>
     </div>
 
-  <div id="linkDetailModal" class="modal-overlay">
-    <div class="sheet">
-      <div class="sheet-header">
-        <div>
-          <div class="sheet-title" id="modalLinkName">Campaña Twitter</div>
-          <span style="font-size:0.8em; color:#888;">Creado por: <span id="modalCreator" style="color:white;">Vicente</span></span>
-        </div>
-        <button class="close-btn" onclick="closeLinkModal()">✕</button>
+    <div class="stats-container" id="dashContent">
       </div>
-
-      <div class="metrics-grid">
-        <div class="metric-card">
-          <span class="m-icon">👆</span>
-          <span class="m-val" id="mClicks">1.2k</span>
-          <span class="m-label">Total Clicks</span>
-        </div>
-        <div class="metric-card">
-          <span class="m-icon">✅</span>
-          <span class="m-val" style="color:var(--accent-green);" id="mJoins">850</span>
-          <span class="m-label">Uniones</span>
-        </div>
-        <div class="metric-card">
-          <span class="m-icon">🚪</span>
-          <span class="m-val" style="color:var(--accent-red);" id="mLeaves">45</span>
-          <span class="m-label">Salidas</span>
-        </div>
-        <div class="metric-card">
-          <span class="m-icon">🛡️</span>
-          <span class="m-val" style="color:var(--accent-purple);" id="mRate">85%</span>
-          <span class="m-label">Tasa Aprobación</span>
-        </div>
-      </div>
-
-      <div class="chart-box">
-        <div class="chart-head">
-          <span>Crecimiento Neto</span>
-          <span style="color:var(--accent-green);">+12% esta semana</span>
-        </div>
-        <div id="growthChart"></div>
-      </div>
-
-      <div class="chart-box">
-        <div class="chart-head">
-          <span>Actividad Diaria</span>
-        </div>
-        <div id="dailyChart"></div>
-      </div>
-
-    </div>
   </div>
 
   <script>
     const tg = window.Telegram.WebApp;
     tg.expand();
 
-    // DATOS MOCK
-    const channels = [
-      { id: 101, name: "Kisaki Updates", subs: "12.5k", icon: "📢" },
-      { id: 102, name: "Trading VIP", subs: "4.2k", icon: "💎" }
-    ];
+    // --- ESTADO ---
+    let historyStack = ['viewHome']; // Para manejar el botón "Atrás"
+    let currentContext = ''; // 'admins' o 'links'
+    let currentChannel = null;
 
-    const dataDB = {
-      101: {
-        admins: [
-          { name: "Vicente", role: "Owner" },
-          { name: "Kisaki Bot", role: "System" }
-        ],
-        links: [
-          { id: 1, name: "Twitter Promo", type: "direct", creator: "Vicente", clicks: 1200, joins: 850, leaves: 45 },
-          { id: 2, name: "Acceso VIP", type: "request", creator: "Elena", clicks: 500, joins: 120, leaves: 5 }
-        ]
-      }
+    // --- DATOS MOCK ---
+    const DB = {
+      channels: [
+        { id: 1, name: "Kisaki Updates", subs: "12.5k" },
+        { id: 2, name: "Trading Signals", subs: "4.2k" },
+        { id: 3, name: "Dev Team", subs: "150" }
+      ],
+      admins: [
+        { id: 101, name: "Vicente", role: "Owner", posts: 154, views: "1.2M", react: "45k" },
+        { id: 102, name: "Kisaki Bot", role: "System", posts: 2500, views: "5.5M", react: "120k" },
+        { id: 103, name: "Elena", role: "Editor", posts: 42, views: "300k", react: "12k" }
+      ],
+      links: [
+        { id: 201, name: "Twitter Promo", type: "Directo", creator: "Vicente", joins: 850, leaves: 20, rate: "98%" },
+        { id: 202, name: "Acceso VIP", type: "Solicitud", creator: "Elena", joins: 120, leaves: 5, rate: "80%" }
+      ]
     };
 
-    let currentChannelId = null;
-
-    // INICIALIZAR
-    const chContainer = document.getElementById('channelList');
-    channels.forEach((ch, idx) => {
-      const card = document.createElement('div');
-      card.className = 'channel-card';
-      card.onclick = () => selectChannel(ch.id, card);
-      card.innerHTML = `<div class="ch-icon">${ch.icon}</div><div><div class="ch-name">${ch.name}</div><div class="ch-subs">${ch.subs}</div></div>`;
-      chContainer.appendChild(card);
-      // Seleccionar primero por defecto
-      if(idx===0) setTimeout(()=> selectChannel(ch.id, card), 100);
-    });
-
-    function selectChannel(id, el) {
-      document.querySelectorAll('.channel-card').forEach(c => c.classList.remove('active'));
-      el.classList.add('active');
-      tg.HapticFeedback.selectionChanged();
-      
-      currentChannelId = id;
-      document.getElementById('tabsControl').style.display = 'flex';
-      
-      // Cargar vista por defecto (Admins)
-      switchTab('admins'); 
+    // --- NAVEGACIÓN ---
+    function navigateTo(viewId) {
+      // Ocultar actual
+      document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));
+      // Mostrar nueva
+      document.getElementById(viewId).classList.add('active');
+      // Guardar historial
+      if (historyStack[historyStack.length - 1] !== viewId) {
+        historyStack.push(viewId);
+      }
+      window.scrollTo(0,0);
     }
 
-    function switchTab(tab) {
-      document.querySelectorAll('.segment-btn').forEach(b => b.classList.remove('active'));
-      event.target.classList.add('active'); // Ojo: en prod usar referencia mejor
-
-      const adminsDiv = document.getElementById('sectionAdmins');
-      const linksDiv = document.getElementById('sectionLinks');
-      
-      if(tab === 'admins') {
-        linksDiv.style.display = 'none';
-        adminsDiv.style.display = 'flex';
-        renderAdmins();
-      } else {
-        adminsDiv.style.display = 'none';
-        linksDiv.style.display = 'flex';
-        renderLinks();
+    function goBack() {
+      if (historyStack.length > 1) {
+        historyStack.pop(); // Quitar actual
+        const prevView = historyStack[historyStack.length - 1];
+        
+        document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));
+        document.getElementById(prevView).classList.add('active');
       }
     }
 
-    function renderAdmins() {
-      const container = document.getElementById('sectionAdmins');
-      container.innerHTML = '';
-      const list = dataDB[currentChannelId]?.admins || [];
-      list.forEach(a => {
-        container.innerHTML += `
-          <div class="admin-card">
-            <div style="display:flex; gap:10px; align-items:center;">
-              <div style="width:35px; height:35px; background:#222; border-radius:50%; display:flex; align-items:center; justify-content:center;">${a.name[0]}</div>
-              <div><h3 style="font-size:0.95em;">${a.name}</h3><p style="font-size:0.8em; color:#888;">${a.role}</p></div>
-            </div>
-          </div>`;
-      });
-    }
-
-    function renderLinks() {
-      const container = document.getElementById('sectionLinks');
-      container.innerHTML = '';
-      const list = dataDB[currentChannelId]?.links || [];
+    // --- FLUJO 1: SELECCIONAR CONTEXTO ---
+    function goToChannels(context) {
+      currentContext = context;
       
-      list.forEach(l => {
-        const icon = l.type === 'request' ? '🔒' : '⚡';
-        const typeClass = l.type === 'request' ? 'link-type-request' : 'link-type-direct';
-        const typeLabel = l.type === 'request' ? 'Solicitud' : 'Directo';
-        
-        const el = document.createElement('div');
-        el.className = 'link-card';
-        el.onclick = () => openLinkDetail(l);
-        el.innerHTML = `
-          <div class="link-info">
-            <div class="link-icon-box ${typeClass}">${icon}</div>
-            <div class="link-meta">
-              <h3>${l.name}</h3>
-              <p><span class="creator-badge">${l.creator}</span> • ${typeLabel}</p>
+      // Configurar textos
+      document.getElementById('contextTitle').innerText = context === 'admins' ? 'Gestionar Administradores' : 'Gestionar Enlaces';
+      
+      // Renderizar Canales
+      const container = document.getElementById('channelListContainer');
+      container.innerHTML = '';
+      
+      DB.channels.forEach(ch => {
+        const div = document.createElement('div');
+        div.className = 'channel-item';
+        div.onclick = () => goToList(ch);
+        div.innerHTML = `
+          <div class="channel-info">
+            <div class="ch-avatar ${context === 'admins' ? 'gradient' : ''}">${ch.name[0]}</div>
+            <div>
+              <div style="font-weight:600; color:white;">${ch.name}</div>
+              <div style="font-size:0.8em; color:#64748b;">${ch.subs} suscriptores</div>
             </div>
           </div>
-          <div class="link-stats">
-            <div class="stat-big">${l.joins}</div>
-            <div class="stat-label">Uniones</div>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        `;
+        container.appendChild(div);
+      });
+
+      navigateTo('viewChannels');
+    }
+
+    // --- FLUJO 2: VER LISTA ---
+    function goToList(channel) {
+      currentChannel = channel;
+      document.getElementById('listTitle').innerText = currentContext === 'admins' ? 'Equipo' : 'Enlaces Activos';
+      document.getElementById('listSubtitle').innerText = channel.name;
+
+      const container = document.getElementById('listContent');
+      container.innerHTML = '';
+
+      const data = currentContext === 'admins' ? DB.admins : DB.links;
+
+      data.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'list-item';
+        div.onclick = () => goToDashboard(item);
+        
+        // Icono según tipo
+        let iconSVG = currentContext === 'admins' 
+          ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>'
+          : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path></svg>';
+        
+        // Badge
+        let badgeHtml = currentContext === 'admins'
+          ? `<span class="badge badge-blue">${item.role}</span>`
+          : `<span class="badge badge-purple">${item.type}</span>`;
+
+        let subtitle = currentContext === 'admins' ? 'Activo hoy' : `Creado por: ${item.creator}`;
+
+        div.innerHTML = `
+          <div style="display:flex; align-items:center; gap:15px;">
+             <div style="width:40px; height:40px; background:#1e293b; border-radius:12px; display:flex; align-items:center; justify-content:center;">${iconSVG}</div>
+             <div class="item-meta">
+               <div class="item-title">${item.name}</div>
+               <div class="item-sub">${subtitle}</div>
+             </div>
+          </div>
+          ${badgeHtml}
+        `;
+        container.appendChild(div);
+      });
+
+      navigateTo('viewList');
+    }
+
+    // --- FLUJO 3: DASHBOARD ---
+    let chart1, chart2;
+
+    function goToDashboard(item) {
+      document.getElementById('dashTitle').innerText = item.name;
+      const container = document.getElementById('dashContent');
+      
+      // Limpiar gráficas previas para evitar bugs
+      if(chart1) chart1.destroy();
+      if(chart2) chart2.destroy();
+      container.innerHTML = ''; 
+
+      if (currentContext === 'admins') {
+        // === DASHBOARD DE ADMINS ===
+        document.getElementById('dashSubtitle').innerText = "Rendimiento del Administrador";
+        
+        container.innerHTML = `
+          <div class="stats-header">
+            <div class="main-stat-lbl">IMPACTO TOTAL</div>
+            <div class="main-stat-val">${item.views}</div>
+          </div>
+          
+          <div class="metrics-row">
+            <div class="metric-box">
+              <svg class="mb-icon" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+              <span class="mb-val">${item.posts}</span>
+              <span class="mb-lbl">Publicaciones</span>
+            </div>
+            <div class="metric-box">
+              <svg class="mb-icon" viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+              <span class="mb-val">${item.react}</span>
+              <span class="mb-lbl">Reacciones</span>
+            </div>
+          </div>
+
+          <div class="chart-wrapper">
+             <div class="cw-header">Actividad Semanal</div>
+             <div id="chartA1"></div>
+          </div>
+          
+          <div class="chart-wrapper">
+             <div class="cw-header">Views vs Reacciones</div>
+             <div id="chartA2"></div>
           </div>
         `;
-        container.appendChild(el);
-      });
+
+        // Render Gráficas Admin
+        setTimeout(() => {
+            renderAreaChart("#chartA1", "#3b82f6", [10, 45, 30, 60, 75, 50, 90]);
+            renderBarChart("#chartA2", "#8b5cf6", [40, 80, 55, 30, 90, 100, 70]);
+        }, 100);
+
+      } else {
+        // === DASHBOARD DE ENLACES ===
+        document.getElementById('dashSubtitle').innerText = "Análisis de Tráfico";
+        
+        container.innerHTML = `
+          <div class="stats-header">
+            <div class="main-stat-lbl">TOTAL UNIONES</div>
+            <div class="main-stat-val" style="background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">${item.joins}</div>
+          </div>
+          
+          <div class="metrics-row">
+            <div class="metric-box">
+              <svg class="mb-icon" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+              <span class="mb-val">${item.leaves}</span>
+              <span class="mb-lbl">Salidas</span>
+            </div>
+            <div class="metric-box">
+              <svg class="mb-icon" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+              <span class="mb-val">${item.rate}</span>
+              <span class="mb-lbl">Aprobación</span>
+            </div>
+          </div>
+
+          <div class="chart-wrapper">
+             <div class="cw-header">Flujo de Entrada (7 Días)</div>
+             <div id="chartL1"></div>
+          </div>
+          
+          <div class="chart-wrapper">
+             <div class="cw-header">Comparativa Mensual</div>
+             <div id="chartL2"></div>
+          </div>
+        `;
+
+        // Render Gráficas Links
+        setTimeout(() => {
+            renderAreaChart("#chartL1", "#10b981", [5, 15, 10, 30, 45, 20, 60]); // Verde
+            renderBarChart("#chartL2", "#06b6d4", [60, 40, 70, 50, 80, 90, 100]); // Cyan
+        }, 100);
+      }
+
+      navigateTo('viewDashboard');
     }
 
-    // --- GRÁFICAS DEL MODAL ---
-    let chartGrowth, chartDaily;
-
-    function openLinkDetail(link) {
-      document.getElementById('modalLinkName').innerText = link.name;
-      document.getElementById('modalCreator').innerText = link.creator;
-      document.getElementById('mClicks').innerText = link.clicks;
-      document.getElementById('mJoins').innerText = link.joins;
-      document.getElementById('mLeaves').innerText = link.leaves;
-      
-      document.getElementById('linkDetailModal').classList.add('open');
-      tg.HapticFeedback.impactOccurred('medium');
-
-      // GRÁFICA 1: CRECIMIENTO (Area Verde)
-      if(chartGrowth) chartGrowth.destroy();
-      const opt1 = {
-        series: [{ name: 'Uniones', data: [10, 40, 25, 50, 49, 90, 120] }],
-        chart: { type: 'area', height: 140, toolbar:{show:false}, background:'transparent' },
-        colors: ['#10b981'], // Verde Esmeralda
-        stroke: { curve: 'smooth', width: 2 },
-        fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.6, opacityTo: 0.1 } },
-        dataLabels: { enabled: false },
-        grid: { show: false },
-        xaxis: { labels: { show: false }, axisBorder: {show:false}, axisTicks: {show:false} },
-        yaxis: { show: false }
-      };
-      chartGrowth = new ApexCharts(document.querySelector("#growthChart"), opt1);
-      chartGrowth.render();
-
-      // GRÁFICA 2: BARRAS DIARIAS
-      if(chartDaily) chartDaily.destroy();
-      const opt2 = {
-        series: [{ name: 'Actividad', data: [20, 15, 30, 40, 35, 50, 60] }],
-        chart: { type: 'bar', height: 140, toolbar:{show:false}, background:'transparent' },
-        colors: ['#3b82f6'],
-        plotOptions: { bar: { borderRadius: 4, columnWidth: '40%' } },
-        dataLabels: { enabled: false },
-        grid: { borderColor: '#333', strokeDashArray: 4, xaxis: { lines: { show: false } } },
-        xaxis: { categories: ['L','M','X','J','V','S','D'], labels: { style: { colors: '#666' } } },
-        yaxis: { show: false }
-      };
-      chartDaily = new ApexCharts(document.querySelector("#dailyChart"), opt2);
-      chartDaily.render();
+    // --- FUNCIONES HELPER GRÁFICAS ---
+    function renderAreaChart(selector, color, data) {
+        const options = {
+            series: [{ name: 'Data', data: data }],
+            chart: { type: 'area', height: 120, toolbar:{show:false}, background:'transparent', animations:{enabled:true} },
+            colors: [color],
+            stroke: { curve: 'smooth', width: 2 },
+            fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.6, opacityTo: 0.05 } },
+            dataLabels: { enabled: false },
+            grid: { show: false },
+            xaxis: { labels: { show: false }, axisBorder: {show:false}, axisTicks: {show:false} },
+            yaxis: { show: false },
+            theme: { mode: 'dark' }
+        };
+        const chart = new ApexCharts(document.querySelector(selector), options);
+        chart.render();
+        if(selector.includes('A')) chart1 = chart; else chart2 = chart; // Guardar referencia simple
     }
 
-    function closeLinkModal() {
-      document.getElementById('linkDetailModal').classList.remove('open');
+    function renderBarChart(selector, color, data) {
+        const options = {
+            series: [{ name: 'Data', data: data }],
+            chart: { type: 'bar', height: 120, toolbar:{show:false}, background:'transparent', animations:{enabled:true} },
+            colors: [color],
+            plotOptions: { bar: { borderRadius: 4, columnWidth: '50%' } },
+            dataLabels: { enabled: false },
+            grid: { show: false },
+            xaxis: { categories: ['L','M','X','J','V','S','D'], labels: { style: { colors: '#64748b', fontSize: '10px' } }, axisBorder:{show:false}, axisTicks:{show:false} },
+            yaxis: { show: false },
+            theme: { mode: 'dark' }
+        };
+        const chart = new ApexCharts(document.querySelector(selector), options);
+        chart.render();
+        if(selector.includes('A')) chart2 = chart; // Guardar referencia
     }
+
   </script>
 </body>
 </html>
