@@ -2,16 +2,16 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Planes Kisaki</title>
+  <title>Planes Kisaki - Multipay</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   
   <style>
-    /* --- RESET & BASICS --- */
+    /* --- BASE --- */
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
     
     body {
-      background-color: #050505; /* Fondo casi negro */
+      background-color: #050505;
       color: #e5e5e5;
       min-height: 100vh;
       display: flex;
@@ -20,227 +20,167 @@
       padding: 20px;
     }
 
-    /* --- BOTÓN VOLVER --- */
-    .back-nav {
-      width: 100%; max-width: 800px; display: flex; justify-content: flex-start; margin-bottom: 20px;
-    }
-    .back-btn {
-      color: #a1a1aa; text-decoration: none; font-size: 0.9em; display: flex; align-items: center; gap: 5px;
-      transition: color 0.3s;
-    }
+    /* --- NAV --- */
+    .back-nav { width: 100%; max-width: 800px; margin-bottom: 20px; }
+    .back-btn { color: #a1a1aa; text-decoration: none; font-size: 0.9em; display: flex; align-items: center; gap: 5px; }
     .back-btn:hover { color: white; }
 
-    /* --- ENCABEZADO --- */
-    .header { text-align: center; margin-bottom: 40px; max-width: 600px; }
+    /* --- HEADER --- */
+    .header { text-align: center; margin-bottom: 30px; max-width: 600px; }
     .header h1 {
       font-size: 1.8em;
       background: linear-gradient(to right, #fff, #a1a1aa);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
       margin-bottom: 10px;
     }
     .header p { color: #71717a; font-size: 0.95em; line-height: 1.5; }
 
-    /* --- SELECTOR DE PAGO ÚNICO (Estilo Toggle fijo) --- */
-    .pricing-toggle {
-      background: #18181b;
-      padding: 4px;
-      border-radius: 50px;
-      display: inline-flex;
-      margin-bottom: 40px;
-      border: 1px solid #27272a;
-    }
-    
-    .toggle-opt {
-      padding: 8px 20px;
-      border-radius: 40px;
-      font-size: 0.85em;
-      font-weight: 600;
-      cursor: default;
-    }
-    
-    .toggle-active {
-      background: #fff;
-      color: #000;
-      box-shadow: 0 2px 10px rgba(255,255,255,0.1);
-    }
-    
-    .toggle-inactive {
-      color: #71717a;
-    }
-
-    /* --- GRID DE TARJETAS --- */
+    /* --- GRID --- */
     .pricing-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 20px;
-      width: 100%;
-      max-width: 800px;
+      display: grid; grid-template-columns: 1fr; gap: 20px; width: 100%; max-width: 800px;
     }
 
-    /* --- ESTILO TARJETA GENERAL --- */
+    /* --- TARJETA --- */
     .card {
-      background: #09090b; /* Muy oscuro */
+      background: #09090b;
       border: 1px solid #27272a;
       border-radius: 24px;
-      padding: 30px;
+      padding: 25px;
       position: relative;
-      display: flex;
-      flex-direction: column;
-      transition: transform 0.3s, border-color 0.3s;
+      display: flex; flex-direction: column;
       overflow: hidden;
+      transition: border-color 0.3s;
     }
 
-    .card:hover { transform: translateY(-5px); border-color: #3f3f46; }
-
-    /* ETIQUETA POPULAR */
-    .badge-popular {
-      position: absolute;
-      top: 20px; right: 20px;
-      background: #6366f1; /* Indigo */
-      color: white;
-      font-size: 0.75em;
-      font-weight: bold;
-      padding: 4px 12px;
-      border-radius: 20px;
-    }
-
-    /* TEXTOS TARJETA */
-    .plan-name { font-size: 1.2em; font-weight: 600; color: #fff; margin-bottom: 5px; }
-    .plan-desc { font-size: 0.9em; color: #a1a1aa; margin-bottom: 25px; min-height: 40px; }
-    
-    .price { display: flex; align-items: baseline; margin-bottom: 25px; gap: 5px; }
-    .price-val { font-size: 2.2em; font-weight: 700; color: white; }
-    .price-meta { font-size: 0.9em; color: #71717a; font-weight: 400; }
-
-    /* BOTONES */
-    .btn {
-      width: 100%;
-      padding: 14px;
-      border-radius: 12px;
-      font-weight: 600;
-      font-size: 0.95em;
-      cursor: pointer;
-      text-align: center;
-      transition: all 0.2s;
-      border: none;
-      margin-bottom: 25px;
-    }
-
-    /* Botón Blanco (Estilo Popular) */
-    .btn-white {
-      background: white;
-      color: black;
-    }
-    .btn-white:hover { background: #e4e4e7; }
-
-    /* Botón Oscuro (Estilo Secundario) */
-    .btn-dark {
-      background: #27272a;
-      color: white;
-      border: 1px solid #3f3f46;
-    }
-    .btn-dark:hover { background: #3f3f46; }
-
-    /* --- LISTA DE CARACTERÍSTICAS --- */
-    .features { list-style: none; display: flex; flex-direction: column; gap: 12px; }
-    .feature-item { display: flex; align-items: center; gap: 10px; font-size: 0.9em; color: #d4d4d8; }
-    
-    .check-icon {
-      width: 18px; height: 18px;
-      background: #27272a;
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      color: #fff; font-size: 0.7em; flex-shrink: 0;
-    }
-    
-    /* Variación Check Brillante para la tarjeta destacada */
-    .card.highlight .check-icon { background: #fff; color: #000; }
-
-    /* --- EFECTO GLOW PARA KISAKI BUSINESS --- */
+    /* ESTILO BUSINESS (Destacado) */
     .card.highlight {
       background: linear-gradient(180deg, #09090b 0%, #111118 100%);
       border: 1px solid #3f3f46;
     }
-    /* Luz sutil abajo */
+    /* Glow adaptable (cambia con JS) */
     .card.highlight::after {
       content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 40%;
-      background: radial-gradient(circle at center, rgba(99, 102, 241, 0.15), transparent 70%);
-      pointer-events: none;
+      background: var(--glow-color, radial-gradient(circle at center, rgba(99, 102, 241, 0.15), transparent 70%));
+      pointer-events: none; transition: background 0.5s;
     }
 
-    /* Responsive Grid */
-    @media (min-width: 768px) {
-      .pricing-grid { grid-template-columns: 1fr 1fr; }
+    .badge-popular {
+      position: absolute; top: 20px; right: 20px;
+      background: #6366f1; color: white;
+      font-size: 0.75em; font-weight: bold; padding: 4px 12px; border-radius: 20px;
     }
+
+    .plan-name { font-size: 1.3em; font-weight: 700; color: #fff; margin-bottom: 5px; }
+    .plan-desc { font-size: 0.9em; color: #a1a1aa; margin-bottom: 20px; min-height: 40px; }
+
+    /* --- NUEVO: PESTAÑAS DE MONEDA --- */
+    .currency-tabs {
+      display: flex; background: #18181b; padding: 4px; border-radius: 12px;
+      margin-bottom: 20px; width: fit-content; border: 1px solid #27272a;
+    }
+    .tab-btn {
+      padding: 6px 14px; border-radius: 8px; font-size: 0.85em; font-weight: 600;
+      cursor: pointer; border: none; background: transparent; color: #71717a;
+      transition: all 0.2s; display: flex; align-items: center; gap: 6px;
+    }
+    .tab-btn.active { background: #27272a; color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+    
+    /* Colores específicos activos */
+    .tab-btn.active.ton-mode { color: #0098EA; } /* Azul TON */
+    .tab-btn.active.star-mode { color: #FFD700; } /* Oro Stars */
+
+    /* --- PRECIO --- */
+    .price-container { margin-bottom: 25px; height: 50px; display: flex; align-items: baseline; gap: 5px; }
+    .price-val { font-size: 2.2em; font-weight: 700; color: white; transition: opacity 0.2s; }
+    .price-meta { font-size: 0.9em; color: #71717a; }
+
+    /* --- BOTÓN DE ACCIÓN --- */
+    .btn {
+      width: 100%; padding: 14px; border-radius: 12px;
+      font-weight: 600; font-size: 0.95em; cursor: pointer; border: none;
+      margin-bottom: 25px; transition: all 0.3s;
+    }
+    
+    /* Estilos dinámicos del botón */
+    .btn.stars-style { background: white; color: black; }
+    .btn.ton-style { background: #0098EA; color: white; } /* Color Oficial TON */
+    .btn:hover { opacity: 0.9; transform: translateY(-2px); }
+
+    /* --- FEATURES --- */
+    .features { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+    .feature-item { display: flex; align-items: center; gap: 10px; font-size: 0.9em; color: #d4d4d8; }
+    .check-icon {
+      width: 18px; height: 18px; background: #27272a; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; color: #fff; font-size: 0.7em; flex-shrink: 0;
+    }
+    .card.highlight .check-icon { background: #fff; color: #000; }
+
+    @media (min-width: 768px) { .pricing-grid { grid-template-columns: 1fr 1fr; } }
   </style>
 </head>
 <body>
 
   <div class="back-nav">
-    <a href="index.html" class="back-btn">
-      <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-      Volver al Inicio
-    </a>
+    <a href="index.html" class="back-btn">← Volver al Inicio</a>
   </div>
 
   <div class="header">
-    <h1>Potencia y Control Total</h1>
-    <p>Elige la herramienta adecuada para escalar tus canales. Pago único, sin sorpresas mensuales.</p>
-  </div>
-
-  <div class="pricing-toggle">
-    <span class="toggle-opt toggle-active">Pago Único</span>
-    <span class="toggle-opt toggle-inactive">Sin Suscripciones</span>
+    <h1>Elige tu método</h1>
+    <p>Pago único. Acceso de por vida. Ahora aceptamos TON.</p>
   </div>
 
   <div class="pricing-grid">
 
-    <div class="card highlight">
-      <div class="badge-popular">Popular</div>
-      
+    <div class="card highlight" id="card-business">
+      <div class="badge-popular">Recomendado</div>
       <div class="plan-name">Kisaki Business</div>
-      <div class="plan-desc">Maximiza el rendimiento de tus canales existentes con analíticas profundas.</div>
+      <div class="plan-desc">Maximiza tus canales con analíticas profundas y gestión avanzada.</div>
+
+      <div class="currency-tabs">
+        <button class="tab-btn active star-mode" onclick="setCurrency('business', 'stars')">⭐️ Stars</button>
+        <button class="tab-btn" onclick="setCurrency('business', 'ton')">💎 TON</button>
+      </div>
       
-      <div class="price">
-        <span class="price-val">⭐️ 500</span>
-        <span class="price-meta">/ para siempre</span>
+      <div class="price-container">
+        <span class="price-val" id="price-business">500</span>
+        <span class="price-meta" id="meta-business">Stars</span>
       </div>
 
-      <button class="btn btn-white" onclick="selectPlan('business')">
-        Obtener Business →
+      <button class="btn stars-style" id="btn-business" onclick="processPayment('business')">
+        Pagar con Stars
       </button>
 
       <ul class="features">
-        <li class="feature-item"><span class="check-icon">✓</span> Acceso a todas las Analytics V5</li>
-        <li class="feature-item"><span class="check-icon">✓</span> Gestión Multi-Canal Ilimitada</li>
-        <li class="feature-item"><span class="check-icon">✓</span> Sugerencias IA de Contenido</li>
-        <li class="feature-item"><span class="check-icon">✓</span> Soporte Prioritario 24/7</li>
-        <li class="feature-item"><span class="check-icon">✓</span> Exportación de Datos CSV</li>
-        <li class="feature-item"><span class="check-icon">✓</span> Insignia de Perfil "Business"</li>
+        <li class="feature-item"><span class="check-icon">✓</span> Todas las Analytics V5</li>
+        <li class="feature-item"><span class="check-icon">✓</span> Multi-Canal Ilimitado</li>
+        <li class="feature-item"><span class="check-icon">✓</span> Sugerencias IA</li>
+        <li class="feature-item"><span class="check-icon">✓</span> Soporte Prioritario</li>
       </ul>
     </div>
 
-    <div class="card">
+    <div class="card" id="card-forge">
       <div class="plan-name">BotForge</div>
-      <div class="plan-desc">Crea tu propio imperio. Clona la tecnología de Kisaki con tu propia marca.</div>
+      <div class="plan-desc">Clona la tecnología de Kisaki. Tu marca, tu bot, tu infraestructura.</div>
+
+      <div class="currency-tabs">
+        <button class="tab-btn active star-mode" onclick="setCurrency('forge', 'stars')">⭐️ Stars</button>
+        <button class="tab-btn" onclick="setCurrency('forge', 'ton')">💎 TON</button>
+      </div>
       
-      <div class="price">
-        <span class="price-val">⭐️ 2,500</span>
-        <span class="price-meta">/ licencia única</span>
+      <div class="price-container">
+        <span class="price-val" id="price-forge">2,500</span>
+        <span class="price-meta" id="meta-forge">Stars</span>
       </div>
 
-      <button class="btn btn-dark" onclick="selectPlan('forge')">
-        Iniciar Clonación
+      <button class="btn stars-style" id="btn-forge" onclick="processPayment('forge')">
+        Pagar con Stars
       </button>
 
       <ul class="features">
-        <li class="feature-item"><span class="check-icon">✓</span> Tu Propio Bot (Marca Blanca)</li>
-        <li class="feature-item"><span class="check-icon">✓</span> Instancia Dedicada en Railway</li>
-        <li class="feature-item"><span class="check-icon">✓</span> Sin menciones a Kisaki</li>
-        <li class="feature-item"><span class="check-icon">✓</span> Control total de Usuarios</li>
-        <li class="feature-item"><span class="check-icon">✓</span> Código Base V4.0 Incluido</li>
-        <li class="feature-item"><span class="check-icon">✓</span> Actualizaciones de Seguridad</li>
+        <li class="feature-item"><span class="check-icon">✓</span> Código Fuente V4.0</li>
+        <li class="feature-item"><span class="check-icon">✓</span> Marca Blanca Total</li>
+        <li class="feature-item"><span class="check-icon">✓</span> Deploy en Railway</li>
+        <li class="feature-item"><span class="check-icon">✓</span> Sin Branding Kisaki</li>
       </ul>
     </div>
 
@@ -250,33 +190,99 @@
     const tg = window.Telegram.WebApp;
     tg.expand();
 
-    // Función para manejar la compra
-    function selectPlan(plan) {
-        if(plan === 'business') {
-            tg.showPopup({
-                title: 'Confirmar Kisaki Business',
-                message: 'Estás a punto de adquirir la licencia Business por 500 Estrellas. ¿Continuar?',
-                buttons: [
-                    {id: 'pay_business', type: 'default', text: 'Pagar Ahora'},
-                    {type: 'cancel'}
-                ]
-            }, function(btnId) {
-                if (btnId === 'pay_business') {
-                    // Aquí iría la lógica de invoice real
-                    tg.sendData(JSON.stringify({action: 'buy_plan', plan: 'business'}));
-                }
-            });
-        } 
-        else if (plan === 'forge') {
-            tg.showPopup({
-                title: 'Acceso BotForge',
-                message: 'El sistema de clonación requiere configuración. ¿Contactar soporte para iniciar?',
-                buttons: [
-                    {id: 'contact_support', type: 'default', text: 'Contactar'},
-                    {type: 'cancel'}
-                ]
-            });
+    // ESTADO: Guardamos qué moneda está seleccionada para cada plan
+    const state = {
+      business: 'stars',
+      forge: 'stars'
+    };
+
+    // PRECIOS (Configura aquí tus valores)
+    const PRICES = {
+      business: { stars: 500, ton: 4.5 },
+      forge: { stars: 2500, ton: 22 }
+    };
+
+    function setCurrency(plan, currency) {
+      // 1. Actualizar Estado
+      state[plan] = currency;
+
+      // 2. Actualizar UI de Pestañas
+      const card = document.getElementById(`card-${plan}`);
+      const btns = card.querySelectorAll('.tab-btn');
+      btns.forEach(btn => {
+        btn.classList.remove('active', 'star-mode', 'ton-mode');
+        if(btn.innerText.toLowerCase().includes(currency)) {
+          btn.classList.add('active', currency === 'stars' ? 'star-mode' : 'ton-mode');
         }
+      });
+
+      // 3. Actualizar Precio y Texto
+      const priceVal = document.getElementById(`price-${plan}`);
+      const priceMeta = document.getElementById(`meta-${plan}`);
+      const mainBtn = document.getElementById(`btn-${plan}`);
+
+      // Animación suave
+      priceVal.style.opacity = 0;
+      setTimeout(() => {
+        if(currency === 'stars') {
+          priceVal.innerText = PRICES[plan].stars;
+          priceMeta.innerText = "Stars";
+          mainBtn.innerText = "Pagar con Stars";
+          mainBtn.className = "btn stars-style"; // Botón Blanco
+          
+          // Efecto Glow (Solo para Business)
+          if(plan === 'business') {
+            card.style.setProperty('--glow-color', 'radial-gradient(circle at center, rgba(99, 102, 241, 0.15), transparent 70%)');
+          }
+
+        } else {
+          priceVal.innerText = PRICES[plan].ton;
+          priceMeta.innerText = "TON";
+          mainBtn.innerText = "Conectar Wallet (TON)";
+          mainBtn.className = "btn ton-style"; // Botón Azul TON
+          
+          // Efecto Glow Azul para TON
+          if(plan === 'business') {
+            card.style.setProperty('--glow-color', 'radial-gradient(circle at center, rgba(0, 152, 234, 0.2), transparent 70%)');
+          }
+        }
+        priceVal.style.opacity = 1;
+      }, 200);
+    }
+
+    function processPayment(plan) {
+      const currency = state[plan];
+      const amount = PRICES[plan][currency];
+
+      if (currency === 'stars') {
+        // PAGO CON TELEGRAM STARS
+        tg.showPopup({
+          title: `Confirmar ${plan.toUpperCase()}`,
+          message: `Pagarás ${amount} Stars. ¿Proceder?`,
+          buttons: [
+            {id: 'pay', type: 'default', text: 'Pagar'},
+            {type: 'cancel'}
+          ]
+        }, (id) => {
+          if(id === 'pay') tg.sendData(JSON.stringify({action: 'buy_stars', plan: plan}));
+        });
+
+      } else {
+        // PAGO CON TON (Simulado o Redirección a Wallet)
+        tg.showPopup({
+          title: 'Pago con TON',
+          message: `Se abrirá tu Wallet para enviar ${amount} TON.`,
+          buttons: [
+            {id: 'connect', type: 'default', text: 'Abrir Wallet'},
+            {type: 'cancel'}
+          ]
+        }, (id) => {
+          if(id === 'connect') {
+             // Aquí integrarías TonConnect UI o enviarías el link
+             tg.sendData(JSON.stringify({action: 'buy_ton', plan: plan, amount: amount}));
+          }
+        });
+      }
     }
   </script>
 
