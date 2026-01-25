@@ -2,290 +2,298 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Channel Admin Panel</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+  <title>Kisaki Admin Console</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+  
   <style>
-    /* --- ESTILOS BASE (Tailwind Translation) --- */
+    /* --- VARIABLES & RESET --- */
     :root {
-      --color-amoled: #000000;
-      --color-panel: #0B0F14;
-      --color-neon: #22D3EE;     /* Cyan Neon */
-      --color-danger: #EF4444;   /* Rojo */
-      --color-success: #22C55E;  /* Verde */
-      --text-gray: #9CA3AF;
+      --bg-amoled: #000000;
+      --bg-card: #09090b;
+      --text-main: #ffffff;
+      --text-sec: #94a3b8;
+      
+      /* GRADIENTES SOLICITADOS */
+      --grad-navy: #0f172a;
+      --grad-blue: #2563eb;
+      --grad-cobalt: #e0e7ff;
+      
+      --accent-glow: rgba(37, 99, 235, 0.5);
     }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'SF Pro Display', 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
 
     body {
-      background-color: var(--color-amoled);
-      color: white;
+      background-color: var(--bg-amoled);
+      color: var(--text-main);
       padding: 20px;
+      padding-bottom: 100px;
       min-height: 100vh;
     }
 
-    /* --- HEADER COMPONENT --- */
-    .header-card {
-      background-color: var(--color-panel);
-      border-radius: 16px; /* rounded-2xl */
-      padding: 20px;
-      margin-bottom: 24px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-      border: 1px solid rgba(255,255,255,0.05);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      animation: slideDown 0.5s ease-out;
+    /* --- HEADER --- */
+    .header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 30px;
     }
-
-    .header-title h2 { font-size: 1.1em; font-weight: 700; margin-bottom: 4px; }
-    .header-subtitle { color: var(--text-gray); font-size: 0.85em; display: flex; align-items: center; gap: 6px; }
-
-    .btn-sync {
-      background-color: var(--color-neon);
-      color: black;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      font-size: 0.9em;
-      transition: transform 0.2s, opacity 0.2s;
-    }
-    .btn-sync:active { transform: scale(0.95); opacity: 0.8; }
-
-    /* --- ADMIN LIST COMPONENT --- */
-    .list-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 15px;
-    }
-
-    .list-title { font-weight: 600; font-size: 1.1em; }
+    .title h1 { font-size: 1.5em; font-weight: 700; letter-spacing: -0.5px; }
+    .title span { color: var(--grad-blue); font-size: 0.9em; }
     
-    .btn-invite {
-      background-color: #2563EB; /* Blue-600 */
-      color: white;
-      border: none;
-      padding: 6px 14px;
-      border-radius: 8px;
-      font-size: 0.9em;
-      cursor: pointer;
+    .btn-add {
+      background: linear-gradient(135deg, var(--grad-blue), #1d4ed8);
+      width: 40px; height: 40px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 15px var(--accent-glow);
+      border: none; color: white; font-size: 1.5em; cursor: pointer;
+      transition: transform 0.2s;
     }
+    .btn-add:active { transform: scale(0.9); }
 
-    /* --- ADMIN CARD COMPONENT --- */
-    .admin-grid { display: flex; flex-direction: column; gap: 12px; }
+    /* --- LISTA TIPO LEADERBOARD --- */
+    .admin-list { display: flex; flex-direction: column; gap: 15px; }
 
     .admin-card {
-      background-color: rgba(0,0,0,0.4);
-      border: 1px solid #1F2937; /* Gray-800 */
-      border-radius: 12px;
-      padding: 14px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      transition: transform 0.2s, border-color 0.2s;
+      position: relative;
+      background: linear-gradient(90deg, #0f172a 0%, #000000 100%);
+      padding: 15px;
+      border-radius: 18px;
+      display: flex; align-items: center; justify-content: space-between;
+      border: 1px solid rgba(255,255,255,0.08);
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     }
-    .admin-card:hover { transform: scale(1.01); border-color: var(--color-neon); }
 
-    .admin-info p { font-weight: 500; font-size: 1em; color: #F3F4F6; }
-    .admin-last-seen { font-size: 0.75em; color: var(--text-gray); }
+    /* El efecto de borde gradiente sutil */
+    .admin-card::before {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+      background: linear-gradient(to bottom, var(--grad-blue), var(--grad-cobalt));
+      border-radius: 4px 0 0 4px;
+    }
 
-    .admin-actions { display: flex; align-items: center; gap: 10px; }
+    .admin-card:active { transform: scale(0.98); border-color: var(--grad-blue); }
+
+    .user-info { display: flex; align-items: center; gap: 12px; }
     
-    .role-badge {
-      background-color: #1F2937;
-      color: #D1D5DB;
-      font-size: 0.75em;
-      padding: 4px 8px;
-      border-radius: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+    .avatar {
+      width: 45px; height: 45px; border-radius: 50%;
+      background: #1e293b; border: 2px solid #000;
+      box-shadow: 0 0 0 2px var(--grad-navy);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: bold; font-size: 1.1em; color: var(--grad-cobalt);
     }
 
-    .btn-delete {
-      background: none; border: none; color: var(--color-danger);
-      cursor: pointer; font-size: 1.2em; padding: 4px;
-    }
+    .details h3 { font-size: 1em; font-weight: 600; }
+    .details p { font-size: 0.8em; color: var(--text-sec); display: flex; align-items: center; gap: 5px; }
+    
+    .status-dot { width: 6px; height: 6px; background: #22c55e; border-radius: 50%; display: inline-block; }
 
-    /* --- MODAL COMPONENT --- */
-    .modal-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.8);
-      backdrop-filter: blur(4px);
-      display: none; /* Oculto por defecto */
-      align-items: center; justify-content: center;
-      z-index: 100;
-      opacity: 0; transition: opacity 0.3s;
-    }
-    .modal-overlay.open { display: flex; opacity: 1; }
-
-    .modal-box {
-      background: var(--color-panel);
-      width: 90%; max-width: 320px;
-      padding: 20px;
-      border-radius: 16px;
+    .btn-edit {
+      background: rgba(255,255,255,0.05);
+      padding: 8px 14px; border-radius: 20px;
+      font-size: 0.8em; color: var(--grad-cobalt);
       border: 1px solid rgba(255,255,255,0.1);
-      transform: scale(0.9); transition: transform 0.3s;
     }
-    .modal-overlay.open .modal-box { transform: scale(1); }
 
-    .input-field {
+    /* --- MODAL DE PERMISOS (Estilo Tasks Project) --- */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(8px); z-index: 100;
+      opacity: 0; pointer-events: none; transition: opacity 0.3s;
+      display: flex; align-items: flex-end; /* Sheet style bottom */
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+
+    .permission-sheet {
       width: 100%;
-      background: #000;
-      border: 1px solid #374151;
-      color: white;
-      padding: 10px;
-      border-radius: 8px;
-      margin-bottom: 12px;
-      outline: none;
+      background: #121212;
+      border-top-left-radius: 30px; border-top-right-radius: 30px;
+      padding: 25px;
+      border-top: 1px solid rgba(255,255,255,0.15);
+      box-shadow: 0 -10px 40px rgba(0,0,0,0.8);
+      transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+      padding-bottom: 50px;
     }
-    .input-field:focus { border-color: var(--color-neon); }
+    .modal-overlay.open .permission-sheet { transform: translateY(0); }
 
-    .modal-actions { display: flex; justify-content: space-between; margin-top: 15px; }
-    .btn-cancel { color: var(--text-gray); background: none; border: none; cursor: pointer; }
-    .btn-send { background: var(--color-neon); color: black; border: none; padding: 8px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+    .sheet-header {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;
+    }
+    .sheet-title { font-size: 1.2em; font-weight: 700; color: white; }
+    .close-btn { background: none; border: none; color: var(--text-sec); font-size: 1.5em; cursor: pointer; }
 
-    /* Animación */
-    @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    /* --- CHECKBOXES GRANULARES --- */
+    .perm-list { display: flex; flex-direction: column; gap: 12px; }
+
+    .perm-item {
+      display: flex; align-items: center; gap: 15px;
+      padding: 12px; border-radius: 12px;
+      transition: background 0.2s;
+    }
+    .perm-item:active { background: rgba(255,255,255,0.05); }
+
+    /* Custom Checkbox Design (Cuadrado redondeado como la imagen) */
+    .custom-check {
+      width: 24px; height: 24px;
+      border: 2px solid #334155; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s; cursor: pointer; flex-shrink: 0;
+    }
+    
+    .custom-check.checked {
+      background: var(--grad-blue); border-color: var(--grad-blue);
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+    .custom-check svg { display: none; width: 14px; height: 14px; stroke: white; stroke-width: 3; }
+    .custom-check.checked svg { display: block; }
+
+    .perm-text { display: flex; flex-direction: column; }
+    .perm-name { font-size: 0.95em; color: #fff; font-weight: 500; }
+    .perm-desc { font-size: 0.75em; color: #64748b; }
+
+    /* Botón Guardar */
+    .btn-save {
+      width: 100%; margin-top: 25px;
+      background: white; color: black;
+      padding: 16px; border-radius: 16px;
+      font-weight: 700; border: none; font-size: 1em;
+      box-shadow: 0 5px 20px rgba(255,255,255,0.1);
+      cursor: pointer;
+    }
+    .btn-save:active { transform: scale(0.98); opacity: 0.9; }
+
   </style>
 </head>
 <body>
 
-  <div class="header-card">
-    <div class="header-title">
-      <h2>Panel Admin</h2>
-      <div class="header-subtitle">
-        <span style="width:8px; height:8px; background:var(--color-success); border-radius:50%;"></span>
-        Kisaki System
-      </div>
+  <div class="header">
+    <div class="title">
+      <h1>Admin Squad</h1>
+      <span>Kisaki Management</span>
     </div>
-    <button class="btn-sync" onclick="syncData()">Sync</button>
+    <button class="btn-add" onclick="tg.showAlert('Abre Telegram para añadir admins nuevos.')">+</button>
   </div>
 
-  <div class="list-header">
-    <h2 class="list-title">Administradores</h2>
-    <button class="btn-invite" onclick="toggleModal(true)">+ Invitar</button>
-  </div>
+  <div class="admin-list" id="adminList">
+    </div>
 
-  <div id="adminListContainer" class="admin-grid">
-    <div style="text-align:center; color:#555; padding:20px;">Cargando admins...</div>
-  </div>
-
-  <div id="inviteModal" class="modal-overlay">
-    <div class="modal-box">
-      <h3 style="margin-bottom:15px; font-weight:600;">Invitar Admin</h3>
-      
-      <label style="font-size:0.8em; color:#aaa;">Username</label>
-      <input type="text" id="newUsername" placeholder="@usuario" class="input-field">
-      
-      <label style="font-size:0.8em; color:#aaa;">Rol</label>
-      <select id="newRole" class="input-field">
-        <option value="Editor">Editor</option>
-        <option value="Moderator">Moderador</option>
-        <option value="Viewer">Observador</option>
-      </select>
-
-      <div class="modal-actions">
-        <button class="btn-cancel" onclick="toggleModal(false)">Cancelar</button>
-        <button class="btn-send" onclick="sendInvite()">Enviar</button>
+  <div id="permModal" class="modal-overlay">
+    <div class="permission-sheet">
+      <div class="sheet-header">
+        <div class="sheet-title" id="modalTitle">Permisos</div>
+        <button class="close-btn" onclick="toggleModal(false)">✕</button>
       </div>
+
+      <div class="perm-list">
+        <div class="perm-item" onclick="toggleCheck(this)">
+          <div class="custom-check checked"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+          <div class="perm-text">
+            <span class="perm-name">Cambiar Info del Canal</span>
+            <span class="perm-desc">Editar título, foto y descripción</span>
+          </div>
+        </div>
+
+        <div class="perm-item" onclick="toggleCheck(this)">
+          <div class="custom-check checked"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+          <div class="perm-text">
+            <span class="perm-name">Publicar Mensajes</span>
+            <span class="perm-desc">Enviar contenido al canal</span>
+          </div>
+        </div>
+
+        <div class="perm-item" onclick="toggleCheck(this)">
+          <div class="custom-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+          <div class="perm-text">
+            <span class="perm-name">Editar Mensajes de otros</span>
+            <span class="perm-desc">Modificar posts existentes</span>
+          </div>
+        </div>
+
+        <div class="perm-item" onclick="toggleCheck(this)">
+          <div class="custom-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+          <div class="perm-text">
+            <span class="perm-name">Eliminar Mensajes</span>
+            <span class="perm-desc">Borrar contenido de cualquiera</span>
+          </div>
+        </div>
+
+        <div class="perm-item" onclick="toggleCheck(this)">
+          <div class="custom-check checked"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+          <div class="perm-text">
+            <span class="perm-name">Gestionar Usuarios</span>
+            <span class="perm-desc">Añadir suscriptores o banear</span>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-save" onclick="savePermissions()">Guardar Cambios</button>
     </div>
   </div>
 
   <script>
     const tg = window.Telegram.WebApp;
     tg.expand();
-    tg.enableClosingConfirmation();
 
-    // DATOS DE EJEMPLO (Mock Data traducida del código React)
-    let admins = [
-      { id: 1, name: 'Vicente', role: 'Owner', last: 'En línea' },
-      { id: 2, name: 'KisakiBot', role: 'System', last: 'Hace 1m' },
-      { id: 3, name: 'ModeradorX', role: 'Moderator', last: 'Hace 1h' }
+    // Datos simulados de Admins Reales
+    const admins = [
+      { id: 1, name: 'Vicente', role: 'Propietario', avatar: 'V' },
+      { id: 2, name: 'Kisaki Bot', role: 'Todo acceso', avatar: 'K' },
+      { id: 3, name: 'Elena Manager', role: 'Limitado', avatar: 'E' },
+      { id: 4, name: 'Support Team', role: 'Limitado', avatar: 'S' }
     ];
 
-    // --- RENDERIZADO DE LISTA ---
-    function renderAdmins() {
-      const container = document.getElementById('adminListContainer');
-      container.innerHTML = ''; // Limpiar
-
-      admins.forEach(admin => {
-        // Crear tarjeta HTML
-        const card = document.createElement('div');
-        card.className = 'admin-card';
-        card.innerHTML = `
-          <div class="admin-info">
-            <p>@${admin.name}</p>
-            <span class="admin-last-seen">${admin.last}</span>
+    // Renderizar Lista
+    const list = document.getElementById('adminList');
+    
+    admins.forEach(admin => {
+      const card = document.createElement('div');
+      card.className = 'admin-card';
+      card.onclick = () => openPermissions(admin.name); // Microinteracción al tocar
+      
+      card.innerHTML = `
+        <div class="user-info">
+          <div class="avatar">${admin.avatar}</div>
+          <div class="details">
+            <h3>${admin.name}</h3>
+            <p><span class="status-dot"></span> ${admin.role}</p>
           </div>
-          <div class="admin-actions">
-            <span class="role-badge">${admin.role}</span>
-            ${admin.role !== 'Owner' ? `<button class="btn-delete" onclick="removeAdmin(${admin.id})">✕</button>` : ''}
-          </div>
-        `;
-        container.appendChild(card);
-      });
-    }
+        </div>
+        <div class="btn-edit">Ajustar</div>
+      `;
+      list.appendChild(card);
+    });
 
-    // --- LÓGICA DEL MODAL ---
+    // Lógica Modal
     function toggleModal(show) {
-      const modal = document.getElementById('inviteModal');
+      const modal = document.getElementById('permModal');
       if (show) {
         modal.classList.add('open');
-        tg.HapticFeedback.impactOccurred('light'); // Vibración táctil
+        tg.HapticFeedback.impactOccurred('light');
       } else {
         modal.classList.remove('open');
       }
     }
 
-    function sendInvite() {
-      const username = document.getElementById('newUsername').value;
-      const role = document.getElementById('newRole').value;
+    function openPermissions(name) {
+      document.getElementById('modalTitle').innerText = `Permisos de ${name}`;
+      toggleModal(true);
+    }
 
-      if(!username) return tg.showAlert("Por favor escribe un usuario");
+    // Lógica Checkbox (Visual)
+    function toggleCheck(item) {
+      const check = item.querySelector('.custom-check');
+      check.classList.toggle('checked');
+      tg.HapticFeedback.selectionChanged(); // Vibración sutil
+    }
 
-      // Simulación de envío
-      tg.showAlert(`Invitación enviada a ${username} como ${role}`);
-      
-      // Agregar visualmente (opcional)
-      admins.push({ id: Date.now(), name: username.replace('@',''), role: role, last: 'Pendiente' });
-      renderAdmins();
-      
-      // Limpiar y cerrar
-      document.getElementById('newUsername').value = '';
+    function savePermissions() {
+      tg.HapticFeedback.notificationOccurred('success');
       toggleModal(false);
-    }
-
-    // --- ACCIONES ---
-    function removeAdmin(id) {
-      tg.showConfirm("¿Eliminar a este administrador?", (confirmed) => {
-        if(confirmed) {
-          admins = admins.filter(a => a.id !== id);
-          renderAdmins();
-          tg.HapticFeedback.notificationOccurred('success');
-        }
-      });
-    }
-
-    function syncData() {
-      tg.HapticFeedback.impactOccurred('medium');
-      // Aquí conectarías con Supabase en el futuro
-      const btn = document.querySelector('.btn-sync');
-      btn.innerText = "Syncing...";
+      // Aquí iría la lógica para enviar a Supabase/Telegram API
       setTimeout(() => {
-        btn.innerText = "Sync";
-        tg.showAlert("Datos sincronizados con el canal.");
-      }, 1000);
+        tg.showAlert("Permisos actualizados correctamente");
+      }, 300);
     }
-
-    // INICIAR
-    renderAdmins();
 
   </script>
 </body>
