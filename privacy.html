@@ -2,82 +2,54 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Política de Privacidad — Kisaki Manager</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
+  <title>Privacidad</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root { --bg-core: #020617; --text-main: #f8fafc; --text-sec: #94a3b8; --glass: rgba(15, 23, 42, 0.6); --border: rgba(255, 255, 255, 0.08); }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'SF Pro Display', 'Inter', sans-serif; }
+    body { background: var(--bg-core); color: var(--text-main); min-height: 100vh; padding: 24px; position: relative; }
+    
+    .blob { position: fixed; border-radius: 50%; filter: blur(80px); z-index: -1; opacity: 0.5; }
+    .b1 { top: -20%; left: -10%; width: 300px; height: 300px; background: #06b6d4; } /* Cyan para seguridad */
+    
+    .nav-header { display: flex; align-items: center; gap: 15px; margin-bottom: 30px; }
+    .btn-back { width: 40px; height: 40px; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: white; cursor: pointer; backdrop-filter: blur(10px); text-decoration: none; }
+
+    .content-glass { background: var(--glass); backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: 24px; padding: 25px; margin-bottom: 20px; }
+    h2 { font-size: 1.1em; margin-bottom: 10px; color: #67e8f9; display: flex; align-items: center; gap: 8px;}
+    p, li { font-size: 0.9em; color: var(--text-sec); line-height: 1.6; margin-bottom: 10px; list-style: none;}
+    .shield-icon { width: 60px; height: 60px; margin: 0 auto 20px; background: rgba(6, 182, 212, 0.15); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: #06b6d4; }
+  </style>
 </head>
 <body>
+  <div class="blob b1"></div>
 
-  <div class="page-header" style="background-image: url('fondo-privacidad.jpg');">
-
-    <a href="legal.html" class="back-floating">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M15 18l-6-6 6-6"/>
-      </svg>
-    </a>
-
+  <div class="nav-header">
+    <a href="legal.html" class="btn-back"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></a>
+    <h1 style="font-size:1.4em; font-weight:700;">Privacidad de Datos</h1>
   </div>
 
-  <div class="content-card">
-
-    <div class="card-header-inner">
-      <svg class="page-title-icon" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
-      </svg>
-
-      <div class="page-title">
-        <h1>Política de Privacidad</h1>
-        <span>Protección de datos y seguridad</span>
-      </div>
-    </div>
-
-    <div class="card-body">
-
-      <div class="content-bubble">
-        <p>
-          En Kisaki Manager valoramos tu confianza. Procesamos únicamente la información estrictamente necesaria para el funcionamiento técnico del sistema.
-        </p>
-      </div>
-
-      <div class="content-bubble">
-        <h2>
-          <svg class="bubble-icon" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
-          Datos tratados
-        </h2>
-        <p>Recopilamos los siguientes datos mínimos para operar el bot:</p>
-        <ul>
-          <li><strong>ID de usuario:</strong> Identificador único de Telegram para gestionar tus permisos.</li>
-          <li><strong>Configuraciones de canal:</strong> Preferencias que guardas para tus grupos o canales.</li>
-          <li><strong>Registros técnicos:</strong> Logs de errores para mantenimiento y depuración.</li>
-        </ul>
-      </div>
-
-      <div class="content-bubble">
-        <h2>
-          <svg class="bubble-icon" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
-          Seguridad
-        </h2>
-        <p>
-          La seguridad es prioridad. <strong>No se almacenan contraseñas</strong>, claves privadas de billeteras, ni información financiera sensible en nuestros servidores.
-        </p>
-      </div>
-
-      <div class="content-bubble">
-        <h2>
-          <svg class="bubble-icon" viewBox="0 0 24 24"><path d="M10 12c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM6 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm12-6c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg>
-          Derechos del usuario
-        </h2>
-        <p>
-          El usuario mantiene el control. Puedes solicitar información sobre tus datos almacenados o la eliminación de registros técnicos cuando sea aplicable contactando al soporte.
-        </p>
-      </div>
-
-      <div style="margin-top: 40px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; color: #7b8fa6; font-size: 0.85em;">
-        © Kisaki Manager • Dog Geek Labs
-      </div>
-
-    </div>
+  <div class="content-glass" style="text-align:center;">
+    <div class="shield-icon"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+    <p>Tus datos son tuyos. Kisaki opera bajo una política de "Mínimo Conocimiento Necesario".</p>
   </div>
 
+  <div class="content-glass">
+    <h2>1. Recolección de Datos</h2>
+    <p>Solo almacenamos lo estrictamente necesario para que el bot funcione:</p>
+    <ul>
+      <li>• <strong>Telegram ID:</strong> Para identificar tu cuenta y permisos.</li>
+      <li>• <strong>Configuraciones:</strong> Las reglas que defines para tus canales.</li>
+      <li>• <strong>Logs de Actividad:</strong> Historial de acciones administrativas (se borran cada 30 días).</li>
+    </ul>
+  </div>
+
+  <div class="content-glass">
+    <h2>2. Almacenamiento Seguro</h2>
+    <p>Toda la información reside en bases de datos encriptadas (Supabase) con seguridad RLS (Row Level Security). Nadie, excepto tú y el sistema automatizado, tiene acceso de lectura a tus configuraciones privadas.</p>
+  </div>
+  
+  <script>window.Telegram.WebApp.expand();</script>
 </body>
 </html>
