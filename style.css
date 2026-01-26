@@ -1499,3 +1499,8 @@ body {
   margin-top: 5px;
   display: none;
 }
+
+.highlight {
+  color: #fbbf24;
+  font-weight: 700;
+}
