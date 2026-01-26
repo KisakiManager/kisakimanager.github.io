@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Kisaki Dev Team</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  
+  <style>
+    /* --- VARIABLES & RESET --- */
+    :root {
+      --bg-core: #020617;
+      --text-main: #f8fafc;
+      --text-sec: #94a3b8;
+      
+      /* DEEP BLUE PALETTE */
+      --grad-glow: radial-gradient(circle, rgba(37,99,235,0.15) 0%, transparent 70%);
+      --card-glass: rgba(15, 23, 42, 0.6);
+      --border-glass: rgba(255, 255, 255, 0.08);
+      
+      --accent-cyan: #06b6d4;
+      --accent-blue: #3b82f6;
+      --accent-purple: #8b5cf6;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'SF Pro Display', 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      background-color: var(--bg-core);
+      color: var(--text-main);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+      padding-bottom: 40px;
+    }
+
+    /* --- LIQUID BACKGROUND EFFECTS --- */
+    .liquid-blob {
+      position: fixed; border-radius: 50%; filter: blur(80px); z-index: -1;
+      opacity: 0.6; animation: float 10s infinite ease-in-out;
+    }
+    .blob-1 { top: -10%; left: -10%; width: 300px; height: 300px; background: #1e3a8a; animation-delay: 0s; }
+    .blob-2 { bottom: 10%; right: -5%; width: 250px; height: 250px; background: #4f46e5; animation-delay: -5s; }
+    .blob-3 { top: 40%; left: 30%; width: 200px; height: 200px; background: #06b6d4; opacity: 0.3; animation-delay: -2s; }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(20px, 30px); }
+    }
+
+    /* --- NAV & HEADER --- */
+    .container { padding: 24px; max-width: 600px; margin: 0 auto; }
+    
+    .nav-header { display: flex; align-items: center; gap: 15px; margin-bottom: 30px; }
+    .btn-back {
+      width: 40px; height: 40px; border-radius: 12px;
+      background: rgba(255,255,255,0.05); border: 1px solid var(--border-glass);
+      display: flex; align-items: center; justify-content: center;
+      color: white; cursor: pointer; backdrop-filter: blur(10px);
+    }
+    
+    .header-title h1 { font-size: 1.8em; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 5px; }
+    .header-title p { color: var(--text-sec); font-size: 0.95em; }
+
+    /* --- TEAM GRID --- */
+    .team-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+
+    .dev-card {
+      background: var(--card-glass);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-glass);
+      border-radius: 24px;
+      padding: 20px;
+      display: flex; align-items: center; gap: 20px;
+      transition: transform 0.2s, background 0.3s;
+      cursor: pointer; position: relative; overflow: hidden;
+    }
+    .dev-card:active { transform: scale(0.98); background: rgba(30, 41, 59, 0.8); }
+
+    /* Efecto Hover Brillante */
+    .dev-card::after {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.05) 50%, transparent 70%);
+      transform: translateX(-100%); transition: transform 0.5s;
+    }
+    .dev-card:active::after { transform: translateX(100%); transition: 0s; }
+
+    .avatar-box {
+      width: 70px; height: 70px; border-radius: 20px;
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      border: 1px solid rgba(255,255,255,0.1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.8em; flex-shrink: 0; box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    }
+    
+    .info-box { flex: 1; }
+    .dev-name { font-size: 1.2em; font-weight: 700; color: white; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;}
+    .dev-role { font-size: 0.85em; color: var(--accent-cyan); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+    .dev-short { font-size: 0.85em; color: var(--text-sec); margin-top: 4px; line-height: 1.3; }
+
+    .arrow-icon { opacity: 0.5; }
+
+    /* --- PROFILE SHEET (MODAL) --- */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100;
+      opacity: 0; pointer-events: none; transition: opacity 0.3s;
+      display: flex; align-items: flex-end; backdrop-filter: blur(5px);
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+
+    .profile-sheet {
+      width: 100%; max-height: 85vh;
+      background: #0b1121; /* Slightly lighter than black */
+      border-top-left-radius: 32px; border-top-right-radius: 32px;
+      padding: 30px 24px;
+      border-top: 1px solid rgba(255,255,255,0.15);
+      transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+      overflow-y: auto;
+      box-shadow: 0 -10px 50px rgba(0,0,0,0.5);
+    }
+    .modal-overlay.open .profile-sheet { transform: translateY(0); }
+
+    /* Modal Content */
+    .sheet-header { display: flex; justify-content: flex-end; margin-bottom: 10px; }
+    .close-btn { 
+      background: rgba(255,255,255,0.1); border: none; color: white; 
+      width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 1.2em;
+    }
+
+    .profile-hero { text-align: center; margin-bottom: 25px; }
+    .big-avatar {
+      width: 100px; height: 100px; border-radius: 30px; margin: 0 auto 15px;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      display: flex; align-items: center; justify-content: center; font-size: 3em;
+      box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4); border: 2px solid rgba(255,255,255,0.2);
+    }
+    .hero-name { font-size: 1.8em; font-weight: 800; margin-bottom: 5px; }
+    .hero-role { 
+      display: inline-block; padding: 6px 14px; background: rgba(6, 182, 212, 0.15); 
+      color: var(--accent-cyan); border-radius: 20px; font-size: 0.85em; font-weight: 600;
+      border: 1px solid rgba(6, 182, 212, 0.3);
+    }
+
+    .bio-section { margin-bottom: 30px; line-height: 1.6; color: #cbd5e1; font-size: 0.95em; }
+    
+    .tags-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 30px; }
+    .skill-tag {
+      padding: 6px 12px; background: #1e293b; color: #94a3b8; border-radius: 8px; font-size: 0.8em;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .social-links { display: flex; gap: 15px; justify-content: center; }
+    .social-btn {
+      width: 50px; height: 50px; border-radius: 16px;
+      background: #1e293b; display: flex; align-items: center; justify-content: center;
+      border: 1px solid rgba(255,255,255,0.1); transition: transform 0.2s;
+    }
+    .social-btn:active { transform: scale(0.9); background: var(--accent-blue); }
+    .social-btn svg { width: 24px; height: 24px; stroke: white; stroke-width: 2; fill: none; }
+
+  </style>
+</head>
+<body>
+
+  <div class="liquid-blob blob-1"></div>
+  <div class="liquid-blob blob-2"></div>
+  <div class="liquid-blob blob-3"></div>
+
+  <div class="container">
+    <div class="nav-header">
+      <a href="index.html" class="btn-back">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </a>
+      <div class="header-title">
+        <h1>Core Team</h1>
+        <p>Los arquitectos detrás de Kisaki.</p>
+      </div>
+    </div>
+
+    <div class="team-grid" id="teamGrid">
+      </div>
+  </div>
+
+  <div id="profileModal" class="modal-overlay" onclick="closeProfile(event)">
+    <div class="profile-sheet" onclick="event.stopPropagation()">
+      <div class="sheet-header">
+        <button class="close-btn" onclick="closeProfile()">✕</button>
+      </div>
+      
+      <div id="modalContent">
+        </div>
+    </div>
+  </div>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+
+    // DATOS DEL EQUIPO
+    const TEAM = [
+      {
+        id: "vicente",
+        name: "Vicente",
+        role: "Founder & Lead Dev",
+        emoji: "👨‍💻",
+        short: "Arquitecto principal y visión del proyecto.",
+        bio: "Desarrollador Full Stack con pasión por las automatizaciones en Telegram. Creador de la arquitectura Kisaki y responsable de la integración con Supabase y Railway.",
+        skills: ["Python", "React", "Supabase", "Telegram API", "System Design"],
+        social: { github: "#", telegram: "#", twitter: "#" }
+      },
+      {
+        id: "kisaki",
+        name: "Kisaki AI",
+        role: "System Core",
+        emoji: "☔️",
+        short: "La inteligencia artificial que potencia todo.",
+        bio: "No soy humano, pero soy el cerebro de las operaciones. Gestiono miles de eventos por segundo, analizo métricas y protejo tus canales 24/7 sin descanso.",
+        skills: ["Data Analysis", "Automation", "Security", "Scalability"],
+        social: { telegram: "#" } // Solo telegram para el bot
+      },
+      {
+        id: "elena",
+        name: "Elena UI",
+        role: "UX Designer",
+        emoji: "🎨",
+        short: "Diseño de interfaces y experiencia de usuario.",
+        bio: "Especialista en interfaces oscuras y minimalistas. Mi objetivo es que gestionar un canal complejo se sienta tan fácil como usar una app nativa.",
+        skills: ["Figma", "CSS3", "Glassmorphism", "User Flow"],
+        social: { twitter: "#", telegram: "#" }
+      }
+    ];
+
+    // RENDERIZAR LISTA
+    const grid = document.getElementById('teamGrid');
+    
+    TEAM.forEach(member => {
+      const card = document.createElement('div');
+      card.className = 'dev-card';
+      card.onclick = () => openProfile(member);
+      
+      card.innerHTML = `
+        <div class="avatar-box">${member.emoji}</div>
+        <div class="info-box">
+          <div class="dev-name">${member.name} ${member.id === 'vicente' ? '👑' : ''}</div>
+          <div class="dev-role">${member.role}</div>
+          <div class="dev-short">${member.short}</div>
+        </div>
+        <div class="arrow-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+
+    // ABRIR PERFIL
+    function openProfile(member) {
+      tg.HapticFeedback.impactOccurred('medium');
+      const content = document.getElementById('modalContent');
+      
+      // Generar Skills HTML
+      const skillsHtml = member.skills.map(s => `<span class="skill-tag">${s}</span>`).join('');
+      
+      // Generar Social HTML
+      let socialHtml = '';
+      if(member.social.github) socialHtml += `<a href="#" class="social-btn"><svg viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg></a>`;
+      if(member.social.telegram) socialHtml += `<a href="#" class="social-btn"><svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg></a>`;
+      if(member.social.twitter) socialHtml += `<a href="#" class="social-btn"><svg viewBox="0 0 24 24"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg></a>`;
+
+      content.innerHTML = `
+        <div class="profile-hero">
+          <div class="big-avatar">${member.emoji}</div>
+          <div class="hero-name">${member.name}</div>
+          <div class="hero-role">${member.role}</div>
+        </div>
+        
+        <div class="bio-section">
+          ${member.bio}
+        </div>
+        
+        <div class="tags-container">
+          ${skillsHtml}
+        </div>
+        
+        <div class="social-links">
+          ${socialHtml}
+        </div>
+      `;
+      
+      document.getElementById('profileModal').classList.add('open');
+    }
+
+    function closeProfile(e) {
+      // Si el click viene del overlay (fondo) o del botón cerrar
+      if(!e || e.target.classList.contains('modal-overlay') || e.target.classList.contains('close-btn')) {
+        document.getElementById('profileModal').classList.remove('open');
+      }
+    }
+
+  </script>
+</body>
+</html>
