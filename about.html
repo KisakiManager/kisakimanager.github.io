@@ -2,79 +2,59 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Sobre Kisaki — Kisaki Manager</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
+  <title>Sobre Kisaki</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root { --bg-core: #020617; --text-main: #f8fafc; --text-sec: #94a3b8; --glass: rgba(15, 23, 42, 0.6); --border: rgba(255, 255, 255, 0.08); --accent: #3b82f6; }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'SF Pro Display', 'Inter', sans-serif; }
+    body { background: var(--bg-core); color: var(--text-main); min-height: 100vh; padding: 24px; position: relative; overflow-x: hidden; }
+    
+    /* Liquid Background */
+    .blob { position: fixed; border-radius: 50%; filter: blur(80px); z-index: -1; opacity: 0.5; }
+    .b1 { top: -10%; right: -10%; width: 300px; height: 300px; background: #4f46e5; }
+    .b2 { bottom: 10%; left: -10%; width: 250px; height: 250px; background: #06b6d4; }
+
+    /* UI Components */
+    .nav-header { display: flex; align-items: center; gap: 15px; margin-bottom: 30px; }
+    .btn-back { width: 40px; height: 40px; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: white; cursor: pointer; backdrop-filter: blur(10px); text-decoration: none; }
+    
+    .hero-brand { text-align: center; margin-bottom: 40px; }
+    .brand-icon { width: 80px; height: 80px; margin: 0 auto 15px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); border-radius: 24px; display: flex; align-items: center; justify-content: center; font-size: 2.5em; box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3); }
+    
+    .content-card { background: var(--glass); backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: 24px; padding: 25px; margin-bottom: 20px; }
+    .section-title { font-size: 1.1em; font-weight: 700; margin-bottom: 10px; color: white; display: flex; align-items: center; gap: 8px; }
+    .section-text { font-size: 0.95em; color: var(--text-sec); line-height: 1.6; }
+  </style>
 </head>
 <body>
+  <div class="blob b1"></div><div class="blob b2"></div>
 
-  <div class="page-header" style="background-image: url('fondo-about.jpg');">
+  <div class="nav-header">
+    <a href="legal.html" class="btn-back"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></a>
+    <h1 style="font-size:1.2em; font-weight:700;">Manifiesto</h1>
+  </div>
 
-    <a href="index.html" class="back-floating">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M15 18l-6-6 6-6"/>
-      </svg>
-    </a>
-
+  <div class="hero-brand">
+    <div class="brand-icon">⚡️</div>
+    <h2 style="font-size:1.8em; font-weight:800;">Kisaki Manager</h2>
+    <p style="color:var(--text-sec);">Arquitectura de Automatización</p>
   </div>
 
   <div class="content-card">
-
-    <div class="card-header-inner">
-      <svg class="page-title-icon" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
-      </svg>
-
-      <div class="page-title">
-        <h1>Sobre Kisaki</h1>
-        <span>Misión, visión y desarrollo</span>
-      </div>
-    </div>
-
-    <div class="card-body">
-
-      <div class="content-bubble">
-        <p>
-          Kisaki Manager es la solución integral para la administración de comunidades en Telegram. Nacimos con la idea de que gestionar un canal debería ser simple, seguro y potente.
-        </p>
-      </div>
-
-      <div class="content-bubble">
-        <h2>
-          <svg class="bubble-icon" viewBox="0 0 24 24"><path d="M13.13 8.65l2.25 2.25c3.07-1.28 4.62-4.08 4.62-4.08s-2.8 1.55-4.08 4.62l-2.79-2.79c-1.44-1.44-3.58-1.57-4.65-.5.26 1.48 1.37 3.33 2.65 4.61 1.28 1.28 3.13 2.39 4.61 2.65 1.07-1.07.94-3.21-.5-4.65l-.11-.11zM7.16 11.23c-1.35 1.76-1.55 4.14-.52 5.17 1.03 1.03 3.41.83 5.17-.52l1.62 1.62c-2.43 1.69-5.46 1.45-7.5-.59-2.04-2.04-2.28-5.07-.59-7.5l1.82 1.82z"/></svg>
-          Nuestra Misión
-        </h2>
-        <p>
-          Empoderar a los administradores de canales con herramientas de automatización avanzadas, eliminando el trabajo manual repetitivo y permitiéndoles enfocarse en lo que realmente importa: su comunidad.
-        </p>
-      </div>
-
-      <div class="content-bubble">
-        <h2>
-          <svg class="bubble-icon" viewBox="0 0 24 24"><path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7zm2.85 11.1l-.85.6V16h-4v-2.3l-.85-.6C7.8 12.16 7 10.63 7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.63-.8 3.16-2.15 4.1z"/></svg>
-          ¿Quiénes somos?
-        </h2>
-        <p>
-          Este proyecto es desarrollado y mantenido por <strong>Dog Geek Labs</strong>. Somos un equipo apasionado por la tecnología, la privacidad y el ecosistema de Telegram.
-        </p>
-      </div>
-
-      <div class="content-bubble">
-        <h2>
-          <svg class="bubble-icon" viewBox="0 0 24 24"><path d="M12 2L9 9l-7 3 7 3 3 7 3-7 7-3-7-3z"/></svg>
-          El Futuro
-        </h2>
-        <p>
-          Estamos en constante evolución. Trabajamos día a día integrando nuevas funciones, soporte para la red TON y mejores herramientas de moderación basadas en las necesidades reales de nuestros usuarios.
-        </p>
-      </div>
-
-      <div style="margin-top: 40px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; color: #7b8fa6; font-size: 0.85em;">
-        © Kisaki Manager • Dog Geek Labs
-      </div>
-
-    </div>
+    <div class="section-title"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg> Nuestra Misión</div>
+    <p class="section-text">
+      Telegram no debería ser un caos. Kisaki nació con un propósito simple: <strong>eliminar el ruido de la gestión de comunidades</strong>. Fusionamos automatización avanzada con una interfaz que se siente humana, permitiendo que los creadores se enfoquen en su contenido, no en la moderación manual.
+    </p>
   </div>
 
+  <div class="content-card">
+    <div class="section-title"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2"><path d="M2 12h5"/><path d="M22 12h-5"/><path d="M12 2v5"/><path d="M12 22v-5"/><path d="M12 12m-5 0a5 5 0 1 0 10 0a5 5 0 1 0 -10 0"/></svg> Visión 2026</div>
+    <p class="section-text">
+      Aspiramos a ser el <strong>Sistema Operativo estándar</strong> para canales de Telegram. Desde la gestión de pagos en cripto hasta la analítica predictiva con IA, Kisaki está construyendo el puente entre las comunidades estáticas de hoy y los ecosistemas autónomos del mañana.
+    </p>
+  </div>
+  
+  <script>window.Telegram.WebApp.expand();</script>
 </body>
 </html>
