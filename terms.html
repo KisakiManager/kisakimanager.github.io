@@ -2,79 +2,50 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Términos de Uso — Kisaki Manager</title>
+  <title>Términos de Servicio</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root { --bg-core: #020617; --text-main: #f8fafc; --text-sec: #94a3b8; --glass: rgba(15, 23, 42, 0.6); --border: rgba(255, 255, 255, 0.08); }
+    body { background: var(--bg-core); color: var(--text-main); font-family: 'SF Pro Display', sans-serif; padding: 24px; }
+    
+    .blob { position: fixed; border-radius: 50%; filter: blur(90px); z-index: -1; opacity: 0.4; }
+    .b1 { top: 10%; right: -20%; width: 300px; height: 300px; background: #64748b; } /* Gris neutro legal */
+
+    .nav-header { display: flex; align-items: center; gap: 15px; margin-bottom: 30px; }
+    .btn-back { width: 40px; height: 40px; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: white; cursor: pointer; text-decoration: none; }
+
+    .term-box { border-bottom: 1px solid var(--border); padding: 20px 0; }
+    .term-box:last-child { border-bottom: none; }
+    h3 { font-size: 1em; margin-bottom: 8px; color: #e2e8f0; }
+    p { font-size: 0.9em; color: var(--text-sec); line-height: 1.5; }
+    .container { background: var(--glass); backdrop-filter: blur(20px); border-radius: 24px; border: 1px solid var(--border); padding: 25px; }
+  </style>
 </head>
 <body>
+  <div class="blob b1"></div>
 
-  <div class="page-header" style="background-image: url('fondo-terminos.png');">
-
-    <a href="legal.html" class="back-floating">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M15 18l-6-6 6-6"/>
-      </svg>
-    </a>
-
+  <div class="nav-header">
+    <a href="legal.html" class="btn-back"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></a>
+    <h1>Términos de Uso</h1>
   </div>
 
-  <div class="content-card">
-
-    <div class="card-header-inner">
-      <svg class="page-title-icon" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
-      </svg>
-
-      <div class="page-title">
-        <h1>Términos de Uso</h1>
-        <span>Reglas y condiciones del servicio</span>
-      </div>
+  <div class="container">
+    <div class="term-box">
+      <h3>1. Aceptación</h3>
+      <p>Al iniciar Kisaki Manager (@bot), aceptas operar bajo las normativas vigentes de Telegram y estos términos. El uso indebido resultará en la suspensión inmediata del servicio.</p>
+    </div>
+    
+    <div class="term-box">
+      <h3>2. Uso "Tal Cual" (AS-IS)</h3>
+      <p>El software se proporciona "tal cual", sin garantías expresas. Aunque nos esforzamos por un uptime del 99.9%, no nos hacemos responsables por pérdidas derivadas de interrupciones de la API de Telegram.</p>
     </div>
 
-    <div class="card-body">
-
-      <div class="content-bubble">
-        <p>
-          Kisaki Manager es un sistema automatizado diseñado para facilitar la gestión de canales y ofrecer funciones avanzadas para Telegram. Al usar este servicio, aceptas las siguientes condiciones.
-        </p>
-      </div>
-
-      <div class="content-bubble">
-        <h2>
-          <svg class="bubble-icon" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
-          Uso permitido
-        </h2>
-        <p>
-          El usuario se compromete a utilizar el bot de forma legítima y ética. Queda estrictamente prohibido el uso de automatizaciones externas (userbots), el spam masivo o cualquier intento de explotación de vulnerabilidades del sistema.
-        </p>
-      </div>
-
-      <div class="content-bubble">
-        <h2>
-          <svg class="bubble-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8 0-1.85.63-3.55 1.69-4.9L16.9 18.31C15.55 19.37 13.85 20 12 20zm6.31-3.1L7.1 5.69C8.45 4.63 10.15 4 12 4c4.42 0 8 3.58 8 8 0 1.85-.63 3.55-1.69 4.9z"/></svg>
-          Limitaciones de responsabilidad
-        </h2>
-        <p>
-          El acceso a las funciones premium no garantiza resultados específicos, como el crecimiento exponencial de canales o beneficios económicos directos. Kisaki Manager es una herramienta de gestión, no de marketing milagroso.
-        </p>
-      </div>
-
-      <div class="content-bubble">
-        <h2>
-          <svg class="bubble-icon" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
-          Suspensión del servicio
-        </h2>
-        <p>
-          Nos reservamos el derecho de limitar, suspender o banear el acceso a las funciones ante la detección de comportamientos anómalos, abusivos o que violen las normativas de Telegram.
-        </p>
-      </div>
-
-      <div style="margin-top: 40px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; color: #7b8fa6; font-size: 0.85em;">
-        © Kisaki Manager • Dog Geek Labs
-      </div>
-
+    <div class="term-box">
+      <h3>3. Conducta Prohibida</h3>
+      <p>Queda estrictamente prohibido usar Kisaki para: SPAM masivo, estafas (scam), distribución de malware o gestión de canales con contenido ilegal según las leyes internacionales.</p>
     </div>
   </div>
-
+  <script>window.Telegram.WebApp.expand();</script>
 </body>
 </html>
