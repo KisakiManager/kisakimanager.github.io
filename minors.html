@@ -2,79 +2,47 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Política de Menores — Kisaki Manager</title>
+  <title>Seguridad de Menores</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root { --bg-core: #020617; --text-main: #f8fafc; --text-sec: #94a3b8; --glass: rgba(15, 23, 42, 0.6); --border: rgba(255, 255, 255, 0.08); }
+    body { background: var(--bg-core); color: var(--text-main); font-family: 'SF Pro Display', sans-serif; padding: 24px; }
+    
+    .blob { position: fixed; border-radius: 50%; filter: blur(80px); z-index: -1; opacity: 0.4; }
+    .b1 { top: 30%; left: 30%; width: 250px; height: 250px; background: #ef4444; } /* Rojo alerta suave */
+
+    .nav-header { display: flex; align-items: center; gap: 15px; margin-bottom: 30px; }
+    .btn-back { width: 40px; height: 40px; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: white; cursor: pointer; text-decoration: none; }
+
+    .warn-card { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 24px; padding: 25px; margin-bottom: 20px; backdrop-filter: blur(20px); }
+    .info-card { background: var(--glass); border: 1px solid var(--border); border-radius: 24px; padding: 25px; backdrop-filter: blur(20px); }
+  </style>
 </head>
 <body>
+  <div class="blob b1"></div>
 
-  <div class="page-header" style="background-image: url('fondo-menores.jpg');">
-
-    <a href="legal.html" class="back-floating">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M15 18l-6-6 6-6"/>
-      </svg>
-    </a>
-
+  <div class="nav-header">
+    <a href="legal.html" class="btn-back"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></a>
+    <h1>Protección de Menores</h1>
   </div>
 
-  <div class="content-card">
-
-    <div class="card-header-inner">
-      <svg class="page-title-icon" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-      </svg>
-
-      <div class="page-title">
-        <h1>Política de Menores</h1>
-        <span>Restricciones de edad y seguridad</span>
-      </div>
+  <div class="warn-card">
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+      <svg width="24" height="24" fill="none" stroke="#fca5a5" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <h3 style="color:#fca5a5; font-size:1.1em;">Restricción de Edad</h3>
     </div>
-
-    <div class="card-body">
-
-      <div class="content-bubble">
-        <p>
-          Kisaki Manager y sus servicios están diseñados exclusivamente para usuarios con la madurez legal necesaria para gestionar comunidades y realizar transacciones digitales.
-        </p>
-      </div>
-
-      <div class="content-bubble">
-        <h2>
-          <svg class="bubble-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/></svg>
-          Restricción de edad
-        </h2>
-        <p>
-          El uso de este bot está <strong>estrictamente prohibido</strong> para menores de 13 años (o la edad mínima requerida para servicios digitales en su país de residencia, si esta fuera mayor).
-        </p>
-      </div>
-
-      <div class="content-bubble">
-        <h2>
-          <svg class="bubble-icon" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
-          Suspensión inmediata
-        </h2>
-        <p>
-          Nos tomamos la seguridad muy en serio. Si nuestros sistemas o moderadores detectan que una cuenta es operada por un menor de la edad permitida, procederemos al <strong>bloqueo permanente</strong> del acceso sin previo aviso.
-        </p>
-      </div>
-
-      <div class="content-bubble">
-        <h2>
-          <svg class="bubble-icon" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
-          Responsabilidad de tutores
-        </h2>
-        <p>
-          Kisaki Manager no recopila intencionalmente datos de menores. Recomendamos encarecidamente a los padres y tutores supervisar la actividad en Telegram de los menores a su cargo.
-        </p>
-      </div>
-
-      <div style="margin-top: 40px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; color: #7b8fa6; font-size: 0.85em;">
-        © Kisaki Manager • Dog Geek Labs
-      </div>
-
-    </div>
+    <p style="color:#fecaca; font-size:0.95em; line-height:1.5;">
+      El uso de las funciones de gestión financiera, criptomonedas (TON) y administración avanzada de Kisaki está estrictamente reservado para usuarios <strong>mayores de 18 años</strong>.
+    </p>
   </div>
 
+  <div class="info-card">
+    <h3 style="margin-bottom:10px;">🛡️ Responsabilidad del Admin</h3>
+    <p style="color:var(--text-sec); font-size:0.95em; line-height:1.5;">
+      Si utilizas Kisaki para gestionar comunidades, tú eres el responsable de asegurar que el contenido compartido cumpla con las normativas de protección infantil. Kisaki incluye herramientas automáticas para filtrar palabras clave sensibles, pero la supervisión humana es obligatoria.
+    </p>
+  </div>
+  <script>window.Telegram.WebApp.expand();</script>
 </body>
 </html>
