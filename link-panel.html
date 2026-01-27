@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Link Manager</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  <style>
+    :root { --bg:#020617; --glass:rgba(15,23,42,0.9); --border:rgba(255,255,255,0.1); --green:#10b981; }
+    body { background:var(--bg); color:#f8fafc; font-family:'Inter', sans-serif; padding:20px; }
+    
+    .nav { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+    .btn-icon { width:40px; height:40px; border-radius:12px; background:rgba(255,255,255,0.05); color:white; border:none; cursor:pointer; }
+    
+    .input-group { margin-bottom:15px; }
+    .input-group label { display:block; color:#94a3b8; font-size:0.85em; margin-bottom:5px; }
+    .input-field { width:100%; background:#0f172a; border:1px solid var(--border); padding:12px; border-radius:10px; color:white; outline:none; }
+    
+    .link-card { background:var(--glass); border:1px solid var(--border); padding:15px; border-radius:16px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; }
+    
+    .fab { position:fixed; bottom:30px; right:30px; width:55px; height:55px; background:var(--green); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.5em; box-shadow:0 10px 20px rgba(16,185,129,0.3); color:white; border:none; cursor:pointer;}
+  </style>
+</head>
+<body>
+
+  <div id="viewList">
+    <div class="nav">
+      <a href="admin.html" class="btn-icon" style="display:flex;align-items:center;justify-content:center;text-decoration:none;">←</a>
+      <h2>Enlaces Activos</h2>
+      <div style="width:40px"></div>
+    </div>
+    
+    <div style="background:#0f172a; border-radius:16px; padding:10px; margin-bottom:20px;">
+      <div id="trafficChart"></div>
+    </div>
+
+    <div id="linksContainer">Cargando...</div>
+    <button class="fab" onclick="showCreate()">+</button>
+  </div>
+
+  <div id="viewCreate" style="display:none;">
+    <div class="nav">
+      <button class="btn-icon" onclick="showList()">✕</button>
+      <h2>Nuevo Enlace</h2>
+      <div style="width:40px"></div>
+    </div>
+
+    <div class="input-group">
+      <label>Nombre del enlace (Etiqueta)</label>
+      <input type="text" id="lnkName" class="input-field" placeholder="Ej: Campaña Twitter">
+    </div>
+
+    <div class="input-group">
+      <label>Tipo de acceso</label>
+      <select id="lnkType" class="input-field">
+        <option value="direct">Directo (Unión automática)</option>
+        <option value="approve">Requiere Aprobación</option>
+      </select>
+    </div>
+
+    <div class="input-group">
+      <label>Límite de usuarios (0 = Infinito)</label>
+      <input type="number" id="lnkLimit" class="input-field" value="0">
+    </div>
+
+    <button onclick="createLink()" style="width:100%; margin-top:10px; padding:15px; background:var(--green); border:none; border-radius:16px; color:black; font-weight:bold;">Generar Enlace</button>
+  </div>
+
+  <script>
+    const sbUrl = 'https://ndkupidhlauzroduvech.supabase.co';
+    const sbKey = 'sb_publishable_fSQ9uBUx_YTfxr2QL2-kfQ_pdE2cqHv';
+    const supabase = window.supabase.createClient(sbUrl, sbKey);
+    
+    // Cargar Lista
+    async function loadLinks() {
+      // Simulado: channel_id = 1 para demo. En prod usa el ID real.
+      const { data } = await supabase.from('invite_links').select('*');
+      
+      const cont = document.getElementById('linksContainer');
+      cont.innerHTML = '';
+      
+      data.forEach(l => {
+        cont.innerHTML += `
+        <div class="link-card">
+          <div>
+            <div style="font-weight:bold">${l.name || 'Sin nombre'}</div>
+            <div style="font-size:0.8em; color:#94a3b8">${l.creates_join_request ? '🔒 Aprobación' : '⚡️ Directo'} • ${l.joins} Joins</div>
+          </div>
+          <div style="color:var(--green)">Activo</div>
+        </div>`;
+      });
+
+      // Gráfica Dummy (Simulando tráfico de los enlaces cargados)
+      new ApexCharts(document.querySelector("#trafficChart"), {
+        series: [{ name: 'Joins', data: [12, 44, 25, 66, 41, 89] }],
+        chart: { type: 'area', height: 100, toolbar:{show:false}, background:'transparent' },
+        colors: ['#10b981'],
+        stroke: { curve: 'smooth', width: 2 },
+        fill: { type: 'gradient', gradient: { shadeIntensity:1, opacityFrom:0.5, opacityTo:0.0 } },
+        dataLabels: { enabled: false },
+        xaxis: { labels: {show:false}, axisBorder:{show:false}, axisTicks:{show:false} },
+        yaxis: { show: false },
+        grid: { show: false },
+        theme: { mode: 'dark' }
+      }).render();
+    }
+
+    async function createLink() {
+      const name = document.getElementById('lnkName').value;
+      const type = document.getElementById('lnkType').value === 'approve';
+      const limit = document.getElementById('lnkLimit').value;
+
+      // Insertar en DB (El bot de Python detectará esto y creará el link real en TG)
+      const { error } = await supabase.from('invite_links').insert({
+        channel_id: -100123456789, // ID Demo, dinámico en prod
+        name: name,
+        creates_join_request: type,
+        member_limit: limit,
+        creator_id: window.Telegram.WebApp.initDataUnsafe?.user?.id
+      });
+
+      if(error) alert('Error: ' + error.message);
+      else {
+        window.Telegram.WebApp.showAlert("Enlace Solicitado. El bot lo generará en breve.");
+        showList();
+        loadLinks();
+      }
+    }
+
+    function showCreate() { document.getElementById('viewList').style.display='none'; document.getElementById('viewCreate').style.display='block'; }
+    function showList() { document.getElementById('viewCreate').style.display='none'; document.getElementById('viewList').style.display='block'; }
+
+    loadLinks();
+  </script>
+</body>
+</html>
