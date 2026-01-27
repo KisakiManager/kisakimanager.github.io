@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Kisaki Admin Realtime</title>
+  <title>Kisaki Admin V5 Realtime</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -20,6 +20,8 @@
       --grad-electric: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%);
       --border-glass: rgba(255,255,255,0.08);
       --accent-blue: #3b82f6;
+      --accent-green: #10b981;
+      --accent-purple: #8b5cf6;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'SF Pro Display', 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -50,8 +52,10 @@
       background: var(--card-bg); border-radius: 24px; padding: 25px;
       border: 1px solid var(--border-glass); height: 160px; 
       display: flex; flex-direction: column; justify-content: flex-end; cursor: pointer;
+      position: relative; overflow: hidden;
     }
     .menu-admins { background: var(--grad-ocean); }
+    .menu-links { background: radial-gradient(circle at top right, #1e1b4b, #0f172a); }
     
     .icon-box {
       position: absolute; top: 20px; left: 20px; width: 50px; height: 50px; 
@@ -66,7 +70,9 @@
       display: flex; align-items: center; justify-content: space-between;
       border: 1px solid var(--border-glass);
     }
-    .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.7em; background: rgba(37, 99, 235, 0.2); color: #60a5fa; }
+    .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.7em; }
+    .badge-blue { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+    .badge-purple { background: rgba(139, 92, 246, 0.2); color: #c084fc; }
 
     /* --- PERMISOS --- */
     .perm-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 30px; }
@@ -90,6 +96,15 @@
 
     /* --- GRÁFICAS --- */
     .chart-wrapper { background: #0f172a; border-radius: 20px; padding: 15px; margin-bottom: 20px; border: 1px solid var(--border-glass); }
+    
+    /* --- METRICAS DE ENLACES --- */
+    .metrics-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+    .metric-box {
+      background: rgba(255,255,255,0.03); padding: 15px; border-radius: 16px;
+      display: flex; flex-direction: column; gap: 5px; border: 1px solid var(--border-glass);
+    }
+    .mb-val { font-size: 1.2em; font-weight: 700; color:white; }
+    .mb-lbl { font-size: 0.75em; color: var(--text-sec); }
 
     @keyframes fadeScale { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
   </style>
@@ -103,13 +118,23 @@
     </div>
 
     <div class="menu-grid">
-      <div class="menu-card menu-admins" onclick="loadChannels()">
+      <div class="menu-card menu-admins" onclick="initFlow('admins')">
         <div class="icon-box">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         </div>
         <div>
           <h2 style="font-size: 1.3em; font-weight: 700;">Admins</h2>
-          <p style="font-size: 0.85em; color: rgba(255,255,255,0.6);">Gestionar permisos y actividad</p>
+          <p style="font-size: 0.85em; color: rgba(255,255,255,0.6);">Permisos y actividad</p>
+        </div>
+      </div>
+
+      <div class="menu-card menu-links" onclick="initFlow('links')">
+        <div class="icon-box">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        </div>
+        <div>
+          <h2 style="font-size: 1.3em; font-weight: 700;">Enlaces</h2>
+          <p style="font-size: 0.85em; color: rgba(255,255,255,0.6);">Tráfico y uniones</p>
         </div>
       </div>
     </div>
@@ -118,23 +143,23 @@
   <div id="viewChannels" class="view-container">
     <div class="nav-header">
       <div class="btn-back" onclick="goBack()"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
-      <div><h1>Seleccionar Canal</h1><p>Tus canales vinculados</p></div>
+      <div><h1>Seleccionar Canal</h1><p id="contextLabel">...</p></div>
     </div>
     <div id="channelListContainer">Cargando canales...</div>
   </div>
 
-  <div id="viewAdmins" class="view-container">
+  <div id="viewList" class="view-container">
     <div class="nav-header">
       <div class="btn-back" onclick="goBack()"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
-      <div><h1 id="lblChannelName">Canal</h1><p>Equipo administrativo</p></div>
+      <div><h1 id="listTitle">Lista</h1><p id="listSubtitle">Detalle del canal</p></div>
     </div>
-    <div id="adminListContainer">Cargando admins...</div>
+    <div id="listContainer">Cargando datos...</div>
   </div>
 
-  <div id="viewDetail" class="view-container">
+  <div id="viewAdminDetail" class="view-container">
     <div class="nav-header">
       <div class="btn-back" onclick="goBack()"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
-      <div><h1 id="lblAdminName">Admin</h1><p>Permisos y Estadísticas</p></div>
+      <div><h1 id="lblAdminName">Admin</h1><p>Gestión de permisos</p></div>
     </div>
 
     <div class="chart-wrapper">
@@ -142,26 +167,50 @@
       <div id="adminChart"></div>
     </div>
 
-    <div style="margin-bottom:15px; font-weight:700;">Permisos de Telegram</div>
-    <div class="perm-list" id="permContainer">
-      </div>
+    <div style="margin-bottom:15px; font-weight:700;">Permisos Reales</div>
+    <div class="perm-list" id="permContainer"></div>
 
     <button class="btn-save" onclick="savePermissions()">Guardar Cambios</button>
+  </div>
+
+  <div id="viewLinkDetail" class="view-container">
+    <div class="nav-header">
+      <div class="btn-back" onclick="goBack()"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+      <div><h1 id="lblLinkName">Enlace</h1><p>Estadísticas de tráfico</p></div>
+    </div>
+
+    <div class="metrics-row">
+      <div class="metric-box">
+        <span class="mb-val" style="color:var(--accent-green)" id="lnkJoins">0</span>
+        <span class="mb-lbl">Uniones Totales</span>
+      </div>
+      <div class="metric-box">
+        <span class="mb-val" style="color:var(--accent-purple)" id="lnkRate">0%</span>
+        <span class="mb-lbl">Tasa Aprobación</span>
+      </div>
+    </div>
+
+    <div class="chart-wrapper">
+      <div style="margin-bottom:10px; font-weight:600; color:#cbd5e1;">Flujo de Usuarios</div>
+      <div id="linkChart"></div>
+    </div>
   </div>
 
   <script>
     const tg = window.Telegram.WebApp;
     tg.expand();
 
-    // 1. CONFIGURACIÓN SUPABASE (PON TUS CREDENCIALES AQUÍ)
+    // 1. CREDENCIALES SUPABASE (Pega las tuyas aquí)
     const SUPABASE_URL = 'https://ndkupidhlauzroduvech.supabase.co';
-    const SUPABASE_KEY = 'sb_publishable_fSQ9uBUx_YTfxr2QL2-kfQ_pdE2cqHv'; // Tu clave pública
+    const SUPABASE_KEY = 'sb_publishable_fSQ9uBUx_YTfxr2QL2-kfQ_pdE2cqHv';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // Estado
+    // Estado Global
     let historyStack = ['viewHome'];
-    let currentAdmin = null; // Objeto admin seleccionado
-    let currentChannelId = null;
+    let currentFlow = ''; // 'admins' o 'links'
+    let currentChannel = null;
+    let currentItem = null; // Admin o Link seleccionado
+    let chartInstance = null;
 
     // --- NAVEGACIÓN ---
     function navigateTo(viewId) {
@@ -179,22 +228,29 @@
       }
     }
 
-    // --- 1. CARGAR CANALES (REAL) ---
+    // --- 1. INICIAR FLUJO ---
+    function initFlow(flowType) {
+      currentFlow = flowType;
+      document.getElementById('contextLabel').innerText = flowType === 'admins' ? 'Gestionar Equipo' : 'Ver Enlaces';
+      loadChannels();
+    }
+
+    // --- 2. CARGAR CANALES ---
     async function loadChannels() {
       navigateTo('viewChannels');
       const container = document.getElementById('channelListContainer');
-      
-      const user = tg.initDataUnsafe?.user;
-      const userId = user ? user.id : 1298554649; // Fallback para pruebas
+      container.innerHTML = 'Cargando...';
 
-      // Consulta real a tu tabla 'managed_channels'
+      const user = tg.initDataUnsafe?.user;
+      const userId = user ? user.id : 1298554649; // Fallback
+
       const { data: channels, error } = await supabase
         .from('managed_channels')
         .select('*')
         .eq('user_id', userId);
 
       if (error || !channels || channels.length === 0) {
-        container.innerHTML = '<div style="color:red">No se encontraron canales.</div>';
+        container.innerHTML = '<div style="color:red; text-align:center">No se encontraron canales.</div>';
         return;
       }
 
@@ -202,7 +258,7 @@
       channels.forEach(ch => {
         const div = document.createElement('div');
         div.className = 'list-item';
-        div.onclick = () => loadAdmins(ch);
+        div.onclick = () => loadItems(ch);
         div.innerHTML = `
           <div style="display:flex;align-items:center;gap:15px;">
             <div style="width:40px;height:40px;background:#1e293b;border-radius:12px;display:flex;justify-content:center;align-items:center;">📢</div>
@@ -215,143 +271,147 @@
       });
     }
 
-    // --- 2. CARGAR ADMINS (REAL) ---
-    async function loadAdmins(channel) {
-      currentChannelId = channel.telegram_chat_id;
-      document.getElementById('lblChannelName').innerText = channel.chat_title;
-      navigateTo('viewAdmins');
-      
-      const container = document.getElementById('adminListContainer');
+    // --- 3. CARGAR LISTA (ADMINS O LINKS) ---
+    async function loadItems(channel) {
+      currentChannel = channel;
+      document.getElementById('listTitle').innerText = currentFlow === 'admins' ? 'Admins' : 'Enlaces';
+      document.getElementById('listSubtitle').innerText = channel.chat_title;
+      navigateTo('viewList');
+
+      const container = document.getElementById('listContainer');
       container.innerHTML = 'Cargando...';
 
-      // Consulta a la nueva tabla 'channel_admins'
-      const { data: admins, error } = await supabase
-        .from('channel_admins')
+      let tableName = currentFlow === 'admins' ? 'channel_admins' : 'invite_links';
+      
+      const { data: items, error } = await supabase
+        .from(tableName)
         .select('*')
         .eq('channel_id', channel.telegram_chat_id);
 
-      if (!admins || admins.length === 0) {
-        container.innerHTML = '<div style="padding:20px; text-align:center; color:#666">No hay datos de admins sincronizados.<br>Ejecuta /sync en el bot.</div>';
+      if (!items || items.length === 0) {
+        container.innerHTML = `<div style="text-align:center;color:#666">No hay ${currentFlow} registrados.</div>`;
         return;
       }
 
       container.innerHTML = '';
-      admins.forEach(admin => {
+      items.forEach(item => {
         const div = document.createElement('div');
         div.className = 'list-item';
-        div.onclick = () => openAdminDetail(admin);
-        div.innerHTML = `
-          <div style="display:flex;align-items:center;gap:15px;">
-            <div style="width:40px;height:40px;border-radius:50%;background:#334155;display:flex;justify-content:center;align-items:center;font-weight:bold;">${(admin.first_name || 'U')[0]}</div>
-            <div>
-              <div style="font-weight:600">${admin.first_name || 'Usuario'}</div>
-              <div style="font-size:0.8em;color:#64748b">${admin.role}</div>
+        
+        if (currentFlow === 'admins') {
+          // Render Admin
+          div.onclick = () => openAdminDetail(item);
+          div.innerHTML = `
+            <div style="display:flex;align-items:center;gap:15px;">
+              <div style="width:40px;height:40px;border-radius:50%;background:#334155;display:flex;justify-content:center;align-items:center;">${(item.first_name||'U')[0]}</div>
+              <div><div style="font-weight:600">${item.first_name}</div><div style="font-size:0.8em;color:#64748b">${item.role}</div></div>
             </div>
-          </div>
-          <span class="badge">${admin.status || 'Active'}</span>
-        `;
+            <span class="badge badge-blue">Editar</span>
+          `;
+        } else {
+          // Render Link
+          div.onclick = () => openLinkDetail(item);
+          div.innerHTML = `
+            <div style="display:flex;align-items:center;gap:15px;">
+              <div style="width:40px;height:40px;border-radius:12px;background:rgba(139,92,246,0.2);color:#c084fc;display:flex;justify-content:center;align-items:center;">🔗</div>
+              <div><div style="font-weight:600">${item.name || 'Enlace'}</div><div style="font-size:0.8em;color:#64748b">Por: ${item.creator_name}</div></div>
+            </div>
+            <span class="badge badge-purple">${item.joins} Joins</span>
+          `;
+        }
         container.appendChild(div);
       });
     }
 
-    // --- 3. DETALLES Y PERMISOS ---
-    let chartInstance = null;
+    // --- 4. DETALLES Y GRÁFICAS ---
 
+    // A) ADMINS
     function openAdminDetail(admin) {
-      currentAdmin = admin; // Guardar referencia para actualizar
-      document.getElementById('lblAdminName').innerText = admin.first_name || 'Admin';
-      navigateTo('viewDetail');
+      currentItem = admin;
+      document.getElementById('lblAdminName').innerText = admin.first_name;
+      navigateTo('viewAdminDetail');
 
-      // A) Gráfica (Usando datos de la DB si existen, sino simulados visualmente)
-      renderChart([admin.stats_posts || 0, admin.stats_views || 0, admin.stats_reactions || 0]);
+      // Gráfica Fake (si no hay datos reales aún) o Real
+      renderChart("#adminChart", [admin.stats_posts||10, admin.stats_views||50, admin.stats_reactions||20, 40, 60, 80, 100], '#3b82f6');
 
-      // B) Generar Checkboxes de Permisos Reales
+      // Checkboxes
       const permMap = [
         { key: 'can_change_info', label: 'Cambiar Info' },
-        { key: 'can_post_messages', label: 'Publicar Mensajes' },
-        { key: 'can_edit_messages', label: 'Editar Mensajes' },
-        { key: 'can_delete_messages', label: 'Eliminar Mensajes' },
-        { key: 'can_invite_users', label: 'Invitar Usuarios' },
-        { key: 'can_restrict_members', label: 'Banear Usuarios' },
-        { key: 'can_manage_voice_chats', label: 'Chats de Voz' }
+        { key: 'can_post_messages', label: 'Publicar' },
+        { key: 'can_edit_messages', label: 'Editar' },
+        { key: 'can_delete_messages', label: 'Eliminar' },
+        { key: 'can_invite_users', label: 'Invitar' },
+        { key: 'can_restrict_members', label: 'Banear' }
       ];
-
+      
       const container = document.getElementById('permContainer');
       container.innerHTML = '';
-
       permMap.forEach(p => {
         const isActive = admin[p.key] === true;
         const div = document.createElement('div');
         div.className = 'perm-item';
         div.onclick = () => togglePerm(div, p.key);
-        div.innerHTML = `
-          <div class="custom-check ${isActive ? 'checked' : ''}" id="chk_${p.key}">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
-          </div>
-          <div>${p.label}</div>
-        `;
+        div.innerHTML = `<div class="custom-check ${isActive?'checked':''}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></div><div>${p.label}</div>`;
         container.appendChild(div);
       });
     }
 
-    // Toggle visual y en objeto temporal
-    function togglePerm(element, key) {
-      const check = element.querySelector('.custom-check');
-      const isChecked = check.classList.contains('checked');
-      
-      if (isChecked) {
-        check.classList.remove('checked');
-        currentAdmin[key] = false;
+    // B) LINKS
+    function openLinkDetail(link) {
+      document.getElementById('lblLinkName').innerText = link.name || 'Enlace';
+      document.getElementById('lnkJoins').innerText = link.joins;
+      document.getElementById('lnkRate').innerText = link.rate || '100%';
+      navigateTo('viewLinkDetail');
+
+      // Gráfica
+      renderChart("#linkChart", [5, 10, 8, link.joins, link.joins+5, link.joins+10, link.joins+20], '#10b981');
+    }
+
+    // --- UTILS ---
+    function togglePerm(el, key) {
+      const chk = el.querySelector('.custom-check');
+      if(chk.classList.contains('checked')) {
+        chk.classList.remove('checked');
+        currentItem[key] = false;
       } else {
-        check.classList.add('checked');
-        currentAdmin[key] = true;
+        chk.classList.add('checked');
+        currentItem[key] = true;
       }
       tg.HapticFeedback.selectionChanged();
     }
 
-    // --- 4. GUARDAR EN SUPABASE ---
     async function savePermissions() {
       const btn = document.querySelector('.btn-save');
       btn.innerText = "Guardando...";
       
-      // Actualizar en Supabase
       const { error } = await supabase
         .from('channel_admins')
         .update({
-          can_change_info: currentAdmin.can_change_info,
-          can_post_messages: currentAdmin.can_post_messages,
-          can_edit_messages: currentAdmin.can_edit_messages,
-          can_delete_messages: currentAdmin.can_delete_messages,
-          can_invite_users: currentAdmin.can_invite_users,
-          can_restrict_members: currentAdmin.can_restrict_members,
-          can_manage_voice_chats: currentAdmin.can_manage_voice_chats
+          can_change_info: currentItem.can_change_info,
+          can_post_messages: currentItem.can_post_messages,
+          can_edit_messages: currentItem.can_edit_messages,
+          can_delete_messages: currentItem.can_delete_messages,
+          can_invite_users: currentItem.can_invite_users,
+          can_restrict_members: currentItem.can_restrict_members
         })
-        .eq('id', currentAdmin.id); // Usamos ID de la tabla, no user_id, para ser precisos
+        .eq('id', currentItem.id);
 
       if (error) {
-        tg.showAlert("Error guardando: " + error.message);
+        tg.showAlert("Error: " + error.message);
         btn.innerText = "Error ❌";
       } else {
         tg.HapticFeedback.notificationOccurred('success');
-        btn.innerText = "¡Guardado! ✅";
-        
-        // Opcional: Avisar al bot para aplicar cambios inmediatamente
-        // tg.sendData(JSON.stringify({ type: 'update_perms', admin_id: currentAdmin.user_id }));
-        
-        setTimeout(() => { btn.innerText = "Guardar Cambios"; }, 2000);
+        btn.innerText = "Guardado ✅";
+        setTimeout(() => btn.innerText = "Guardar Cambios", 2000);
       }
     }
 
-    function renderChart(dataPoints) {
-      if (chartInstance) chartInstance.destroy();
-      
-      // Si los datos son 0 (nuevos), ponemos fake para que se vea bonito
-      const seriesData = dataPoints.reduce((a,b)=>a+b,0) === 0 ? [10, 40, 35, 50, 49, 60, 70] : dataPoints;
-
+    function renderChart(selector, data, color) {
+      if(chartInstance) chartInstance.destroy();
       const options = {
-        series: [{ name: 'Actividad', data: seriesData }],
+        series: [{ name: 'Data', data: data }],
         chart: { type: 'area', height: 120, toolbar:{show:false}, background:'transparent' },
-        colors: ['#3b82f6'],
+        colors: [color],
         stroke: { curve: 'smooth', width: 2 },
         fill: { type: 'gradient', gradient: { shadeIntensity:1, opacityFrom:0.5, opacityTo:0.0 } },
         dataLabels: { enabled: false },
@@ -360,7 +420,7 @@
         yaxis: { show: false },
         theme: { mode: 'dark' }
       };
-      chartInstance = new ApexCharts(document.querySelector("#adminChart"), options);
+      chartInstance = new ApexCharts(document.querySelector(selector), options);
       chartInstance.render();
     }
   </script>
