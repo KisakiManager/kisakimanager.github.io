@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Kisaki Admin V5 Realtime</title>
+  <title>Kisaki Admin V5 - Secure</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -34,15 +34,79 @@
       overflow-x: hidden;
     }
 
-    /* --- LAYOUT --- */
-    .view-container { 
-        padding: 24px; 
-        display: none; 
-        animation: fadeScale 0.3s;
-        /* Aseguramos que el contenido tenga posición relativa */
-        position: relative; 
-        z-index: 10; 
+    /* --- LOADER DE SEGURIDAD (KISAKI SHIELD) --- */
+    #kisaki-loader {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background-color: #020617;
+      z-index: 99999;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      transition: opacity 0.5s ease, visibility 0.5s;
+      /* CLAVE: Esto permite clicar los botones de abajo cuando la opacidad es 0 */
+      pointer-events: none; 
     }
+
+    /* Clase para cuando el loader está activo y debe bloquear la pantalla */
+    #kisaki-loader.is-active {
+      pointer-events: auto;
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    /* Clase para ocultarlo visualmente */
+    #kisaki-loader.is-hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .loader-logo-container {
+      position: relative; width: 120px; height: 120px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 30px;
+    }
+    
+    .kisaki-cat {
+      width: 90px; height: 90px; border-radius: 50%; object-fit: cover; z-index: 2;
+      box-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
+    }
+
+    .loader-ring {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      border-radius: 50%; border: 3px solid transparent;
+      border-top-color: #3b82f6; border-right-color: #8b5cf6;
+      animation: spin 1.5s linear infinite; z-index: 1;
+    }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+
+    .loader-text {
+      font-family: 'SF Pro Display', sans-serif; color: #e2e8f0; font-size: 1.1em; letter-spacing: 0.5px;
+      min-height: 24px; font-weight: 500;
+    }
+    .dots::after { content: ''; animation: dots 1.5s steps(4, end) infinite; }
+    @keyframes dots { 0%, 20% { content: ''; } 40% { content: '.'; } 60% { content: '..'; } 80%, 100% { content: '...'; } }
+
+    /* FASES DEL LOADER */
+    .phase { display: none; flex-direction: column; align-items: center; width: 100%; }
+    .phase.active { display: flex; }
+
+    /* Fase Éxito */
+    .success-icon { font-size: 4em; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); margin-bottom: 20px; }
+    @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .typewriter { color: #4ade80; font-weight: 700; }
+
+    /* Fase Bloqueo */
+    .lock-icon { 
+      width: 70px; height: 70px; background: rgba(239, 68, 68, 0.1); color: #ef4444; 
+      border-radius: 20px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; 
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    .btn-telegram {
+      margin-top: 25px; background: white; color: black; padding: 14px 28px; border-radius: 14px; 
+      text-decoration: none; font-weight: 700; display: inline-flex; align-items: center; gap: 10px;
+      box-shadow: 0 5px 15px rgba(255,255,255,0.2);
+    }
+
+    /* --- LAYOUT DE LA APP --- */
+    .view-container { padding: 24px; display: none; animation: fadeScale 0.3s; position: relative; z-index: 10; }
     .view-container.active { display: block; }
 
     /* --- NAV --- */
@@ -51,8 +115,6 @@
       width: 40px; height: 40px; border-radius: 12px;
       background: rgba(255,255,255,0.05); border: 1px solid var(--border-glass);
       display: flex; align-items: center; justify-content: center; color: white; cursor: pointer;
-      /* Aseguramos área de toque */
-      touch-action: manipulation;
     }
 
     /* --- MENU GRID --- */
@@ -61,15 +123,12 @@
       background: var(--card-bg); border-radius: 24px; padding: 25px;
       border: 1px solid var(--border-glass); height: 160px; 
       display: flex; flex-direction: column; justify-content: flex-end; cursor: pointer;
-      position: relative; overflow: hidden;
-      /* Feedback táctil */
-      transition: transform 0.1s;
+      position: relative; overflow: hidden; transition: transform 0.1s;
     }
     .menu-card:active { transform: scale(0.98); }
-    
     .menu-admins { background: var(--grad-ocean); }
     .menu-links { background: radial-gradient(circle at top right, #1e1b4b, #0f172a); }
-
+    
     .icon-box {
       position: absolute; top: 20px; left: 20px; width: 50px; height: 50px; 
       background: rgba(255,255,255,0.1); border-radius: 16px; 
@@ -82,7 +141,6 @@
       padding: 14px; border-radius: 18px; margin-bottom: 12px;
       display: flex; align-items: center; justify-content: space-between;
       border: 1px solid var(--border-glass);
-      cursor: pointer;
     }
     .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.7em; }
     .badge-blue { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
@@ -110,7 +168,7 @@
 
     /* --- GRÁFICAS --- */
     .chart-wrapper { background: #0f172a; border-radius: 20px; padding: 15px; margin-bottom: 20px; border: 1px solid var(--border-glass); }
-
+    
     /* --- METRICAS DE ENLACES --- */
     .metrics-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
     .metric-box {
@@ -120,36 +178,38 @@
     .mb-val { font-size: 1.2em; font-weight: 700; color:white; }
     .mb-lbl { font-size: 0.75em; color: var(--text-sec); }
 
-    /* --- LOADER (CORREGIDO PARA NO BLOQUEAR CLICS) --- */
-    #kisaki-loader {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background-color: #020617; 
-      z-index: 99999;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      transition: opacity 0.6s ease;
-      /* ESTA LÍNEA ES CRUCIAL: Permite clics debajo cuando la opacidad es 0 */
-      pointer-events: none; 
-    }
-    /* Pero mientras está activo (visible), debe bloquear */
-    #kisaki-loader.active {
-      pointer-events: auto;
-    }
-
-    .loader-ring {
-      width: 50px; height: 50px; border-radius: 50%;
-      border: 3px solid transparent; border-top-color: #3b82f6;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin { 100% { transform: rotate(360deg); } }
-    
     @keyframes fadeScale { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
   </style>
 </head>
 <body>
 
-  <div id="kisaki-loader" class="active">
-    <div class="loader-ring"></div>
-    <div style="margin-top:15px; color:#64748b; font-size:0.9em;">Cargando...</div>
+  <div id="kisaki-loader" class="is-active">
+    
+    <div id="phase-loading" class="phase active">
+      <div class="loader-logo-container">
+        <div class="loader-ring"></div>
+        <img src="3538.png" alt="Kisaki" class="kisaki-cat"> 
+      </div>
+      <div class="loader-text">Cargando interfaz Kisaki<span class="dots"></span></div>
+    </div>
+
+    <div id="phase-success" class="phase">
+      <div class="success-icon">👍</div>
+      <div class="loader-text typewriter">Acceso aprobado...</div>
+    </div>
+
+    <div id="phase-blocked" class="phase">
+      <div class="lock-icon">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+      </div>
+      <h2 style="color:white; font-size:1.4em; font-weight:700; margin-bottom:10px;">Acceso Restringido</h2>
+      <p style="color:#94a3b8; font-size:0.9em; max-width:280px; text-align:center; line-height:1.5;">Esta herramienta administrativa solo funciona dentro del entorno seguro de Telegram.</p>
+      <a href="https://t.me/KisakiManagerBot" class="btn-telegram">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+        Abrir Bot
+      </a>
+    </div>
+
   </div>
 
   <div id="viewHome" class="view-container active">
@@ -238,20 +298,60 @@
   </div>
 
   <script>
-    // Inicialización del Loader
-    window.onload = function() {
-        const loader = document.getElementById('kisaki-loader');
-        // Simular carga o esperar a Telegram
-        setTimeout(() => {
-            loader.style.opacity = '0';
-            loader.classList.remove('active'); // Esto permite que los clics pasen
-            setTimeout(() => loader.style.display = 'none', 600);
-        }, 1000);
-    };
+    // --- LÓGICA DE SEGURIDAD Y CARGA ---
+    (function() {
+      const tg = window.Telegram.WebApp;
+      tg.expand(); // Expandir siempre
 
-    const tg = window.Telegram.WebApp;
-    tg.expand();
+      const loader = document.getElementById('kisaki-loader');
+      const pLoad = document.getElementById('phase-loading');
+      const pSuccess = document.getElementById('phase-success');
+      const pBlocked = document.getElementById('phase-blocked');
 
+      // 1. Verificar si estamos en Telegram
+      const isTelegram = (tg.initData && tg.initData.length > 0);
+      
+      // 2. Verificar si ya visitamos esta sesión (para no cargar de nuevo)
+      const isSessionActive = sessionStorage.getItem('kisaki_admin_session');
+
+      if (!isTelegram) {
+        // --- CASO 1: BLOQUEADO (Externo) ---
+        pLoad.classList.remove('active');
+        pBlocked.classList.add('active');
+        // No ocultamos el loader, se queda bloqueando.
+        console.warn("Acceso externo. Bloqueando panel.");
+      
+      } else {
+        // --- CASO 2: ACCESO PERMITIDO (Telegram) ---
+        
+        if (isSessionActive) {
+          // A) Usuario ya validado -> Carga instantánea
+          loader.classList.remove('is-active');
+          loader.classList.add('is-hidden');
+          loader.style.display = 'none'; // Eliminar del DOM flow
+        } else {
+          // B) Primera vez -> Animación
+          setTimeout(() => {
+            pLoad.classList.remove('active');
+            pSuccess.classList.add('active');
+            if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+            
+            // Marcar sesión
+            sessionStorage.setItem('kisaki_admin_session', 'true');
+
+            // Ocultar loader después del éxito
+            setTimeout(() => {
+              loader.classList.remove('is-active');
+              loader.classList.add('is-hidden');
+              setTimeout(() => { loader.style.display = 'none'; }, 500);
+            }, 1500);
+          }, 2000); // 2 segundos de "carga" falsa para efecto visual
+        }
+      }
+    })();
+
+    // --- LÓGICA DEL ADMIN PANEL (SUPABASE) ---
+    
     // 1. CREDENCIALES SUPABASE
     const SUPABASE_URL = 'https://ndkupidhlauzroduvech.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_fSQ9uBUx_YTfxr2QL2-kfQ_pdE2cqHv';
@@ -259,22 +359,16 @@
 
     // Estado Global
     let historyStack = ['viewHome'];
-    let currentFlow = ''; // 'admins' o 'links'
+    let currentFlow = ''; 
     let currentChannel = null;
-    let currentItem = null; // Admin o Link seleccionado
+    let currentItem = null; 
     let chartInstance = null;
 
     // --- NAVEGACIÓN ---
     function navigateTo(viewId) {
-      console.log("Navegando a:", viewId);
       document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));
-      const target = document.getElementById(viewId);
-      if (target) {
-          target.classList.add('active');
-          historyStack.push(viewId);
-      } else {
-          console.error("Vista no encontrada:", viewId);
-      }
+      document.getElementById(viewId).classList.add('active');
+      historyStack.push(viewId);
     }
 
     function goBack() {
@@ -286,58 +380,55 @@
       }
     }
 
-    // --- 1. INICIAR FLUJO ---
+    // --- FUNCIONES PRINCIPALES ---
     function initFlow(flowType) {
-      console.log("Iniciando flujo:", flowType);
       currentFlow = flowType;
       document.getElementById('contextLabel').innerText = flowType === 'admins' ? 'Gestionar Equipo' : 'Ver Enlaces';
       loadChannels();
     }
 
-    // --- 2. CARGAR CANALES ---
     async function loadChannels() {
       navigateTo('viewChannels');
       const container = document.getElementById('channelListContainer');
       container.innerHTML = 'Cargando...';
 
+      const user = window.Telegram.WebApp.initDataUnsafe?.user;
+      const userId = user ? user.id : 1298554649; // Fallback ID
+
       try {
-          const user = tg.initDataUnsafe?.user;
-          const userId = user ? user.id : 1298554649; // Fallback
+        const { data: channels, error } = await supabase
+          .from('managed_channels')
+          .select('*')
+          .eq('user_id', userId);
 
-          const { data: channels, error } = await supabase
-            .from('managed_channels')
-            .select('*')
-            .eq('user_id', userId);
+        if (error) throw error;
 
-          if (error) throw error;
+        if (!channels || channels.length === 0) {
+          container.innerHTML = '<div style="color:#ef4444; text-align:center; padding:20px;">No se encontraron canales vinculados.<br>Añade el bot como admin en tu canal.</div>';
+          return;
+        }
 
-          if (!channels || channels.length === 0) {
-            container.innerHTML = '<div style="color:#ef4444; text-align:center; padding:20px;">No se encontraron canales vinculados.<br>Asegúrate de haber añadido al bot como admin.</div>';
-            return;
-          }
-
-          container.innerHTML = '';
-          channels.forEach(ch => {
-            const div = document.createElement('div');
-            div.className = 'list-item';
-            div.onclick = () => loadItems(ch); // Clic para cargar items del canal
-            div.innerHTML = `
-              <div style="display:flex;align-items:center;gap:15px;">
-                <div style="width:40px;height:40px;background:#1e293b;border-radius:12px;display:flex;justify-content:center;align-items:center;">📢</div>
-                <div>
-                  <div style="font-weight:600">${ch.chat_title}</div>
-                  <div style="font-size:0.8em;color:#64748b">ID: ${ch.telegram_chat_id}</div>
-                </div>
-              </div>`;
-            container.appendChild(div);
-          });
-      } catch (e) {
-          console.error(e);
-          container.innerHTML = `<div style="color:red">Error: ${e.message}</div>`;
+        container.innerHTML = '';
+        channels.forEach(ch => {
+          const div = document.createElement('div');
+          div.className = 'list-item';
+          div.onclick = () => loadItems(ch);
+          div.innerHTML = `
+            <div style="display:flex;align-items:center;gap:15px;">
+              <div style="width:40px;height:40px;background:#1e293b;border-radius:12px;display:flex;justify-content:center;align-items:center;">📢</div>
+              <div>
+                <div style="font-weight:600">${ch.chat_title}</div>
+                <div style="font-size:0.8em;color:#64748b">ID: ${ch.telegram_chat_id}</div>
+              </div>
+            </div>`;
+          container.appendChild(div);
+        });
+      } catch (err) {
+        console.error(err);
+        container.innerHTML = `<div style="color:red">Error de conexión: ${err.message}</div>`;
       }
     }
 
-    // --- 3. CARGAR LISTA (ADMINS O LINKS) ---
     async function loadItems(channel) {
       currentChannel = channel;
       document.getElementById('listTitle').innerText = currentFlow === 'admins' ? 'Admins' : 'Enlaces';
@@ -355,7 +446,7 @@
         .eq('channel_id', channel.telegram_chat_id);
 
       if (!items || items.length === 0) {
-        container.innerHTML = `<div style="text-align:center;color:#666;padding:20px;">No hay ${currentFlow} registrados en este canal.<br>Prueba ejecutar /sync en el bot.</div>`;
+        container.innerHTML = `<div style="text-align:center;color:#666;padding:20px;">No hay ${currentFlow} registrados.<br>Ejecuta /sync en el bot.</div>`;
         return;
       }
 
@@ -365,22 +456,20 @@
         div.className = 'list-item';
 
         if (currentFlow === 'admins') {
-          // Render Admin
           div.onclick = () => openAdminDetail(item);
           div.innerHTML = `
             <div style="display:flex;align-items:center;gap:15px;">
               <div style="width:40px;height:40px;border-radius:50%;background:#334155;display:flex;justify-content:center;align-items:center;">${(item.first_name||'U')[0]}</div>
-              <div><div style="font-weight:600">${item.first_name || 'Sin nombre'}</div><div style="font-size:0.8em;color:#64748b">${item.role || 'Admin'}</div></div>
+              <div><div style="font-weight:600">${item.first_name || 'Usuario'}</div><div style="font-size:0.8em;color:#64748b">${item.role || 'Admin'}</div></div>
             </div>
             <span class="badge badge-blue">Editar</span>
           `;
         } else {
-          // Render Link
           div.onclick = () => openLinkDetail(item);
           div.innerHTML = `
             <div style="display:flex;align-items:center;gap:15px;">
               <div style="width:40px;height:40px;border-radius:12px;background:rgba(139,92,246,0.2);color:#c084fc;display:flex;justify-content:center;align-items:center;">🔗</div>
-              <div><div style="font-weight:600">${item.name || 'Enlace'}</div><div style="font-size:0.8em;color:#64748b">Por: ${item.creator_name || 'Desconocido'}</div></div>
+              <div><div style="font-weight:600">${item.name || 'Enlace'}</div><div style="font-size:0.8em;color:#64748b">Por: ${item.creator_name || '?'}</div></div>
             </div>
             <span class="badge badge-purple">${item.joins || 0} Joins</span>
           `;
@@ -389,18 +478,12 @@
       });
     }
 
-    // --- 4. DETALLES Y GRÁFICAS ---
-
-    // A) ADMINS
     function openAdminDetail(admin) {
       currentItem = admin;
       document.getElementById('lblAdminName').innerText = admin.first_name;
       navigateTo('viewAdminDetail');
+      renderChart("#adminChart", [admin.stats_posts||0, admin.stats_views||0, admin.stats_reactions||0, 10, 20, 15, 30], '#3b82f6');
 
-      // Gráfica
-      renderChart("#adminChart", [admin.stats_posts||0, admin.stats_views||0, admin.stats_reactions||0, 20, 45, 30, 60], '#3b82f6');
-
-      // Checkboxes
       const permMap = [
         { key: 'can_change_info', label: 'Cambiar Info' },
         { key: 'can_post_messages', label: 'Publicar' },
@@ -422,19 +505,15 @@
       });
     }
 
-    // B) LINKS
     function openLinkDetail(link) {
       document.getElementById('lblLinkName').innerText = link.name || 'Enlace';
       document.getElementById('lnkJoins').innerText = link.joins || 0;
       document.getElementById('lnkRate').innerText = link.rate || '100%';
       navigateTo('viewLinkDetail');
-
-      // Gráfica
-      let joins = link.joins || 0;
-      renderChart("#linkChart", [joins, joins+2, joins+5, joins+10, joins+12, joins+20, joins+35], '#10b981');
+      let j = link.joins || 0;
+      renderChart("#linkChart", [j, j+2, j+5, j+10, j+12, j+20, j+35], '#10b981');
     }
 
-    // --- UTILS ---
     function togglePerm(el, key) {
       const chk = el.querySelector('.custom-check');
       if(chk.classList.contains('checked')) {
@@ -444,13 +523,12 @@
         chk.classList.add('checked');
         currentItem[key] = true;
       }
-      if(tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
+      if(window.Telegram.WebApp.HapticFeedback) window.Telegram.WebApp.HapticFeedback.selectionChanged();
     }
 
     async function savePermissions() {
       const btn = document.querySelector('.btn-save');
       btn.innerText = "Guardando...";
-
       const { error } = await supabase
         .from('channel_admins')
         .update({
@@ -464,10 +542,10 @@
         .eq('id', currentItem.id);
 
       if (error) {
-        tg.showAlert("Error: " + error.message);
+        window.Telegram.WebApp.showAlert("Error: " + error.message);
         btn.innerText = "Error ❌";
       } else {
-        if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+        if(window.Telegram.WebApp.HapticFeedback) window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
         btn.innerText = "Guardado ✅";
         setTimeout(() => btn.innerText = "Guardar Cambios", 2000);
       }
