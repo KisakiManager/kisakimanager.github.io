@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Kisaki Admin V5 - Secure</title>
+  <title>Kisaki Admin V5 Realtime</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -34,34 +34,8 @@
       overflow-x: hidden;
     }
 
-    /* --- PANTALLA DE BLOQUEO (VISIBLE POR DEFECTO) --- */
-    #security-lock {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background-color: #020617;
-      z-index: 99999;
-      display: flex; /* Visible por defecto */
-      flex-direction: column; align-items: center; justify-content: center;
-    }
-
-    .lock-icon { 
-      width: 80px; height: 80px; background: rgba(239, 68, 68, 0.1); color: #ef4444; 
-      border-radius: 24px; display: flex; align-items: center; justify-content: center; margin-bottom: 25px; 
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      box-shadow: 0 0 30px rgba(239, 68, 68, 0.2);
-    }
-    
-    .lock-title { font-size: 1.6em; font-weight: 800; margin-bottom: 10px; color: white; }
-    .lock-desc { color: #94a3b8; text-align: center; max-width: 300px; line-height: 1.5; margin-bottom: 30px; }
-
-    .btn-telegram {
-      background: white; color: black; padding: 14px 28px; border-radius: 14px; 
-      text-decoration: none; font-weight: 700; display: inline-flex; align-items: center; gap: 10px;
-      box-shadow: 0 5px 15px rgba(255,255,255,0.1); transition: transform 0.2s;
-    }
-    .btn-telegram:active { transform: scale(0.95); }
-
-    /* --- LAYOUT DE LA APP --- */
-    .view-container { padding: 24px; display: none; animation: fadeScale 0.3s; position: relative; z-index: 10; }
+    /* --- LAYOUT --- */
+    .view-container { padding: 24px; display: none; animation: fadeScale 0.3s; }
     .view-container.active { display: block; }
 
     /* --- NAV --- */
@@ -78,12 +52,11 @@
       background: var(--card-bg); border-radius: 24px; padding: 25px;
       border: 1px solid var(--border-glass); height: 160px; 
       display: flex; flex-direction: column; justify-content: flex-end; cursor: pointer;
-      position: relative; overflow: hidden; transition: transform 0.1s;
+      position: relative; overflow: hidden;
     }
-    .menu-card:active { transform: scale(0.98); }
     .menu-admins { background: var(--grad-ocean); }
     .menu-links { background: radial-gradient(circle at top right, #1e1b4b, #0f172a); }
-    
+
     .icon-box {
       position: absolute; top: 20px; left: 20px; width: 50px; height: 50px; 
       background: rgba(255,255,255,0.1); border-radius: 16px; 
@@ -123,7 +96,7 @@
 
     /* --- GRÁFICAS --- */
     .chart-wrapper { background: #0f172a; border-radius: 20px; padding: 15px; margin-bottom: 20px; border: 1px solid var(--border-glass); }
-    
+
     /* --- METRICAS DE ENLACES --- */
     .metrics-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
     .metric-box {
@@ -137,20 +110,6 @@
   </style>
 </head>
 <body>
-
-  <div id="security-lock">
-    <div class="lock-icon">
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-    </div>
-    <div class="lock-title">Acceso Denegado</div>
-    <div class="lock-desc">
-      El panel de administración Kisaki es una herramienta segura exclusiva para usuarios de Telegram.
-    </div>
-    <a href="https://t.me/KisakiManagerBot" class="btn-telegram">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-      Abrir en Telegram
-    </a>
-  </div>
 
   <div id="viewHome" class="view-container active">
     <div style="margin: 20px 0 40px 0;">
@@ -238,46 +197,22 @@
   </div>
 
   <script>
-    // --- 1. SCRIPT DE SEGURIDAD INSTANTÁNEA ---
-    (function() {
-      const tg = window.Telegram.WebApp;
-      const lockScreen = document.getElementById('security-lock');
+    const tg = window.Telegram.WebApp;
+    tg.expand();
 
-      // VERIFICACIÓN:
-      // 1. ¿Está en Telegram? (initData existe)
-      const isTelegram = (tg.initData && tg.initData.length > 0);
-      
-      // 2. ¿Ya fue verificado en index? (sessionStorage existe)
-      // Nota: Debes asegurarte de que index.html guarde 'kisaki_session_active'
-      const hasSession = sessionStorage.getItem('kisaki_session_active') === 'true';
-
-      if (isTelegram || hasSession) {
-        // ✅ ACCESO CONCEDIDO
-        // Ocultamos el candado inmediatamente (display: none) para que no estorbe
-        lockScreen.style.display = 'none';
-        tg.expand();
-      } else {
-        // ❌ ACCESO DENEGADO
-        // El candado ya está visible por CSS, no hacemos nada más que loguear
-        console.warn("Acceso externo o sesión inválida. Bloqueo activo.");
-      }
-    })();
-
-    // --- 2. LÓGICA DEL ADMIN PANEL (SUPABASE) ---
-    
-    // Credenciales
+    // 1. CREDENCIALES SUPABASE (Pega las tuyas aquí)
     const SUPABASE_URL = 'https://ndkupidhlauzroduvech.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_fSQ9uBUx_YTfxr2QL2-kfQ_pdE2cqHv';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     // Estado Global
     let historyStack = ['viewHome'];
-    let currentFlow = ''; 
+    let currentFlow = ''; // 'admins' o 'links'
     let currentChannel = null;
-    let currentItem = null; 
+    let currentItem = null; // Admin o Link seleccionado
     let chartInstance = null;
 
-    // Navegación
+    // --- NAVEGACIÓN ---
     function navigateTo(viewId) {
       document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));
       document.getElementById(viewId).classList.add('active');
@@ -293,55 +228,50 @@
       }
     }
 
-    // Funciones de Negocio
+    // --- 1. INICIAR FLUJO ---
     function initFlow(flowType) {
       currentFlow = flowType;
       document.getElementById('contextLabel').innerText = flowType === 'admins' ? 'Gestionar Equipo' : 'Ver Enlaces';
       loadChannels();
     }
 
+    // --- 2. CARGAR CANALES ---
     async function loadChannels() {
       navigateTo('viewChannels');
       const container = document.getElementById('channelListContainer');
       container.innerHTML = 'Cargando...';
 
-      const user = window.Telegram.WebApp.initDataUnsafe?.user;
-      const userId = user ? user.id : 1298554649; // Fallback ID
+      const user = tg.initDataUnsafe?.user;
+      const userId = user ? user.id : 1298554649; // Fallback
 
-      try {
-        const { data: channels, error } = await supabase
-          .from('managed_channels')
-          .select('*')
-          .eq('user_id', userId);
+      const { data: channels, error } = await supabase
+        .from('managed_channels')
+        .select('*')
+        .eq('user_id', userId);
 
-        if (error) throw error;
-
-        if (!channels || channels.length === 0) {
-          container.innerHTML = '<div style="color:#ef4444; text-align:center; padding:20px;">No se encontraron canales.<br>Añade el bot como admin.</div>';
-          return;
-        }
-
-        container.innerHTML = '';
-        channels.forEach(ch => {
-          const div = document.createElement('div');
-          div.className = 'list-item';
-          div.onclick = () => loadItems(ch);
-          div.innerHTML = `
-            <div style="display:flex;align-items:center;gap:15px;">
-              <div style="width:40px;height:40px;background:#1e293b;border-radius:12px;display:flex;justify-content:center;align-items:center;">📢</div>
-              <div>
-                <div style="font-weight:600">${ch.chat_title}</div>
-                <div style="font-size:0.8em;color:#64748b">ID: ${ch.telegram_chat_id}</div>
-              </div>
-            </div>`;
-          container.appendChild(div);
-        });
-      } catch (err) {
-        console.error(err);
-        container.innerHTML = `<div style="color:red">Error de conexión: ${err.message}</div>`;
+      if (error || !channels || channels.length === 0) {
+        container.innerHTML = '<div style="color:red; text-align:center">No se encontraron canales.</div>';
+        return;
       }
+
+      container.innerHTML = '';
+      channels.forEach(ch => {
+        const div = document.createElement('div');
+        div.className = 'list-item';
+        div.onclick = () => loadItems(ch);
+        div.innerHTML = `
+          <div style="display:flex;align-items:center;gap:15px;">
+            <div style="width:40px;height:40px;background:#1e293b;border-radius:12px;display:flex;justify-content:center;align-items:center;">📢</div>
+            <div>
+              <div style="font-weight:600">${ch.chat_title}</div>
+              <div style="font-size:0.8em;color:#64748b">ID: ${ch.telegram_chat_id}</div>
+            </div>
+          </div>`;
+        container.appendChild(div);
+      });
     }
 
+    // --- 3. CARGAR LISTA (ADMINS O LINKS) ---
     async function loadItems(channel) {
       currentChannel = channel;
       document.getElementById('listTitle').innerText = currentFlow === 'admins' ? 'Admins' : 'Enlaces';
@@ -359,7 +289,7 @@
         .eq('channel_id', channel.telegram_chat_id);
 
       if (!items || items.length === 0) {
-        container.innerHTML = `<div style="text-align:center;color:#666;padding:20px;">No hay datos registrados.<br>Ejecuta /sync en el bot.</div>`;
+        container.innerHTML = `<div style="text-align:center;color:#666">No hay ${currentFlow} registrados.</div>`;
         return;
       }
 
@@ -369,34 +299,42 @@
         div.className = 'list-item';
 
         if (currentFlow === 'admins') {
+          // Render Admin
           div.onclick = () => openAdminDetail(item);
           div.innerHTML = `
             <div style="display:flex;align-items:center;gap:15px;">
               <div style="width:40px;height:40px;border-radius:50%;background:#334155;display:flex;justify-content:center;align-items:center;">${(item.first_name||'U')[0]}</div>
-              <div><div style="font-weight:600">${item.first_name || 'Usuario'}</div><div style="font-size:0.8em;color:#64748b">${item.role || 'Admin'}</div></div>
+              <div><div style="font-weight:600">${item.first_name}</div><div style="font-size:0.8em;color:#64748b">${item.role}</div></div>
             </div>
             <span class="badge badge-blue">Editar</span>
           `;
         } else {
+          // Render Link
           div.onclick = () => openLinkDetail(item);
           div.innerHTML = `
             <div style="display:flex;align-items:center;gap:15px;">
               <div style="width:40px;height:40px;border-radius:12px;background:rgba(139,92,246,0.2);color:#c084fc;display:flex;justify-content:center;align-items:center;">🔗</div>
-              <div><div style="font-weight:600">${item.name || 'Enlace'}</div><div style="font-size:0.8em;color:#64748b">Por: ${item.creator_name || '?'}</div></div>
+              <div><div style="font-weight:600">${item.name || 'Enlace'}</div><div style="font-size:0.8em;color:#64748b">Por: ${item.creator_name}</div></div>
             </div>
-            <span class="badge badge-purple">${item.joins || 0} Joins</span>
+            <span class="badge badge-purple">${item.joins} Joins</span>
           `;
         }
         container.appendChild(div);
       });
     }
 
+    // --- 4. DETALLES Y GRÁFICAS ---
+
+    // A) ADMINS
     function openAdminDetail(admin) {
       currentItem = admin;
       document.getElementById('lblAdminName').innerText = admin.first_name;
       navigateTo('viewAdminDetail');
-      renderChart("#adminChart", [admin.stats_posts||0, admin.stats_views||0, admin.stats_reactions||0, 10, 20, 15, 30], '#3b82f6');
 
+      // Gráfica Fake (si no hay datos reales aún) o Real
+      renderChart("#adminChart", [admin.stats_posts||10, admin.stats_views||50, admin.stats_reactions||20, 40, 60, 80, 100], '#3b82f6');
+
+      // Checkboxes
       const permMap = [
         { key: 'can_change_info', label: 'Cambiar Info' },
         { key: 'can_post_messages', label: 'Publicar' },
@@ -418,15 +356,18 @@
       });
     }
 
+    // B) LINKS
     function openLinkDetail(link) {
       document.getElementById('lblLinkName').innerText = link.name || 'Enlace';
-      document.getElementById('lnkJoins').innerText = link.joins || 0;
+      document.getElementById('lnkJoins').innerText = link.joins;
       document.getElementById('lnkRate').innerText = link.rate || '100%';
       navigateTo('viewLinkDetail');
-      let j = link.joins || 0;
-      renderChart("#linkChart", [j, j+2, j+5, j+10, j+12, j+20, j+35], '#10b981');
+
+      // Gráfica
+      renderChart("#linkChart", [5, 10, 8, link.joins, link.joins+5, link.joins+10, link.joins+20], '#10b981');
     }
 
+    // --- UTILS ---
     function togglePerm(el, key) {
       const chk = el.querySelector('.custom-check');
       if(chk.classList.contains('checked')) {
@@ -436,12 +377,13 @@
         chk.classList.add('checked');
         currentItem[key] = true;
       }
-      if(window.Telegram.WebApp.HapticFeedback) window.Telegram.WebApp.HapticFeedback.selectionChanged();
+      tg.HapticFeedback.selectionChanged();
     }
 
     async function savePermissions() {
       const btn = document.querySelector('.btn-save');
       btn.innerText = "Guardando...";
+
       const { error } = await supabase
         .from('channel_admins')
         .update({
@@ -455,10 +397,10 @@
         .eq('id', currentItem.id);
 
       if (error) {
-        window.Telegram.WebApp.showAlert("Error: " + error.message);
+        tg.showAlert("Error: " + error.message);
         btn.innerText = "Error ❌";
       } else {
-        if(window.Telegram.WebApp.HapticFeedback) window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+        tg.HapticFeedback.notificationOccurred('success');
         btn.innerText = "Guardado ✅";
         setTimeout(() => btn.innerText = "Guardar Cambios", 2000);
       }
