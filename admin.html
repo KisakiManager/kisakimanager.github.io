@@ -2,443 +2,81 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Kisaki Admin V5 - Open</title>
+  <title>Kisaki Admin Hub</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-
   <style>
-    /* --- VARIABLES & RESET --- */
-    :root {
-      --bg-core: #020617;
-      --card-bg: #0f172a;
-      --text-main: #f8fafc;
-      --text-sec: #94a3b8;
-      --grad-ocean: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
-      --grad-electric: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%);
-      --border-glass: rgba(255,255,255,0.08);
-      --accent-blue: #3b82f6;
-      --accent-green: #10b981;
-      --accent-purple: #8b5cf6;
-    }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'SF Pro Display', 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-
-    body {
-      background-color: var(--bg-core);
-      color: var(--text-main);
-      min-height: 100vh;
-      display: flex; flex-direction: column;
-      overflow-x: hidden;
-    }
-
-    /* --- LAYOUT DE LA APP --- */
-    .view-container { 
-      padding: 24px; 
-      display: none; 
-      animation: fadeScale 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-      position: relative; 
-      z-index: 1; 
-    }
-    .view-container.active { display: block; }
-
-    /* --- NAV --- */
-    .nav-header { display: flex; align-items: center; gap: 15px; margin-bottom: 30px; }
-    .btn-back {
-      width: 40px; height: 40px; border-radius: 12px;
-      background: rgba(255,255,255,0.05); border: 1px solid var(--border-glass);
-      display: flex; align-items: center; justify-content: center; color: white; cursor: pointer;
-      transition: background 0.2s;
-    }
-    .btn-back:active { background: rgba(255,255,255,0.1); }
-
-    /* --- MENU GRID --- */
-    .menu-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
-    .menu-card {
-      background: var(--card-bg); border-radius: 24px; padding: 25px;
-      border: 1px solid var(--border-glass); height: 160px; 
-      display: flex; flex-direction: column; justify-content: flex-end; cursor: pointer;
-      position: relative; overflow: hidden; transition: transform 0.1s;
-    }
-    .menu-card:active { transform: scale(0.98); }
+    :root { --bg: #020617; --glass: rgba(30, 41, 59, 0.6); --border: rgba(255,255,255,0.08); --text: #f8fafc; --blue: #3b82f6; }
+    * { margin:0; padding:0; box-sizing:border-box; font-family: 'Inter', system-ui, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding: 24px; min-height: 100vh; }
     
-    .menu-admins { background: var(--grad-ocean); }
-    .menu-links { background: radial-gradient(circle at top right, #1e1b4b, #0f172a); }
-
-    .icon-box {
-      position: absolute; top: 20px; left: 20px; width: 50px; height: 50px; 
-      background: rgba(255,255,255,0.1); border-radius: 16px; 
-      display: flex; align-items: center; justify-content: center;
+    /* Liquid BG */
+    .blob { position: fixed; filter: blur(90px); z-index: -1; opacity: 0.4; border-radius: 50%; }
+    .b1 { top: -10%; left: -10%; width: 300px; height: 300px; background: #1d4ed8; }
+    
+    .header { margin-bottom: 40px; }
+    .header h1 { font-size: 2em; font-weight: 800; letter-spacing: -1px; margin-bottom: 5px; }
+    
+    .grid { display: flex; flex-direction: column; gap: 15px; }
+    
+    .card-btn {
+      background: var(--glass); border: 1px solid var(--border);
+      padding: 20px; border-radius: 24px; text-decoration: none; color: white;
+      display: flex; align-items: center; gap: 20px; transition: transform 0.2s;
+      backdrop-filter: blur(20px);
     }
-
-    /* --- LISTAS --- */
-    .list-item {
-      background: linear-gradient(90deg, #0f172a 0%, #020617 100%);
-      padding: 14px; border-radius: 18px; margin-bottom: 12px;
-      display: flex; align-items: center; justify-content: space-between;
-      border: 1px solid var(--border-glass);
-      cursor: pointer;
+    .card-btn:active { transform: scale(0.98); background: rgba(59, 130, 246, 0.1); }
+    
+    .icon { 
+      width: 50px; height: 50px; background: rgba(255,255,255,0.05); border-radius: 16px;
+      display: flex; align-items: center; justify-content: center; font-size: 1.5em;
     }
-    .list-item:active { background: #1e293b; }
+    
+    .info h3 { font-size: 1.1em; font-weight: 700; margin-bottom: 2px; }
+    .info p { font-size: 0.85em; color: #94a3b8; }
 
-    .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.7em; }
-    .badge-blue { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
-    .badge-purple { background: rgba(139, 92, 246, 0.2); color: #c084fc; }
-
-    /* --- PERMISOS --- */
-    .perm-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 30px; }
-    .perm-item {
-      display: flex; align-items: center; gap: 15px; padding: 12px;
-      background: #0f0f0f; border-radius: 12px; cursor: pointer;
+    .back-btn { 
+      margin-bottom: 20px; display: inline-flex; align-items: center; gap: 8px; 
+      color: #94a3b8; text-decoration: none; font-weight: 600; 
     }
-    .custom-check {
-      width: 22px; height: 22px; border: 2px solid #333; border-radius: 6px;
-      display: flex; align-items: center; justify-content: center; transition: 0.2s;
-    }
-    .custom-check.checked { background: var(--accent-blue); border-color: var(--accent-blue); }
-    .custom-check svg { display: none; width: 14px; stroke: white; stroke-width: 3; }
-    .custom-check.checked svg { display: block; }
-
-    .btn-save {
-      width: 100%; background: var(--grad-electric); color: white; padding: 16px;
-      border-radius: 16px; border: none; font-weight: 700; font-size: 1.1em;
-      cursor: pointer; box-shadow: 0 4px 20px rgba(37, 99, 235, 0.4);
-    }
-    .btn-save:active { opacity: 0.9; transform: translateY(1px); }
-
-    /* --- GRÁFICAS --- */
-    .chart-wrapper { background: #0f172a; border-radius: 20px; padding: 15px; margin-bottom: 20px; border: 1px solid var(--border-glass); }
-
-    /* --- METRICAS DE ENLACES --- */
-    .metrics-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-    .metric-box {
-      background: rgba(255,255,255,0.03); padding: 15px; border-radius: 16px;
-      display: flex; flex-direction: column; gap: 5px; border: 1px solid var(--border-glass);
-    }
-    .mb-val { font-size: 1.2em; font-weight: 700; color:white; }
-    .mb-lbl { font-size: 0.75em; color: var(--text-sec); }
-
-    @keyframes fadeScale { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
   </style>
 </head>
 <body>
+  <div class="blob b1"></div>
+  
+  <a href="index.html" class="back-btn">← Volver al Inicio</a>
 
-  <div id="viewHome" class="view-container active">
-    <div style="margin: 20px 0 40px 0;">
-      <h1 style="font-size: 2em; font-weight: 800;">Panel Kisaki</h1>
-      <p style="color: var(--text-sec);">Gestión en tiempo real</p>
-    </div>
+  <div class="header">
+    <h1>Panel de Control</h1>
+    <p style="color:#94a3b8;">Selecciona una herramienta de gestión.</p>
+  </div>
 
-    <div class="menu-grid">
-      <div class="menu-card menu-admins" onclick="initFlow('admins')">
-        <div class="icon-box">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        </div>
-        <div>
-          <h2 style="font-size: 1.3em; font-weight: 700;">Admins</h2>
-          <p style="font-size: 0.85em; color: rgba(255,255,255,0.6);">Permisos y actividad</p>
-        </div>
+  <div class="grid">
+    <a href="admin-panel.html" class="card-btn">
+      <div class="icon" style="color:#3b82f6">👮‍♂️</div>
+      <div class="info">
+        <h3>Gestión de Admins</h3>
+        <p>Permisos, promociones y métricas.</p>
       </div>
+    </a>
 
-      <div class="menu-card menu-links" onclick="initFlow('links')">
-        <div class="icon-box">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-        </div>
-        <div>
-          <h2 style="font-size: 1.3em; font-weight: 700;">Enlaces</h2>
-          <p style="font-size: 0.85em; color: rgba(255,255,255,0.6);">Tráfico y uniones</p>
-        </div>
+    <a href="link-panel.html" class="card-btn">
+      <div class="icon" style="color:#10b981">🔗</div>
+      <div class="info">
+        <h3>Gestor de Enlaces</h3>
+        <p>Crear accesos y ver tráfico.</p>
       </div>
-    </div>
-  </div>
+    </a>
 
-  <div id="viewChannels" class="view-container">
-    <div class="nav-header">
-      <div class="btn-back" onclick="goBack()"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
-      <div><h1>Seleccionar Canal</h1><p id="contextLabel">...</p></div>
-    </div>
-    <div id="channelListContainer">Cargando canales...</div>
-  </div>
-
-  <div id="viewList" class="view-container">
-    <div class="nav-header">
-      <div class="btn-back" onclick="goBack()"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
-      <div><h1 id="listTitle">Lista</h1><p id="listSubtitle">Detalle del canal</p></div>
-    </div>
-    <div id="listContainer">Cargando datos...</div>
-  </div>
-
-  <div id="viewAdminDetail" class="view-container">
-    <div class="nav-header">
-      <div class="btn-back" onclick="goBack()"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
-      <div><h1 id="lblAdminName">Admin</h1><p>Gestión de permisos</p></div>
-    </div>
-
-    <div class="chart-wrapper">
-      <div style="margin-bottom:10px; font-weight:600; color:#cbd5e1;">Actividad (7 Días)</div>
-      <div id="adminChart"></div>
-    </div>
-
-    <div style="margin-bottom:15px; font-weight:700;">Permisos Reales</div>
-    <div class="perm-list" id="permContainer"></div>
-
-    <button class="btn-save" onclick="savePermissions()">Guardar Cambios</button>
-  </div>
-
-  <div id="viewLinkDetail" class="view-container">
-    <div class="nav-header">
-      <div class="btn-back" onclick="goBack()"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
-      <div><h1 id="lblLinkName">Enlace</h1><p>Estadísticas de tráfico</p></div>
-    </div>
-
-    <div class="metrics-row">
-      <div class="metric-box">
-        <span class="mb-val" style="color:var(--accent-green)" id="lnkJoins">0</span>
-        <span class="mb-lbl">Uniones Totales</span>
+    <a href="rating-admin.html" class="card-btn">
+      <div class="icon" style="color:#f59e0b">⭐️</div>
+      <div class="info">
+        <h3>Evaluación de Equipo</h3>
+        <p>Valorar desempeño y enviar feedback.</p>
       </div>
-      <div class="metric-box">
-        <span class="mb-val" style="color:var(--accent-purple)" id="lnkRate">0%</span>
-        <span class="mb-lbl">Tasa Aprobación</span>
-      </div>
-    </div>
-
-    <div class="chart-wrapper">
-      <div style="margin-bottom:10px; font-weight:600; color:#cbd5e1;">Flujo de Usuarios</div>
-      <div id="linkChart"></div>
-    </div>
+    </a>
   </div>
 
-  <script>
-    const tg = window.Telegram.WebApp;
-    tg.expand();
-
-    // 1. CREDENCIALES SUPABASE
-    const SUPABASE_URL = 'https://ndkupidhlauzroduvech.supabase.co';
-    const SUPABASE_KEY = 'sb_publishable_fSQ9uBUx_YTfxr2QL2-kfQ_pdE2cqHv';
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    // Estado Global
-    let historyStack = ['viewHome'];
-    let currentFlow = ''; 
-    let currentChannel = null;
-    let currentItem = null; 
-    let chartInstance = null;
-
-    // --- NAVEGACIÓN ---
-    function navigateTo(viewId) {
-      console.log("Navegando a:", viewId); // Debug
-      document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));
-      document.getElementById(viewId).classList.add('active');
-      historyStack.push(viewId);
-    }
-
-    function goBack() {
-      if(historyStack.length > 1) {
-        historyStack.pop();
-        const prev = historyStack[historyStack.length - 1];
-        document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));
-        document.getElementById(prev).classList.add('active');
-      }
-    }
-
-    // --- FUNCIONES DE NEGOCIO ---
-    function initFlow(flowType) {
-      console.log("Iniciando flujo:", flowType); // Debug
-      currentFlow = flowType;
-      document.getElementById('contextLabel').innerText = flowType === 'admins' ? 'Gestionar Equipo' : 'Ver Enlaces';
-      loadChannels();
-    }
-
-    async function loadChannels() {
-      navigateTo('viewChannels');
-      const container = document.getElementById('channelListContainer');
-      container.innerHTML = '<div style="text-align:center; padding:20px; color:#ccc;">Cargando canales...</div>';
-
-      try {
-        const user = tg.initDataUnsafe?.user;
-        const userId = user ? user.id : 1298554649; // Fallback para pruebas
-
-        const { data: channels, error } = await supabase
-          .from('managed_channels')
-          .select('*')
-          .eq('user_id', userId);
-
-        if (error) throw error;
-
-        if (!channels || channels.length === 0) {
-          container.innerHTML = '<div style="color:#ef4444; text-align:center; padding:20px;">No se encontraron canales vinculados.</div>';
-          return;
-        }
-
-        container.innerHTML = '';
-        channels.forEach(ch => {
-          const div = document.createElement('div');
-          div.className = 'list-item';
-          div.onclick = () => loadItems(ch);
-          div.innerHTML = `
-            <div style="display:flex;align-items:center;gap:15px;">
-              <div style="width:40px;height:40px;background:#1e293b;border-radius:12px;display:flex;justify-content:center;align-items:center;">📢</div>
-              <div>
-                <div style="font-weight:600">${ch.chat_title}</div>
-                <div style="font-size:0.8em;color:#64748b">ID: ${ch.telegram_chat_id}</div>
-              </div>
-            </div>`;
-          container.appendChild(div);
-        });
-      } catch (err) {
-        console.error("Error cargando canales:", err);
-        container.innerHTML = `<div style="color:red; text-align:center; padding:20px;">Error: ${err.message}</div>`;
-      }
-    }
-
-    async function loadItems(channel) {
-      currentChannel = channel;
-      document.getElementById('listTitle').innerText = currentFlow === 'admins' ? 'Admins' : 'Enlaces';
-      document.getElementById('listSubtitle').innerText = channel.chat_title;
-      navigateTo('viewList');
-
-      const container = document.getElementById('listContainer');
-      container.innerHTML = '<div style="text-align:center; padding:20px; color:#ccc;">Cargando datos...</div>';
-
-      let tableName = currentFlow === 'admins' ? 'channel_admins' : 'invite_links';
-
-      try {
-        const { data: items, error } = await supabase
-          .from(tableName)
-          .select('*')
-          .eq('channel_id', channel.telegram_chat_id);
-
-        if (error) throw error;
-
-        if (!items || items.length === 0) {
-          container.innerHTML = `<div style="text-align:center;color:#666;padding:20px;">No hay ${currentFlow} registrados en este canal.</div>`;
-          return;
-        }
-
-        container.innerHTML = '';
-        items.forEach(item => {
-          const div = document.createElement('div');
-          div.className = 'list-item';
-
-          if (currentFlow === 'admins') {
-            div.onclick = () => openAdminDetail(item);
-            div.innerHTML = `
-              <div style="display:flex;align-items:center;gap:15px;">
-                <div style="width:40px;height:40px;border-radius:50%;background:#334155;display:flex;justify-content:center;align-items:center;">${(item.first_name||'U')[0]}</div>
-                <div><div style="font-weight:600">${item.first_name}</div><div style="font-size:0.8em;color:#64748b">${item.role}</div></div>
-              </div>
-              <span class="badge badge-blue">Editar</span>
-            `;
-          } else {
-            div.onclick = () => openLinkDetail(item);
-            div.innerHTML = `
-              <div style="display:flex;align-items:center;gap:15px;">
-                <div style="width:40px;height:40px;border-radius:12px;background:rgba(139,92,246,0.2);color:#c084fc;display:flex;justify-content:center;align-items:center;">🔗</div>
-                <div><div style="font-weight:600">${item.name || 'Enlace'}</div><div style="font-size:0.8em;color:#64748b">Por: ${item.creator_name}</div></div>
-              </div>
-              <span class="badge badge-purple">${item.joins || 0} Joins</span>
-            `;
-          }
-          container.appendChild(div);
-        });
-      } catch (err) {
-        console.error("Error cargando items:", err);
-        container.innerHTML = `<div style="color:red; text-align:center; padding:20px;">Error: ${err.message}</div>`;
-      }
-    }
-
-    function openAdminDetail(admin) {
-      currentItem = admin;
-      document.getElementById('lblAdminName').innerText = admin.first_name;
-      navigateTo('viewAdminDetail');
-      renderChart("#adminChart", [admin.stats_posts||0, admin.stats_views||0, admin.stats_reactions||0, 10, 20, 15, 30], '#3b82f6');
-
-      const permMap = [
-        { key: 'can_change_info', label: 'Cambiar Info' },
-        { key: 'can_post_messages', label: 'Publicar' },
-        { key: 'can_edit_messages', label: 'Editar' },
-        { key: 'can_delete_messages', label: 'Eliminar' },
-        { key: 'can_invite_users', label: 'Invitar' },
-        { key: 'can_restrict_members', label: 'Banear' }
-      ];
-
-      const container = document.getElementById('permContainer');
-      container.innerHTML = '';
-      permMap.forEach(p => {
-        const isActive = admin[p.key] === true;
-        const div = document.createElement('div');
-        div.className = 'perm-item';
-        div.onclick = () => togglePerm(div, p.key);
-        div.innerHTML = `<div class="custom-check ${isActive?'checked':''}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></div><div>${p.label}</div>`;
-        container.appendChild(div);
-      });
-    }
-
-    function openLinkDetail(link) {
-      document.getElementById('lblLinkName').innerText = link.name || 'Enlace';
-      document.getElementById('lnkJoins').innerText = link.joins || 0;
-      document.getElementById('lnkRate').innerText = link.rate || '100%';
-      navigateTo('viewLinkDetail');
-      let j = link.joins || 0;
-      renderChart("#linkChart", [j, j+2, j+5, j+10, j+12, j+20, j+35], '#10b981');
-    }
-
-    function togglePerm(el, key) {
-      const chk = el.querySelector('.custom-check');
-      if(chk.classList.contains('checked')) {
-        chk.classList.remove('checked');
-        currentItem[key] = false;
-      } else {
-        chk.classList.add('checked');
-        currentItem[key] = true;
-      }
-      if(tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
-    }
-
-    async function savePermissions() {
-      const btn = document.querySelector('.btn-save');
-      btn.innerText = "Guardando...";
-      const { error } = await supabase
-        .from('channel_admins')
-        .update({
-          can_change_info: currentItem.can_change_info,
-          can_post_messages: currentItem.can_post_messages,
-          can_edit_messages: currentItem.can_edit_messages,
-          can_delete_messages: currentItem.can_delete_messages,
-          can_invite_users: currentItem.can_invite_users,
-          can_restrict_members: currentItem.can_restrict_members
-        })
-        .eq('id', currentItem.id);
-
-      if (error) {
-        alert("Error al guardar: " + error.message);
-        btn.innerText = "Error ❌";
-      } else {
-        if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-        btn.innerText = "Guardado ✅";
-        setTimeout(() => btn.innerText = "Guardar Cambios", 2000);
-      }
-    }
-
-    function renderChart(selector, data, color) {
-      if(chartInstance) chartInstance.destroy();
-      const options = {
-        series: [{ name: 'Data', data: data }],
-        chart: { type: 'area', height: 120, toolbar:{show:false}, background:'transparent' },
-        colors: [color],
-        stroke: { curve: 'smooth', width: 2 },
-        fill: { type: 'gradient', gradient: { shadeIntensity:1, opacityFrom:0.5, opacityTo:0.0 } },
-        dataLabels: { enabled: false },
-        grid: { show: false },
-        xaxis: { labels: { show:false }, axisBorder:{show:false}, axisTicks:{show:false} },
-        yaxis: { show: false },
-        theme: { mode: 'dark' }
-      };
-      chartInstance = new ApexCharts(document.querySelector(selector), options);
-      chartInstance.render();
-    }
-  </script>
+  <script>window.Telegram.WebApp.expand();</script>
 </body>
 </html>
