@@ -17,6 +17,7 @@
       --text-main: #f8fafc;
       --text-sec: #94a3b8;
       --grad-ocean: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+      --grad-electric: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%);
       --border-glass: rgba(255,255,255,0.08);
       --accent-blue: #3b82f6;
       --accent-green: #10b981;
@@ -38,9 +39,8 @@
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background-color: #020617;
       z-index: 99999;
-      display: flex; /* Visible al inicio */
+      display: flex; /* Visible por defecto */
       flex-direction: column; align-items: center; justify-content: center;
-      transition: opacity 0.4s ease;
     }
 
     .lock-icon { 
@@ -238,24 +238,28 @@
   </div>
 
   <script>
-    // --- 1. SCRIPT DE SEGURIDAD (EJECUCIÓN INMEDIATA) ---
+    // --- 1. SCRIPT DE SEGURIDAD INSTANTÁNEA ---
     (function() {
       const tg = window.Telegram.WebApp;
       const lockScreen = document.getElementById('security-lock');
 
-      // VERIFICACIÓN BINARIA: ¿Es Telegram?
-      // Si initData existe -> Es Telegram -> OCULTAR CANDADO
-      // Si initData no existe -> Es Chrome -> DEJAR CANDADO
+      // VERIFICACIÓN:
+      // 1. ¿Está en Telegram? (initData existe)
+      const isTelegram = (tg.initData && tg.initData.length > 0);
       
-      if (tg.initData && tg.initData.length > 0) {
-        // ✅ ES TELEGRAM
-        tg.expand();
-        // Ocultar candado inmediatamente
+      // 2. ¿Ya fue verificado en index? (sessionStorage existe)
+      // Nota: Debes asegurarte de que index.html guarde 'kisaki_session_active'
+      const hasSession = sessionStorage.getItem('kisaki_session_active') === 'true';
+
+      if (isTelegram || hasSession) {
+        // ✅ ACCESO CONCEDIDO
+        // Ocultamos el candado inmediatamente (display: none) para que no estorbe
         lockScreen.style.display = 'none';
+        tg.expand();
       } else {
-        // ❌ NO ES TELEGRAM
-        // No hacemos nada, el candado ya está visible por CSS.
-        console.warn("Acceso externo detectado. Manteniendo bloqueo.");
+        // ❌ ACCESO DENEGADO
+        // El candado ya está visible por CSS, no hacemos nada más que loguear
+        console.warn("Acceso externo o sesión inválida. Bloqueo activo.");
       }
     })();
 
@@ -313,7 +317,7 @@
         if (error) throw error;
 
         if (!channels || channels.length === 0) {
-          container.innerHTML = '<div style="color:#ef4444; text-align:center; padding:20px;">No se encontraron canales vinculados.<br>Añade el bot como admin en tu canal.</div>';
+          container.innerHTML = '<div style="color:#ef4444; text-align:center; padding:20px;">No se encontraron canales vinculados.<br>Añade el bot como admin.</div>';
           return;
         }
 
