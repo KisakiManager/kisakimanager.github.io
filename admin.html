@@ -35,7 +35,14 @@
     }
 
     /* --- LAYOUT --- */
-    .view-container { padding: 24px; display: none; animation: fadeScale 0.3s; }
+    .view-container { 
+        padding: 24px; 
+        display: none; 
+        animation: fadeScale 0.3s;
+        /* Aseguramos que el contenido tenga posición relativa */
+        position: relative; 
+        z-index: 10; 
+    }
     .view-container.active { display: block; }
 
     /* --- NAV --- */
@@ -44,6 +51,8 @@
       width: 40px; height: 40px; border-radius: 12px;
       background: rgba(255,255,255,0.05); border: 1px solid var(--border-glass);
       display: flex; align-items: center; justify-content: center; color: white; cursor: pointer;
+      /* Aseguramos área de toque */
+      touch-action: manipulation;
     }
 
     /* --- MENU GRID --- */
@@ -53,10 +62,14 @@
       border: 1px solid var(--border-glass); height: 160px; 
       display: flex; flex-direction: column; justify-content: flex-end; cursor: pointer;
       position: relative; overflow: hidden;
+      /* Feedback táctil */
+      transition: transform 0.1s;
     }
+    .menu-card:active { transform: scale(0.98); }
+    
     .menu-admins { background: var(--grad-ocean); }
     .menu-links { background: radial-gradient(circle at top right, #1e1b4b, #0f172a); }
-    
+
     .icon-box {
       position: absolute; top: 20px; left: 20px; width: 50px; height: 50px; 
       background: rgba(255,255,255,0.1); border-radius: 16px; 
@@ -69,6 +82,7 @@
       padding: 14px; border-radius: 18px; margin-bottom: 12px;
       display: flex; align-items: center; justify-content: space-between;
       border: 1px solid var(--border-glass);
+      cursor: pointer;
     }
     .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.7em; }
     .badge-blue { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
@@ -96,7 +110,7 @@
 
     /* --- GRÁFICAS --- */
     .chart-wrapper { background: #0f172a; border-radius: 20px; padding: 15px; margin-bottom: 20px; border: 1px solid var(--border-glass); }
-    
+
     /* --- METRICAS DE ENLACES --- */
     .metrics-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
     .metric-box {
@@ -106,10 +120,37 @@
     .mb-val { font-size: 1.2em; font-weight: 700; color:white; }
     .mb-lbl { font-size: 0.75em; color: var(--text-sec); }
 
+    /* --- LOADER (CORREGIDO PARA NO BLOQUEAR CLICS) --- */
+    #kisaki-loader {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background-color: #020617; 
+      z-index: 99999;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      transition: opacity 0.6s ease;
+      /* ESTA LÍNEA ES CRUCIAL: Permite clics debajo cuando la opacidad es 0 */
+      pointer-events: none; 
+    }
+    /* Pero mientras está activo (visible), debe bloquear */
+    #kisaki-loader.active {
+      pointer-events: auto;
+    }
+
+    .loader-ring {
+      width: 50px; height: 50px; border-radius: 50%;
+      border: 3px solid transparent; border-top-color: #3b82f6;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+    
     @keyframes fadeScale { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
   </style>
 </head>
 <body>
+
+  <div id="kisaki-loader" class="active">
+    <div class="loader-ring"></div>
+    <div style="margin-top:15px; color:#64748b; font-size:0.9em;">Cargando...</div>
+  </div>
 
   <div id="viewHome" class="view-container active">
     <div style="margin: 20px 0 40px 0;">
@@ -197,10 +238,21 @@
   </div>
 
   <script>
+    // Inicialización del Loader
+    window.onload = function() {
+        const loader = document.getElementById('kisaki-loader');
+        // Simular carga o esperar a Telegram
+        setTimeout(() => {
+            loader.style.opacity = '0';
+            loader.classList.remove('active'); // Esto permite que los clics pasen
+            setTimeout(() => loader.style.display = 'none', 600);
+        }, 1000);
+    };
+
     const tg = window.Telegram.WebApp;
     tg.expand();
 
-    // 1. CREDENCIALES SUPABASE (Pega las tuyas aquí)
+    // 1. CREDENCIALES SUPABASE
     const SUPABASE_URL = 'https://ndkupidhlauzroduvech.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_fSQ9uBUx_YTfxr2QL2-kfQ_pdE2cqHv';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -214,9 +266,15 @@
 
     // --- NAVEGACIÓN ---
     function navigateTo(viewId) {
+      console.log("Navegando a:", viewId);
       document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));
-      document.getElementById(viewId).classList.add('active');
-      historyStack.push(viewId);
+      const target = document.getElementById(viewId);
+      if (target) {
+          target.classList.add('active');
+          historyStack.push(viewId);
+      } else {
+          console.error("Vista no encontrada:", viewId);
+      }
     }
 
     function goBack() {
@@ -230,6 +288,7 @@
 
     // --- 1. INICIAR FLUJO ---
     function initFlow(flowType) {
+      console.log("Iniciando flujo:", flowType);
       currentFlow = flowType;
       document.getElementById('contextLabel').innerText = flowType === 'admins' ? 'Gestionar Equipo' : 'Ver Enlaces';
       loadChannels();
@@ -241,34 +300,41 @@
       const container = document.getElementById('channelListContainer');
       container.innerHTML = 'Cargando...';
 
-      const user = tg.initDataUnsafe?.user;
-      const userId = user ? user.id : 1298554649; // Fallback
+      try {
+          const user = tg.initDataUnsafe?.user;
+          const userId = user ? user.id : 1298554649; // Fallback
 
-      const { data: channels, error } = await supabase
-        .from('managed_channels')
-        .select('*')
-        .eq('user_id', userId);
+          const { data: channels, error } = await supabase
+            .from('managed_channels')
+            .select('*')
+            .eq('user_id', userId);
 
-      if (error || !channels || channels.length === 0) {
-        container.innerHTML = '<div style="color:red; text-align:center">No se encontraron canales.</div>';
-        return;
+          if (error) throw error;
+
+          if (!channels || channels.length === 0) {
+            container.innerHTML = '<div style="color:#ef4444; text-align:center; padding:20px;">No se encontraron canales vinculados.<br>Asegúrate de haber añadido al bot como admin.</div>';
+            return;
+          }
+
+          container.innerHTML = '';
+          channels.forEach(ch => {
+            const div = document.createElement('div');
+            div.className = 'list-item';
+            div.onclick = () => loadItems(ch); // Clic para cargar items del canal
+            div.innerHTML = `
+              <div style="display:flex;align-items:center;gap:15px;">
+                <div style="width:40px;height:40px;background:#1e293b;border-radius:12px;display:flex;justify-content:center;align-items:center;">📢</div>
+                <div>
+                  <div style="font-weight:600">${ch.chat_title}</div>
+                  <div style="font-size:0.8em;color:#64748b">ID: ${ch.telegram_chat_id}</div>
+                </div>
+              </div>`;
+            container.appendChild(div);
+          });
+      } catch (e) {
+          console.error(e);
+          container.innerHTML = `<div style="color:red">Error: ${e.message}</div>`;
       }
-
-      container.innerHTML = '';
-      channels.forEach(ch => {
-        const div = document.createElement('div');
-        div.className = 'list-item';
-        div.onclick = () => loadItems(ch);
-        div.innerHTML = `
-          <div style="display:flex;align-items:center;gap:15px;">
-            <div style="width:40px;height:40px;background:#1e293b;border-radius:12px;display:flex;justify-content:center;align-items:center;">📢</div>
-            <div>
-              <div style="font-weight:600">${ch.chat_title}</div>
-              <div style="font-size:0.8em;color:#64748b">ID: ${ch.telegram_chat_id}</div>
-            </div>
-          </div>`;
-        container.appendChild(div);
-      });
     }
 
     // --- 3. CARGAR LISTA (ADMINS O LINKS) ---
@@ -282,14 +348,14 @@
       container.innerHTML = 'Cargando...';
 
       let tableName = currentFlow === 'admins' ? 'channel_admins' : 'invite_links';
-      
+
       const { data: items, error } = await supabase
         .from(tableName)
         .select('*')
         .eq('channel_id', channel.telegram_chat_id);
 
       if (!items || items.length === 0) {
-        container.innerHTML = `<div style="text-align:center;color:#666">No hay ${currentFlow} registrados.</div>`;
+        container.innerHTML = `<div style="text-align:center;color:#666;padding:20px;">No hay ${currentFlow} registrados en este canal.<br>Prueba ejecutar /sync en el bot.</div>`;
         return;
       }
 
@@ -297,14 +363,14 @@
       items.forEach(item => {
         const div = document.createElement('div');
         div.className = 'list-item';
-        
+
         if (currentFlow === 'admins') {
           // Render Admin
           div.onclick = () => openAdminDetail(item);
           div.innerHTML = `
             <div style="display:flex;align-items:center;gap:15px;">
               <div style="width:40px;height:40px;border-radius:50%;background:#334155;display:flex;justify-content:center;align-items:center;">${(item.first_name||'U')[0]}</div>
-              <div><div style="font-weight:600">${item.first_name}</div><div style="font-size:0.8em;color:#64748b">${item.role}</div></div>
+              <div><div style="font-weight:600">${item.first_name || 'Sin nombre'}</div><div style="font-size:0.8em;color:#64748b">${item.role || 'Admin'}</div></div>
             </div>
             <span class="badge badge-blue">Editar</span>
           `;
@@ -314,9 +380,9 @@
           div.innerHTML = `
             <div style="display:flex;align-items:center;gap:15px;">
               <div style="width:40px;height:40px;border-radius:12px;background:rgba(139,92,246,0.2);color:#c084fc;display:flex;justify-content:center;align-items:center;">🔗</div>
-              <div><div style="font-weight:600">${item.name || 'Enlace'}</div><div style="font-size:0.8em;color:#64748b">Por: ${item.creator_name}</div></div>
+              <div><div style="font-weight:600">${item.name || 'Enlace'}</div><div style="font-size:0.8em;color:#64748b">Por: ${item.creator_name || 'Desconocido'}</div></div>
             </div>
-            <span class="badge badge-purple">${item.joins} Joins</span>
+            <span class="badge badge-purple">${item.joins || 0} Joins</span>
           `;
         }
         container.appendChild(div);
@@ -331,8 +397,8 @@
       document.getElementById('lblAdminName').innerText = admin.first_name;
       navigateTo('viewAdminDetail');
 
-      // Gráfica Fake (si no hay datos reales aún) o Real
-      renderChart("#adminChart", [admin.stats_posts||10, admin.stats_views||50, admin.stats_reactions||20, 40, 60, 80, 100], '#3b82f6');
+      // Gráfica
+      renderChart("#adminChart", [admin.stats_posts||0, admin.stats_views||0, admin.stats_reactions||0, 20, 45, 30, 60], '#3b82f6');
 
       // Checkboxes
       const permMap = [
@@ -343,7 +409,7 @@
         { key: 'can_invite_users', label: 'Invitar' },
         { key: 'can_restrict_members', label: 'Banear' }
       ];
-      
+
       const container = document.getElementById('permContainer');
       container.innerHTML = '';
       permMap.forEach(p => {
@@ -359,12 +425,13 @@
     // B) LINKS
     function openLinkDetail(link) {
       document.getElementById('lblLinkName').innerText = link.name || 'Enlace';
-      document.getElementById('lnkJoins').innerText = link.joins;
+      document.getElementById('lnkJoins').innerText = link.joins || 0;
       document.getElementById('lnkRate').innerText = link.rate || '100%';
       navigateTo('viewLinkDetail');
 
       // Gráfica
-      renderChart("#linkChart", [5, 10, 8, link.joins, link.joins+5, link.joins+10, link.joins+20], '#10b981');
+      let joins = link.joins || 0;
+      renderChart("#linkChart", [joins, joins+2, joins+5, joins+10, joins+12, joins+20, joins+35], '#10b981');
     }
 
     // --- UTILS ---
@@ -377,13 +444,13 @@
         chk.classList.add('checked');
         currentItem[key] = true;
       }
-      tg.HapticFeedback.selectionChanged();
+      if(tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
     }
 
     async function savePermissions() {
       const btn = document.querySelector('.btn-save');
       btn.innerText = "Guardando...";
-      
+
       const { error } = await supabase
         .from('channel_admins')
         .update({
@@ -400,7 +467,7 @@
         tg.showAlert("Error: " + error.message);
         btn.innerText = "Error ❌";
       } else {
-        tg.HapticFeedback.notificationOccurred('success');
+        if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
         btn.innerText = "Guardado ✅";
         setTimeout(() => btn.innerText = "Guardar Cambios", 2000);
       }
