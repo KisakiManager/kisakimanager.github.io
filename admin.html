@@ -2,27 +2,24 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Kisaki Admin V4</title>
+  <title>Kisaki Admin Realtime</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  
+
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-  
+
   <style>
     /* --- VARIABLES & RESET --- */
     :root {
-      --bg-core: #020617; /* Fondo Azul Muy Oscuro (Casi negro) */
+      --bg-core: #020617;
       --card-bg: #0f172a;
       --text-main: #f8fafc;
       --text-sec: #94a3b8;
-      
-      /* GRADIENTES PREMIUM (Estilo Image 4057) */
       --grad-ocean: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
       --grad-electric: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%);
-      --grad-royal: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%);
-      
       --border-glass: rgba(255,255,255,0.08);
-      --shadow-glow: 0 10px 30px -10px rgba(37, 99, 235, 0.3);
+      --accent-blue: #3b82f6;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'SF Pro Display', 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -35,129 +32,65 @@
       overflow-x: hidden;
     }
 
-    /* --- LAYOUT GENERAL --- */
-    .view-container {
-      padding: 24px;
-      animation: fadeScale 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-      display: none; /* Se controla con JS */
-    }
+    /* --- LAYOUT --- */
+    .view-container { padding: 24px; display: none; animation: fadeScale 0.3s; }
     .view-container.active { display: block; }
 
-    /* --- HEADER DE NAVEGACIÓN --- */
-    .nav-header {
-      display: flex; align-items: center; gap: 15px; margin-bottom: 30px;
-    }
+    /* --- NAV --- */
+    .nav-header { display: flex; align-items: center; gap: 15px; margin-bottom: 30px; }
     .btn-back {
       width: 40px; height: 40px; border-radius: 12px;
       background: rgba(255,255,255,0.05); border: 1px solid var(--border-glass);
-      display: flex; align-items: center; justify-content: center;
-      color: white; cursor: pointer; transition: 0.2s;
+      display: flex; align-items: center; justify-content: center; color: white; cursor: pointer;
     }
-    .btn-back:active { transform: scale(0.9); background: rgba(255,255,255,0.1); }
-    
-    .view-title h1 { font-size: 1.4em; font-weight: 700; letter-spacing: -0.5px; }
-    .view-title p { font-size: 0.85em; color: var(--text-sec); }
 
-    /* --- VIEW 1: HOME (TARJETAS GRANDES) --- */
+    /* --- MENU GRID --- */
     .menu-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
-
     .menu-card {
-      background: var(--card-bg);
-      border-radius: 24px;
-      padding: 25px;
-      border: 1px solid var(--border-glass);
-      position: relative; overflow: hidden;
-      cursor: pointer; transition: transform 0.2s;
-      height: 160px; display: flex; flex-direction: column; justify-content: flex-end;
+      background: var(--card-bg); border-radius: 24px; padding: 25px;
+      border: 1px solid var(--border-glass); height: 160px; 
+      display: flex; flex-direction: column; justify-content: flex-end; cursor: pointer;
     }
-    .menu-card:active { transform: scale(0.98); }
-    
-    /* Gradientes Específicos */
     .menu-admins { background: var(--grad-ocean); }
-    .menu-links { background: radial-gradient(circle at top right, #1e1b4b, #0f172a); }
-
-    .menu-card::before {
-      content: ''; position: absolute; top: -50px; right: -50px; width: 150px; height: 150px;
-      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-      filter: blur(20px);
-    }
-
-    .icon-box {
-      position: absolute; top: 20px; left: 20px;
-      width: 50px; height: 50px; border-radius: 16px;
-      background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);
-      display: flex; align-items: center; justify-content: center;
-      border: 1px solid rgba(255,255,255,0.1);
-    }
-    .icon-box svg { width: 24px; height: 24px; stroke: white; stroke-width: 2; }
-
-    .card-label h2 { font-size: 1.3em; font-weight: 700; margin-bottom: 5px; }
-    .card-label p { font-size: 0.85em; color: rgba(255,255,255,0.6); }
-
-    /* --- VIEW 2: SELECTOR DE CANALES --- */
-    .channel-list { display: flex; flex-direction: column; gap: 12px; }
     
-    .channel-item {
-      background: #0f172a; padding: 16px; border-radius: 18px;
-      display: flex; align-items: center; justify-content: space-between;
-      border: 1px solid var(--border-glass);
+    .icon-box {
+      position: absolute; top: 20px; left: 20px; width: 50px; height: 50px; 
+      background: rgba(255,255,255,0.1); border-radius: 16px; 
+      display: flex; align-items: center; justify-content: center;
     }
-    .channel-info { display: flex; align-items: center; gap: 15px; }
-    .ch-avatar { 
-      width: 44px; height: 44px; border-radius: 14px; background: #1e293b;
-      display: flex; align-items: center; justify-content: center; font-weight: bold; color: #64748b;
-    }
-    .ch-avatar.gradient { background: var(--grad-electric); color: white; }
 
-    /* --- VIEW 3: LISTAS (ADMINS / LINKS) --- */
+    /* --- LISTAS --- */
     .list-item {
       background: linear-gradient(90deg, #0f172a 0%, #020617 100%);
       padding: 14px; border-radius: 18px; margin-bottom: 12px;
       display: flex; align-items: center; justify-content: space-between;
-      border: 1px solid var(--border-glass); position: relative;
-    }
-    /* Borde lateral indicativo */
-    .list-item::after {
-      content: ''; position: absolute; left: 0; top: 15%; height: 70%; width: 4px;
-      background: var(--grad-electric); border-radius: 0 4px 4px 0;
-    }
-
-    .item-meta { display: flex; flex-direction: column; }
-    .item-title { font-weight: 600; font-size: 1em; }
-    .item-sub { font-size: 0.8em; color: var(--text-sec); display: flex; align-items: center; gap: 5px; }
-    
-    .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.7em; font-weight: 700; text-transform: uppercase; }
-    .badge-blue { background: rgba(37, 99, 235, 0.2); color: #60a5fa; }
-    .badge-purple { background: rgba(147, 51, 234, 0.2); color: #c084fc; }
-
-    /* --- VIEW 4: DASHBOARD (ESTADÍSTICAS) --- */
-    .stats-container { padding-bottom: 40px; }
-    
-    .stats-header {
-      background: var(--card-bg); padding: 20px; border-radius: 24px;
-      margin-bottom: 20px; border: 1px solid var(--border-glass); text-align: center;
-    }
-    .main-stat-val { font-size: 2.2em; font-weight: 800; background: var(--grad-electric); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .main-stat-lbl { font-size: 0.9em; color: var(--text-sec); text-transform: uppercase; letter-spacing: 1px; }
-
-    /* Grid de Métricas Pequeñas */
-    .metrics-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-    .metric-box {
-      background: rgba(255,255,255,0.03); padding: 15px; border-radius: 16px;
-      display: flex; flex-direction: column; gap: 5px; border: 1px solid var(--border-glass);
-    }
-    .mb-icon { width: 20px; height: 20px; margin-bottom: 5px; }
-    .mb-val { font-size: 1.1em; font-weight: 700; }
-    .mb-lbl { font-size: 0.75em; color: var(--text-sec); }
-
-    /* Gráficas */
-    .chart-wrapper {
-      background: #0f172a; border-radius: 20px; padding: 15px; margin-bottom: 20px;
       border: 1px solid var(--border-glass);
     }
-    .cw-header { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.9em; color: #cbd5e1; font-weight: 600; }
+    .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.7em; background: rgba(37, 99, 235, 0.2); color: #60a5fa; }
 
-    /* Animaciones */
+    /* --- PERMISOS --- */
+    .perm-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 30px; }
+    .perm-item {
+      display: flex; align-items: center; gap: 15px; padding: 12px;
+      background: #0f0f0f; border-radius: 12px; cursor: pointer;
+    }
+    .custom-check {
+      width: 22px; height: 22px; border: 2px solid #333; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center; transition: 0.2s;
+    }
+    .custom-check.checked { background: var(--accent-blue); border-color: var(--accent-blue); }
+    .custom-check svg { display: none; width: 14px; stroke: white; stroke-width: 3; }
+    .custom-check.checked svg { display: block; }
+
+    .btn-save {
+      width: 100%; background: var(--grad-electric); color: white; padding: 16px;
+      border-radius: 16px; border: none; font-weight: 700; font-size: 1.1em;
+      cursor: pointer; box-shadow: 0 4px 20px rgba(37, 99, 235, 0.4);
+    }
+
+    /* --- GRÁFICAS --- */
+    .chart-wrapper { background: #0f172a; border-radius: 20px; padding: 15px; margin-bottom: 20px; border: 1px solid var(--border-glass); }
+
     @keyframes fadeScale { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
   </style>
 </head>
@@ -166,27 +99,17 @@
   <div id="viewHome" class="view-container active">
     <div style="margin: 20px 0 40px 0;">
       <h1 style="font-size: 2em; font-weight: 800;">Panel Kisaki</h1>
-      <p style="color: var(--text-sec);">Selecciona una herramienta de gestión</p>
+      <p style="color: var(--text-sec);">Gestión en tiempo real</p>
     </div>
 
     <div class="menu-grid">
-      <div class="menu-card menu-admins" onclick="goToChannels('admins')">
+      <div class="menu-card menu-admins" onclick="loadChannels()">
         <div class="icon-box">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         </div>
-        <div class="card-label">
-          <h2>Gestión de Admins</h2>
-          <p>Permisos, actividad y rendimiento.</p>
-        </div>
-      </div>
-
-      <div class="menu-card menu-links" onclick="goToChannels('links')">
-        <div class="icon-box">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
-        </div>
-        <div class="card-label">
-          <h2>Gestión de Enlaces</h2>
-          <p>Tráfico, uniones y conversiones.</p>
+        <div>
+          <h2 style="font-size: 1.3em; font-weight: 700;">Admins</h2>
+          <p style="font-size: 0.85em; color: rgba(255,255,255,0.6);">Gestionar permisos y actividad</p>
         </div>
       </div>
     </div>
@@ -194,306 +117,252 @@
 
   <div id="viewChannels" class="view-container">
     <div class="nav-header">
-      <div class="btn-back" onclick="goBack()">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-      </div>
-      <div class="view-title">
-        <h1>Seleccionar Canal</h1>
-        <p id="contextTitle">...</p>
-      </div>
+      <div class="btn-back" onclick="goBack()"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+      <div><h1>Seleccionar Canal</h1><p>Tus canales vinculados</p></div>
     </div>
-
-    <div class="channel-list" id="channelListContainer">
-      </div>
+    <div id="channelListContainer">Cargando canales...</div>
   </div>
 
-  <div id="viewList" class="view-container">
+  <div id="viewAdmins" class="view-container">
     <div class="nav-header">
-      <div class="btn-back" onclick="goBack()">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-      </div>
-      <div class="view-title">
-        <h1 id="listTitle">Lista</h1>
-        <p id="listSubtitle">Detalle del canal</p>
-      </div>
+      <div class="btn-back" onclick="goBack()"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+      <div><h1 id="lblChannelName">Canal</h1><p>Equipo administrativo</p></div>
     </div>
-
-    <div id="listContent">
-      </div>
+    <div id="adminListContainer">Cargando admins...</div>
   </div>
 
-  <div id="viewDashboard" class="view-container">
+  <div id="viewDetail" class="view-container">
     <div class="nav-header">
-      <div class="btn-back" onclick="goBack()">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-      </div>
-      <div class="view-title">
-        <h1 id="dashTitle">Estadísticas</h1>
-        <p id="dashSubtitle">Reporte detallado</p>
-      </div>
+      <div class="btn-back" onclick="goBack()"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+      <div><h1 id="lblAdminName">Admin</h1><p>Permisos y Estadísticas</p></div>
     </div>
 
-    <div class="stats-container" id="dashContent">
+    <div class="chart-wrapper">
+      <div style="margin-bottom:10px; font-weight:600; color:#cbd5e1;">Actividad (7 Días)</div>
+      <div id="adminChart"></div>
+    </div>
+
+    <div style="margin-bottom:15px; font-weight:700;">Permisos de Telegram</div>
+    <div class="perm-list" id="permContainer">
       </div>
+
+    <button class="btn-save" onclick="savePermissions()">Guardar Cambios</button>
   </div>
 
   <script>
     const tg = window.Telegram.WebApp;
     tg.expand();
 
-    // --- ESTADO ---
-    let historyStack = ['viewHome']; // Para manejar el botón "Atrás"
-    let currentContext = ''; // 'admins' o 'links'
-    let currentChannel = null;
+    // 1. CONFIGURACIÓN SUPABASE (PON TUS CREDENCIALES AQUÍ)
+    const SUPABASE_URL = 'https://ndkupidhlauzroduvech.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_fSQ9uBUx_YTfxr2QL2-kfQ_pdE2cqHv'; // Tu clave pública
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // --- DATOS MOCK ---
-    const DB = {
-      channels: [
-        { id: 1, name: "Kisaki Updates", subs: "12.5k" },
-        { id: 2, name: "Trading Signals", subs: "4.2k" },
-        { id: 3, name: "Dev Team", subs: "150" }
-      ],
-      admins: [
-        { id: 101, name: "Vicente", role: "Owner", posts: 154, views: "1.2M", react: "45k" },
-        { id: 102, name: "Kisaki Bot", role: "System", posts: 2500, views: "5.5M", react: "120k" },
-        { id: 103, name: "Elena", role: "Editor", posts: 42, views: "300k", react: "12k" }
-      ],
-      links: [
-        { id: 201, name: "Twitter Promo", type: "Directo", creator: "Vicente", joins: 850, leaves: 20, rate: "98%" },
-        { id: 202, name: "Acceso VIP", type: "Solicitud", creator: "Elena", joins: 120, leaves: 5, rate: "80%" }
-      ]
-    };
+    // Estado
+    let historyStack = ['viewHome'];
+    let currentAdmin = null; // Objeto admin seleccionado
+    let currentChannelId = null;
 
     // --- NAVEGACIÓN ---
     function navigateTo(viewId) {
-      // Ocultar actual
       document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));
-      // Mostrar nueva
       document.getElementById(viewId).classList.add('active');
-      // Guardar historial
-      if (historyStack[historyStack.length - 1] !== viewId) {
-        historyStack.push(viewId);
-      }
-      window.scrollTo(0,0);
+      historyStack.push(viewId);
     }
 
     function goBack() {
-      if (historyStack.length > 1) {
-        historyStack.pop(); // Quitar actual
-        const prevView = historyStack[historyStack.length - 1];
-        
+      if(historyStack.length > 1) {
+        historyStack.pop();
+        const prev = historyStack[historyStack.length - 1];
         document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));
-        document.getElementById(prevView).classList.add('active');
+        document.getElementById(prev).classList.add('active');
       }
     }
 
-    // --- FLUJO 1: SELECCIONAR CONTEXTO ---
-    function goToChannels(context) {
-      currentContext = context;
-      
-      // Configurar textos
-      document.getElementById('contextTitle').innerText = context === 'admins' ? 'Gestionar Administradores' : 'Gestionar Enlaces';
-      
-      // Renderizar Canales
-      const container = document.getElementById('channelListContainer');
-      container.innerHTML = '';
-      
-      DB.channels.forEach(ch => {
-        const div = document.createElement('div');
-        div.className = 'channel-item';
-        div.onclick = () => goToList(ch);
-        div.innerHTML = `
-          <div class="channel-info">
-            <div class="ch-avatar ${context === 'admins' ? 'gradient' : ''}">${ch.name[0]}</div>
-            <div>
-              <div style="font-weight:600; color:white;">${ch.name}</div>
-              <div style="font-size:0.8em; color:#64748b;">${ch.subs} suscriptores</div>
-            </div>
-          </div>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
-        `;
-        container.appendChild(div);
-      });
-
+    // --- 1. CARGAR CANALES (REAL) ---
+    async function loadChannels() {
       navigateTo('viewChannels');
-    }
+      const container = document.getElementById('channelListContainer');
+      
+      const user = tg.initDataUnsafe?.user;
+      const userId = user ? user.id : 1298554649; // Fallback para pruebas
 
-    // --- FLUJO 2: VER LISTA ---
-    function goToList(channel) {
-      currentChannel = channel;
-      document.getElementById('listTitle').innerText = currentContext === 'admins' ? 'Equipo' : 'Enlaces Activos';
-      document.getElementById('listSubtitle').innerText = channel.name;
+      // Consulta real a tu tabla 'managed_channels'
+      const { data: channels, error } = await supabase
+        .from('managed_channels')
+        .select('*')
+        .eq('user_id', userId);
 
-      const container = document.getElementById('listContent');
+      if (error || !channels || channels.length === 0) {
+        container.innerHTML = '<div style="color:red">No se encontraron canales.</div>';
+        return;
+      }
+
       container.innerHTML = '';
-
-      const data = currentContext === 'admins' ? DB.admins : DB.links;
-
-      data.forEach(item => {
+      channels.forEach(ch => {
         const div = document.createElement('div');
         div.className = 'list-item';
-        div.onclick = () => goToDashboard(item);
-        
-        // Icono según tipo
-        let iconSVG = currentContext === 'admins' 
-          ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>'
-          : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path></svg>';
-        
-        // Badge
-        let badgeHtml = currentContext === 'admins'
-          ? `<span class="badge badge-blue">${item.role}</span>`
-          : `<span class="badge badge-purple">${item.type}</span>`;
-
-        let subtitle = currentContext === 'admins' ? 'Activo hoy' : `Creado por: ${item.creator}`;
-
+        div.onclick = () => loadAdmins(ch);
         div.innerHTML = `
-          <div style="display:flex; align-items:center; gap:15px;">
-             <div style="width:40px; height:40px; background:#1e293b; border-radius:12px; display:flex; align-items:center; justify-content:center;">${iconSVG}</div>
-             <div class="item-meta">
-               <div class="item-title">${item.name}</div>
-               <div class="item-sub">${subtitle}</div>
-             </div>
+          <div style="display:flex;align-items:center;gap:15px;">
+            <div style="width:40px;height:40px;background:#1e293b;border-radius:12px;display:flex;justify-content:center;align-items:center;">📢</div>
+            <div>
+              <div style="font-weight:600">${ch.chat_title}</div>
+              <div style="font-size:0.8em;color:#64748b">ID: ${ch.telegram_chat_id}</div>
+            </div>
+          </div>`;
+        container.appendChild(div);
+      });
+    }
+
+    // --- 2. CARGAR ADMINS (REAL) ---
+    async function loadAdmins(channel) {
+      currentChannelId = channel.telegram_chat_id;
+      document.getElementById('lblChannelName').innerText = channel.chat_title;
+      navigateTo('viewAdmins');
+      
+      const container = document.getElementById('adminListContainer');
+      container.innerHTML = 'Cargando...';
+
+      // Consulta a la nueva tabla 'channel_admins'
+      const { data: admins, error } = await supabase
+        .from('channel_admins')
+        .select('*')
+        .eq('channel_id', channel.telegram_chat_id);
+
+      if (!admins || admins.length === 0) {
+        container.innerHTML = '<div style="padding:20px; text-align:center; color:#666">No hay datos de admins sincronizados.<br>Ejecuta /sync en el bot.</div>';
+        return;
+      }
+
+      container.innerHTML = '';
+      admins.forEach(admin => {
+        const div = document.createElement('div');
+        div.className = 'list-item';
+        div.onclick = () => openAdminDetail(admin);
+        div.innerHTML = `
+          <div style="display:flex;align-items:center;gap:15px;">
+            <div style="width:40px;height:40px;border-radius:50%;background:#334155;display:flex;justify-content:center;align-items:center;font-weight:bold;">${(admin.first_name || 'U')[0]}</div>
+            <div>
+              <div style="font-weight:600">${admin.first_name || 'Usuario'}</div>
+              <div style="font-size:0.8em;color:#64748b">${admin.role}</div>
+            </div>
           </div>
-          ${badgeHtml}
+          <span class="badge">${admin.status || 'Active'}</span>
         `;
         container.appendChild(div);
       });
-
-      navigateTo('viewList');
     }
 
-    // --- FLUJO 3: DASHBOARD ---
-    let chart1, chart2;
+    // --- 3. DETALLES Y PERMISOS ---
+    let chartInstance = null;
 
-    function goToDashboard(item) {
-      document.getElementById('dashTitle').innerText = item.name;
-      const container = document.getElementById('dashContent');
+    function openAdminDetail(admin) {
+      currentAdmin = admin; // Guardar referencia para actualizar
+      document.getElementById('lblAdminName').innerText = admin.first_name || 'Admin';
+      navigateTo('viewDetail');
+
+      // A) Gráfica (Usando datos de la DB si existen, sino simulados visualmente)
+      renderChart([admin.stats_posts || 0, admin.stats_views || 0, admin.stats_reactions || 0]);
+
+      // B) Generar Checkboxes de Permisos Reales
+      const permMap = [
+        { key: 'can_change_info', label: 'Cambiar Info' },
+        { key: 'can_post_messages', label: 'Publicar Mensajes' },
+        { key: 'can_edit_messages', label: 'Editar Mensajes' },
+        { key: 'can_delete_messages', label: 'Eliminar Mensajes' },
+        { key: 'can_invite_users', label: 'Invitar Usuarios' },
+        { key: 'can_restrict_members', label: 'Banear Usuarios' },
+        { key: 'can_manage_voice_chats', label: 'Chats de Voz' }
+      ];
+
+      const container = document.getElementById('permContainer');
+      container.innerHTML = '';
+
+      permMap.forEach(p => {
+        const isActive = admin[p.key] === true;
+        const div = document.createElement('div');
+        div.className = 'perm-item';
+        div.onclick = () => togglePerm(div, p.key);
+        div.innerHTML = `
+          <div class="custom-check ${isActive ? 'checked' : ''}" id="chk_${p.key}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div>${p.label}</div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    // Toggle visual y en objeto temporal
+    function togglePerm(element, key) {
+      const check = element.querySelector('.custom-check');
+      const isChecked = check.classList.contains('checked');
       
-      // Limpiar gráficas previas para evitar bugs
-      if(chart1) chart1.destroy();
-      if(chart2) chart2.destroy();
-      container.innerHTML = ''; 
-
-      if (currentContext === 'admins') {
-        // === DASHBOARD DE ADMINS ===
-        document.getElementById('dashSubtitle').innerText = "Rendimiento del Administrador";
-        
-        container.innerHTML = `
-          <div class="stats-header">
-            <div class="main-stat-lbl">IMPACTO TOTAL</div>
-            <div class="main-stat-val">${item.views}</div>
-          </div>
-          
-          <div class="metrics-row">
-            <div class="metric-box">
-              <svg class="mb-icon" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-              <span class="mb-val">${item.posts}</span>
-              <span class="mb-lbl">Publicaciones</span>
-            </div>
-            <div class="metric-box">
-              <svg class="mb-icon" viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-              <span class="mb-val">${item.react}</span>
-              <span class="mb-lbl">Reacciones</span>
-            </div>
-          </div>
-
-          <div class="chart-wrapper">
-             <div class="cw-header">Actividad Semanal</div>
-             <div id="chartA1"></div>
-          </div>
-          
-          <div class="chart-wrapper">
-             <div class="cw-header">Views vs Reacciones</div>
-             <div id="chartA2"></div>
-          </div>
-        `;
-
-        // Render Gráficas Admin
-        setTimeout(() => {
-            renderAreaChart("#chartA1", "#3b82f6", [10, 45, 30, 60, 75, 50, 90]);
-            renderBarChart("#chartA2", "#8b5cf6", [40, 80, 55, 30, 90, 100, 70]);
-        }, 100);
-
+      if (isChecked) {
+        check.classList.remove('checked');
+        currentAdmin[key] = false;
       } else {
-        // === DASHBOARD DE ENLACES ===
-        document.getElementById('dashSubtitle').innerText = "Análisis de Tráfico";
-        
-        container.innerHTML = `
-          <div class="stats-header">
-            <div class="main-stat-lbl">TOTAL UNIONES</div>
-            <div class="main-stat-val" style="background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">${item.joins}</div>
-          </div>
-          
-          <div class="metrics-row">
-            <div class="metric-box">
-              <svg class="mb-icon" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-              <span class="mb-val">${item.leaves}</span>
-              <span class="mb-lbl">Salidas</span>
-            </div>
-            <div class="metric-box">
-              <svg class="mb-icon" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-              <span class="mb-val">${item.rate}</span>
-              <span class="mb-lbl">Aprobación</span>
-            </div>
-          </div>
-
-          <div class="chart-wrapper">
-             <div class="cw-header">Flujo de Entrada (7 Días)</div>
-             <div id="chartL1"></div>
-          </div>
-          
-          <div class="chart-wrapper">
-             <div class="cw-header">Comparativa Mensual</div>
-             <div id="chartL2"></div>
-          </div>
-        `;
-
-        // Render Gráficas Links
-        setTimeout(() => {
-            renderAreaChart("#chartL1", "#10b981", [5, 15, 10, 30, 45, 20, 60]); // Verde
-            renderBarChart("#chartL2", "#06b6d4", [60, 40, 70, 50, 80, 90, 100]); // Cyan
-        }, 100);
+        check.classList.add('checked');
+        currentAdmin[key] = true;
       }
-
-      navigateTo('viewDashboard');
+      tg.HapticFeedback.selectionChanged();
     }
 
-    // --- FUNCIONES HELPER GRÁFICAS ---
-    function renderAreaChart(selector, color, data) {
-        const options = {
-            series: [{ name: 'Data', data: data }],
-            chart: { type: 'area', height: 120, toolbar:{show:false}, background:'transparent', animations:{enabled:true} },
-            colors: [color],
-            stroke: { curve: 'smooth', width: 2 },
-            fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.6, opacityTo: 0.05 } },
-            dataLabels: { enabled: false },
-            grid: { show: false },
-            xaxis: { labels: { show: false }, axisBorder: {show:false}, axisTicks: {show:false} },
-            yaxis: { show: false },
-            theme: { mode: 'dark' }
-        };
-        const chart = new ApexCharts(document.querySelector(selector), options);
-        chart.render();
-        if(selector.includes('A')) chart1 = chart; else chart2 = chart; // Guardar referencia simple
+    // --- 4. GUARDAR EN SUPABASE ---
+    async function savePermissions() {
+      const btn = document.querySelector('.btn-save');
+      btn.innerText = "Guardando...";
+      
+      // Actualizar en Supabase
+      const { error } = await supabase
+        .from('channel_admins')
+        .update({
+          can_change_info: currentAdmin.can_change_info,
+          can_post_messages: currentAdmin.can_post_messages,
+          can_edit_messages: currentAdmin.can_edit_messages,
+          can_delete_messages: currentAdmin.can_delete_messages,
+          can_invite_users: currentAdmin.can_invite_users,
+          can_restrict_members: currentAdmin.can_restrict_members,
+          can_manage_voice_chats: currentAdmin.can_manage_voice_chats
+        })
+        .eq('id', currentAdmin.id); // Usamos ID de la tabla, no user_id, para ser precisos
+
+      if (error) {
+        tg.showAlert("Error guardando: " + error.message);
+        btn.innerText = "Error ❌";
+      } else {
+        tg.HapticFeedback.notificationOccurred('success');
+        btn.innerText = "¡Guardado! ✅";
+        
+        // Opcional: Avisar al bot para aplicar cambios inmediatamente
+        // tg.sendData(JSON.stringify({ type: 'update_perms', admin_id: currentAdmin.user_id }));
+        
+        setTimeout(() => { btn.innerText = "Guardar Cambios"; }, 2000);
+      }
     }
 
-    function renderBarChart(selector, color, data) {
-        const options = {
-            series: [{ name: 'Data', data: data }],
-            chart: { type: 'bar', height: 120, toolbar:{show:false}, background:'transparent', animations:{enabled:true} },
-            colors: [color],
-            plotOptions: { bar: { borderRadius: 4, columnWidth: '50%' } },
-            dataLabels: { enabled: false },
-            grid: { show: false },
-            xaxis: { categories: ['L','M','X','J','V','S','D'], labels: { style: { colors: '#64748b', fontSize: '10px' } }, axisBorder:{show:false}, axisTicks:{show:false} },
-            yaxis: { show: false },
-            theme: { mode: 'dark' }
-        };
-        const chart = new ApexCharts(document.querySelector(selector), options);
-        chart.render();
-        if(selector.includes('A')) chart2 = chart; // Guardar referencia
-    }
+    function renderChart(dataPoints) {
+      if (chartInstance) chartInstance.destroy();
+      
+      // Si los datos son 0 (nuevos), ponemos fake para que se vea bonito
+      const seriesData = dataPoints.reduce((a,b)=>a+b,0) === 0 ? [10, 40, 35, 50, 49, 60, 70] : dataPoints;
 
+      const options = {
+        series: [{ name: 'Actividad', data: seriesData }],
+        chart: { type: 'area', height: 120, toolbar:{show:false}, background:'transparent' },
+        colors: ['#3b82f6'],
+        stroke: { curve: 'smooth', width: 2 },
+        fill: { type: 'gradient', gradient: { shadeIntensity:1, opacityFrom:0.5, opacityTo:0.0 } },
+        dataLabels: { enabled: false },
+        grid: { show: false },
+        xaxis: { labels: { show:false }, axisBorder:{show:false}, axisTicks:{show:false} },
+        yaxis: { show: false },
+        theme: { mode: 'dark' }
+      };
+      chartInstance = new ApexCharts(document.querySelector("#adminChart"), options);
+      chartInstance.render();
+    }
   </script>
 </body>
 </html>
