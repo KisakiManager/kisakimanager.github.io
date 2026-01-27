@@ -369,43 +369,79 @@
       const successIcon = document.querySelector('.success-icon');
       const typeText = document.querySelector('.typewriter');
 
-      const MIN_LOAD_TIME = 2000;
-      const start = Date.now();
+      // 1. VERIFICACIÓN DE SEGURIDAD BÁSICA (Siempre se ejecuta)
+      const isTelegram = tg.initData && tg.initData.length > 0;
 
-      function finishLoading() {
-        const now = Date.now();
-        const elapsed = now - start;
-        const remaining = Math.max(0, MIN_LOAD_TIME - elapsed);
+      // 2. VERIFICAR SI YA ENTRAMOS ANTES (En esta sesión)
+      const hasVisited = sessionStorage.getItem('kisaki_session_active');
 
-        setTimeout(() => {
-          if (tg.initData && tg.initData.length > 0) {
-            // ✅ ÉXITO
+      if (isTelegram) {
+        
+        // CASO A: Usuario verificado y ya vio la intro (Navegación rápida)
+        if (hasVisited) {
+          loader.style.display = 'none'; // Quitar loader instantáneamente
+          tg.expand();
+          loadUserData(); // Cargar nombre si hace falta
+        } 
+        // CASO B: Primera vez o recarga completa (Mostrar Animación)
+        else {
+          runFullAnimation();
+        }
+
+      } else {
+        // CASO C: No es Telegram (Bloqueo inmediato)
+        phaseLoad.style.display = 'none';
+        phaseBlock.style.display = 'flex';
+        console.warn("Acceso externo detectado.");
+      }
+
+      // --- FUNCIONES AUXILIARES ---
+
+      function runFullAnimation() {
+        const MIN_LOAD_TIME = 2000; // 2 segundos de show
+        const start = Date.now();
+
+        function finish() {
+          const now = Date.now();
+          const elapsed = now - start;
+          const remaining = Math.max(0, MIN_LOAD_TIME - elapsed);
+
+          setTimeout(() => {
+            // Transición a Éxito
             phaseLoad.style.display = 'none';
             successIcon.style.display = 'block';
             typeText.style.display = 'block';
+            
             if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+
+            // Guardar que ya vimos la intro
+            sessionStorage.setItem('kisaki_session_active', 'true');
 
             setTimeout(() => {
               loader.style.opacity = '0';
-              setTimeout(() => { loader.style.display = 'none'; }, 600);
-            }, 1800);
+              setTimeout(() => { 
+                loader.style.display = 'none'; 
+                tg.expand();
+              }, 600);
+            }, 1500); // Tiempo para leer "Acceso aprobado"
 
-            // Cargar nombre usuario
-            const user = tg.initDataUnsafe?.user;
-            if (user && user.first_name) {
-              document.querySelector('.header-greeting h1').innerText = `Hola, ${user.first_name} 👋`;
-            }
+            loadUserData();
 
-          } else {
-            // ❌ BLOQUEO
-            phaseLoad.style.display = 'none';
-            phaseBlock.style.display = 'flex';
-            console.warn("Acceso externo detectado. Bloqueando contenido.");
-          }
-        }, remaining);
+          }, remaining);
+        }
+        
+        // Iniciar conteo al cargar la ventana
+        window.onload = finish;
       }
 
-      window.onload = finishLoading;
+      function loadUserData() {
+        const user = tg.initDataUnsafe?.user;
+        if (user && user.first_name) {
+          const greetingEl = document.querySelector('.header-greeting h1');
+          if(greetingEl) greetingEl.innerText = `Hola, ${user.first_name} 👋`;
+        }
+      }
+
     })();
   </script>
 
