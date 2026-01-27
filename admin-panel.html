@@ -4,9 +4,11 @@
   <meta charset="UTF-8">
   <title>Admin Panel</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  
   <style>
     :root { --bg:#020617; --glass:rgba(30,41,59,0.7); --border:rgba(255,255,255,0.1); --blue:#3b82f6; --text:#f8fafc; }
     body { background:var(--bg); color:var(--text); font-family:system-ui, sans-serif; padding:20px; }
@@ -66,36 +68,61 @@
   </div>
 
   <script>
-    // --- CONEXIÓN SUPABASE (IGUAL QUE ANALYTICS) ---
-    const sbUrl = 'https://ndkupidhlauzroduvech.supabase.co';
-    const sbKey = 'sb_publishable_fSQ9uBUx_YTfxr2QL2-kfQ_pdE2cqHv';
-    const supabase = window.supabase.createClient(sbUrl, sbKey);
+    // --- ⚠️ IMPORTANTE: PON TUS CREDENCIALES REALES AQUÍ ---
+    const sbUrl = 'https://ndkupidhlauzroduvech.supabase.co'; // <--- CAMBIA ESTO
+    const sbKey = 'sb_publishable_fSQ9uBUx_YTfxr2QL2-kfQ_pdE2cqHv'; // <--- CAMBIA ESTO
+    
+    // Inicialización segura
+    let supabase;
+    try {
+      supabase = window.supabase.createClient(sbUrl, sbKey);
+    } catch (e) {
+      alert("Error iniciando Supabase. Revisa las credenciales en el código.");
+    }
+
     const tg = window.Telegram.WebApp;
     tg.expand();
 
     let currentAdmin = null;
 
-    // 1. CARGAR CANALES (Lógica de analytics.html)
+    // 1. CARGAR CANALES
     async function init() {
       const user = tg.initDataUnsafe?.user;
-      const userId = user ? user.id : 1298554649; // Tu ID fallback
+      // IMPORTANTE: Si estás probando en navegador, usa un ID que SEPAS que tiene canales en la DB
+      const userId = user ? user.id : 1298554649; 
 
+      console.log("Buscando canales para usuario:", userId);
+
+      const list = document.getElementById('channelList');
+      
       const { data: channels, error } = await supabase
         .from('managed_channels')
         .select('*')
         .eq('user_id', userId);
 
-      const list = document.getElementById('channelList');
-      
-      if(error || !channels.length) {
-        list.innerHTML = `<div style="text-align:center; color:#ef4444; padding:20px;">No se encontraron canales vinculados.<br><small>${error?.message || ''}</small></div>`;
+      if(error) {
+        list.innerHTML = `<div style="text-align:center; color:#ef4444; padding:20px;">Error de conexión:<br>${error.message}</div>`;
+        return;
+      }
+
+      if(!channels || channels.length === 0) {
+        list.innerHTML = `<div style="text-align:center; color:#94a3b8; padding:20px;">
+          No se encontraron canales.<br><br>
+          <b>Solución:</b><br>
+          1. Añade al bot a tu canal.<br>
+          2. Hazlo admin.<br>
+          3. Escribe <code>/sync</code> en el canal.
+        </div>`;
         return;
       }
 
       list.innerHTML = '';
       channels.forEach(c => {
+        // CORRECCIÓN CLAVE: Escapar comillas en el título para no romper el HTML
+        const safeTitle = c.chat_title.replace(/'/g, "\\'");
+        
         list.innerHTML += `
-        <div class="card" onclick="loadAdmins(${c.telegram_chat_id}, '${c.chat_title}')">
+        <div class="card" onclick="loadAdmins(${c.telegram_chat_id}, '${safeTitle}')">
           <div class="avatar">📢</div>
           <div style="flex:1;">
             <div style="font-weight:bold;">${c.chat_title}</div>
@@ -108,31 +135,41 @@
 
     // 2. CARGAR ADMINS DEL CANAL
     async function loadAdmins(chatId, title) {
+      console.log("Cargando admins para:", chatId);
       showView('viewAdmins');
       document.getElementById('lblChannel').innerText = title;
-      document.getElementById('adminList').innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8;">Cargando admins...</div>';
+      const list = document.getElementById('adminList');
+      list.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8;">Consultando base de datos...</div>';
 
-      const { data: admins } = await supabase
+      const { data: admins, error } = await supabase
         .from('channel_admins')
         .select('*')
         .eq('channel_id', chatId);
 
-      const list = document.getElementById('adminList');
-      list.innerHTML = '';
+      if (error) {
+        list.innerHTML = `<div style="color:red; text-align:center">Error: ${error.message}</div>`;
+        return;
+      }
 
       if(!admins || !admins.length) {
-        list.innerHTML = '<div style="text-align:center;">No hay admins sincronizados. Ejecuta /sync en el canal.</div>';
+        list.innerHTML = '<div style="text-align:center; padding:20px;">⚠️ No hay administradores registrados.<br>Ejecuta /sync en el canal.</div>';
+        // Renderizar gráfica vacía para que no se vea feo
+        renderChart([]);
         return;
       }
 
       // Render Lista
+      list.innerHTML = '';
       admins.forEach(a => {
+        // Convertir objeto a string seguro para pasarlo en onclick
+        const adminData = JSON.stringify(a).replace(/"/g, '&quot;');
+        
         list.innerHTML += `
-        <div class="card" onclick='editAdmin(${JSON.stringify(a)})'>
+        <div class="card" onclick="editAdmin(${adminData})">
           <div class="avatar">${(a.first_name||'U')[0]}</div>
           <div style="flex:1;">
             <div style="font-weight:bold;">${a.first_name}</div>
-            <div style="font-size:0.8em; color:#94a3b8;">${a.role || 'Admin'} • ${a.stats_posts} Posts</div>
+            <div style="font-size:0.8em; color:#94a3b8;">${a.role || 'Admin'} • ${a.stats_posts || 0} Posts</div>
           </div>
           <div>⚙️</div>
         </div>`;
@@ -144,6 +181,7 @@
 
     // 3. EDITAR ADMIN
     function editAdmin(admin) {
+      console.log("Editando admin:", admin);
       currentAdmin = admin;
       showView('viewEdit');
       document.getElementById('lblAdmin').innerText = admin.first_name;
@@ -174,6 +212,9 @@
 
     // 4. GUARDAR CAMBIOS
     async function saveChanges() {
+      const btn = document.querySelector('.btn-action');
+      btn.innerText = "Guardando...";
+      
       const updates = {};
       const perms = ['can_post_messages','can_edit_messages','can_delete_messages','can_restrict_members','can_invite_users','can_change_info'];
       
@@ -187,18 +228,20 @@
         .eq('id', currentAdmin.id);
 
       if(!error) {
+        if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
         tg.showAlert("Permisos guardados correctamente.");
         showView('viewAdmins');
       } else {
         tg.showAlert("Error: " + error.message);
       }
+      btn.innerText = "Guardar Permisos";
     }
 
     function renderChart(admins) {
       const names = admins.map(a => a.first_name);
       const posts = admins.map(a => a.stats_posts || 0);
 
-      new ApexCharts(document.querySelector("#postsChart"), {
+      const options = {
         series: [{ name: 'Posts', data: posts }],
         chart: { type: 'bar', height: 200, toolbar:{show:false}, background:'transparent' },
         plotOptions: { bar: { borderRadius: 4, horizontal: true, distributed: true } },
@@ -207,7 +250,11 @@
         theme: { mode: 'dark' },
         colors: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'],
         grid: { show:false }
-      }).render();
+      };
+
+      const chartDiv = document.querySelector("#postsChart");
+      chartDiv.innerHTML = ""; // Limpiar gráfica anterior
+      new ApexCharts(chartDiv, options).render();
     }
 
     function showView(id) {
