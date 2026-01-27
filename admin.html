@@ -34,75 +34,58 @@
       overflow-x: hidden;
     }
 
-    /* --- LOADER DE SEGURIDAD (KISAKI SHIELD) --- */
+    /* --- PANTALLA DE CARGA Y SEGURIDAD --- */
     #kisaki-loader {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background-color: #020617;
       z-index: 99999;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      transition: opacity 0.5s ease, visibility 0.5s;
-      /* CLAVE: Esto permite clicar los botones de abajo cuando la opacidad es 0 */
-      pointer-events: none; 
+      transition: opacity 0.5s ease;
     }
 
-    /* Clase para cuando el loader está activo y debe bloquear la pantalla */
-    #kisaki-loader.is-active {
-      pointer-events: auto;
-      opacity: 1;
-      visibility: visible;
-    }
-    
-    /* Clase para ocultarlo visualmente */
-    #kisaki-loader.is-hidden {
+    /* Ocultar visualmente y permitir clics debajo */
+    #kisaki-loader.hidden {
       opacity: 0;
-      visibility: hidden;
+      pointer-events: none;
     }
 
-    .loader-logo-container {
-      position: relative; width: 120px; height: 120px;
-      display: flex; align-items: center; justify-content: center;
-      margin-bottom: 30px;
-    }
+    /* Elementos dentro del loader */
+    .loader-content { display: none; flex-direction: column; align-items: center; text-align: center; }
+    .loader-content.active { display: flex; }
+
+    .loader-logo-container { position: relative; width: 100px; height: 100px; margin-bottom: 25px; }
     
     .kisaki-cat {
-      width: 90px; height: 90px; border-radius: 50%; object-fit: cover; z-index: 2;
-      box-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
+      width: 80px; height: 80px; border-radius: 50%; object-fit: cover;
+      box-shadow: 0 0 25px rgba(59, 130, 246, 0.4);
+      position: absolute; top: 10px; left: 10px; z-index: 2;
     }
 
     .loader-ring {
       position: absolute; top: 0; left: 0; width: 100%; height: 100%;
       border-radius: 50%; border: 3px solid transparent;
       border-top-color: #3b82f6; border-right-color: #8b5cf6;
-      animation: spin 1.5s linear infinite; z-index: 1;
+      animation: spin 1.2s linear infinite; z-index: 1;
     }
     @keyframes spin { 100% { transform: rotate(360deg); } }
 
-    .loader-text {
-      font-family: 'SF Pro Display', sans-serif; color: #e2e8f0; font-size: 1.1em; letter-spacing: 0.5px;
-      min-height: 24px; font-weight: 500;
-    }
-    .dots::after { content: ''; animation: dots 1.5s steps(4, end) infinite; }
-    @keyframes dots { 0%, 20% { content: ''; } 40% { content: '.'; } 60% { content: '..'; } 80%, 100% { content: '...'; } }
-
-    /* FASES DEL LOADER */
-    .phase { display: none; flex-direction: column; align-items: center; width: 100%; }
-    .phase.active { display: flex; }
-
+    .loader-text { font-size: 1.1em; color: #e2e8f0; font-weight: 500; letter-spacing: 0.5px; }
+    
     /* Fase Éxito */
-    .success-icon { font-size: 4em; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); margin-bottom: 20px; }
+    .success-icon { font-size: 3.5em; margin-bottom: 15px; animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-    .typewriter { color: #4ade80; font-weight: 700; }
+    .typewriter { color: #4ade80; font-weight: 700; border-right: 2px solid #4ade80; padding-right: 4px; animation: blink 0.8s infinite; }
+    @keyframes blink { 50% { border-color: transparent; } }
 
     /* Fase Bloqueo */
     .lock-icon { 
-      width: 70px; height: 70px; background: rgba(239, 68, 68, 0.1); color: #ef4444; 
-      border-radius: 20px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; 
+      width: 60px; height: 60px; background: rgba(239, 68, 68, 0.1); color: #ef4444; 
+      border-radius: 18px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; 
       border: 1px solid rgba(239, 68, 68, 0.3);
     }
     .btn-telegram {
-      margin-top: 25px; background: white; color: black; padding: 14px 28px; border-radius: 14px; 
-      text-decoration: none; font-weight: 700; display: inline-flex; align-items: center; gap: 10px;
-      box-shadow: 0 5px 15px rgba(255,255,255,0.2);
+      margin-top: 25px; background: white; color: black; padding: 12px 24px; border-radius: 12px; 
+      text-decoration: none; font-weight: 700; display: inline-flex; align-items: center; gap: 8px;
     }
 
     /* --- LAYOUT DE LA APP --- */
@@ -183,22 +166,22 @@
 </head>
 <body>
 
-  <div id="kisaki-loader" class="is-active">
+  <div id="kisaki-loader">
     
-    <div id="phase-loading" class="phase active">
+    <div id="phase-loading" class="loader-content active">
       <div class="loader-logo-container">
         <div class="loader-ring"></div>
         <img src="3538.png" alt="Kisaki" class="kisaki-cat"> 
       </div>
-      <div class="loader-text">Cargando interfaz Kisaki<span class="dots"></span></div>
+      <div class="loader-text">Cargando interfaz Kisaki...</div>
     </div>
 
-    <div id="phase-success" class="phase">
+    <div id="phase-success" class="loader-content">
       <div class="success-icon">👍</div>
       <div class="loader-text typewriter">Acceso aprobado...</div>
     </div>
 
-    <div id="phase-blocked" class="phase">
+    <div id="phase-blocked" class="loader-content">
       <div class="lock-icon">
         <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
       </div>
@@ -298,61 +281,60 @@
   </div>
 
   <script>
-    // --- LÓGICA DE SEGURIDAD Y CARGA ---
+    // --- 1. SCRIPT DE SEGURIDAD (EJECUCIÓN INMEDIATA) ---
     (function() {
       const tg = window.Telegram.WebApp;
-      tg.expand(); // Expandir siempre
-
       const loader = document.getElementById('kisaki-loader');
       const pLoad = document.getElementById('phase-loading');
       const pSuccess = document.getElementById('phase-success');
       const pBlocked = document.getElementById('phase-blocked');
 
-      // 1. Verificar si estamos en Telegram
+      // 1. Verificar si estamos en Telegram (initData debe existir y no estar vacío)
       const isTelegram = (tg.initData && tg.initData.length > 0);
       
-      // 2. Verificar si ya visitamos esta sesión (para no cargar de nuevo)
+      // 2. ¿Ya entramos antes en esta sesión? (Para no mostrar el gato cada vez)
       const isSessionActive = sessionStorage.getItem('kisaki_admin_session');
 
       if (!isTelegram) {
-        // --- CASO 1: BLOQUEADO (Externo) ---
+        // --- CASO A: BLOQUEADO (Navegador Externo) ---
         pLoad.classList.remove('active');
         pBlocked.classList.add('active');
-        // No ocultamos el loader, se queda bloqueando.
-        console.warn("Acceso externo. Bloqueando panel.");
+        // El loader se queda visible bloqueando todo.
       
       } else {
-        // --- CASO 2: ACCESO PERMITIDO (Telegram) ---
-        
+        // --- CASO B: ACCESO PERMITIDO (Telegram) ---
+        tg.expand(); // Expandir pantalla completa
+
         if (isSessionActive) {
-          // A) Usuario ya validado -> Carga instantánea
-          loader.classList.remove('is-active');
-          loader.classList.add('is-hidden');
-          loader.style.display = 'none'; // Eliminar del DOM flow
+          // B1: Usuario recurrente -> Entrar directo sin animación
+          loader.classList.add('hidden');
+          setTimeout(() => { loader.style.display = 'none'; }, 500);
         } else {
-          // B) Primera vez -> Animación
+          // B2: Primera vez -> Mostrar animación del gato
           setTimeout(() => {
+            // Cambiar a fase "Éxito"
             pLoad.classList.remove('active');
             pSuccess.classList.add('active');
+            
+            // Vibración táctil si es posible
             if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
             
-            // Marcar sesión
+            // Guardar sesión
             sessionStorage.setItem('kisaki_admin_session', 'true');
 
-            // Ocultar loader después del éxito
+            // Ocultar loader después de 1.5s
             setTimeout(() => {
-              loader.classList.remove('is-active');
-              loader.classList.add('is-hidden');
+              loader.classList.add('hidden');
               setTimeout(() => { loader.style.display = 'none'; }, 500);
             }, 1500);
-          }, 2000); // 2 segundos de "carga" falsa para efecto visual
+          }, 2000); // 2 segundos de "carga" para ver la animación
         }
       }
     })();
 
-    // --- LÓGICA DEL ADMIN PANEL (SUPABASE) ---
+    // --- 2. LÓGICA DEL ADMIN PANEL (SUPABASE) ---
     
-    // 1. CREDENCIALES SUPABASE
+    // Credenciales
     const SUPABASE_URL = 'https://ndkupidhlauzroduvech.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_fSQ9uBUx_YTfxr2QL2-kfQ_pdE2cqHv';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -364,7 +346,7 @@
     let currentItem = null; 
     let chartInstance = null;
 
-    // --- NAVEGACIÓN ---
+    // Navegación
     function navigateTo(viewId) {
       document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));
       document.getElementById(viewId).classList.add('active');
@@ -380,7 +362,7 @@
       }
     }
 
-    // --- FUNCIONES PRINCIPALES ---
+    // Funciones de Negocio
     function initFlow(flowType) {
       currentFlow = flowType;
       document.getElementById('contextLabel').innerText = flowType === 'admins' ? 'Gestionar Equipo' : 'Ver Enlaces';
@@ -393,7 +375,7 @@
       container.innerHTML = 'Cargando...';
 
       const user = window.Telegram.WebApp.initDataUnsafe?.user;
-      const userId = user ? user.id : 1298554649; // Fallback ID
+      const userId = user ? user.id : 1298554649; // Fallback
 
       try {
         const { data: channels, error } = await supabase
@@ -404,7 +386,7 @@
         if (error) throw error;
 
         if (!channels || channels.length === 0) {
-          container.innerHTML = '<div style="color:#ef4444; text-align:center; padding:20px;">No se encontraron canales vinculados.<br>Añade el bot como admin en tu canal.</div>';
+          container.innerHTML = '<div style="color:#ef4444; text-align:center; padding:20px;">No se encontraron canales.<br>Añade el bot como admin.</div>';
           return;
         }
 
@@ -425,7 +407,7 @@
         });
       } catch (err) {
         console.error(err);
-        container.innerHTML = `<div style="color:red">Error de conexión: ${err.message}</div>`;
+        container.innerHTML = `<div style="color:red">Error: ${err.message}</div>`;
       }
     }
 
@@ -446,7 +428,7 @@
         .eq('channel_id', channel.telegram_chat_id);
 
       if (!items || items.length === 0) {
-        container.innerHTML = `<div style="text-align:center;color:#666;padding:20px;">No hay ${currentFlow} registrados.<br>Ejecuta /sync en el bot.</div>`;
+        container.innerHTML = `<div style="text-align:center;color:#666;padding:20px;">No hay datos registrados.<br>Ejecuta /sync en el bot.</div>`;
         return;
       }
 
