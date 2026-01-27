@@ -2,80 +2,71 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Admin Management</title>
+  <title>Admin Panel</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
   <style>
-    /* Estilos base iguales a index */
-    :root { --bg:#020617; --glass:rgba(15,23,42,0.8); --border:rgba(255,255,255,0.1); --blue:#3b82f6; }
-    body { background:var(--bg); color:#f8fafc; font-family:'Inter', sans-serif; padding:20px; }
+    :root { --bg:#020617; --glass:rgba(30,41,59,0.7); --border:rgba(255,255,255,0.1); --blue:#3b82f6; --text:#f8fafc; }
+    body { background:var(--bg); color:var(--text); font-family:system-ui, sans-serif; padding:20px; }
     
-    /* Headers & Nav */
-    .nav { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
-    .btn-icon { width:40px; height:40px; border-radius:12px; background:rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center; color:white; border:none; cursor:pointer; }
+    .nav { display:flex; gap:15px; align-items:center; margin-bottom:20px; }
+    .btn-back { background:rgba(255,255,255,0.1); border:none; color:white; width:40px; height:40px; border-radius:12px; font-size:1.2em; cursor:pointer; }
     
-    /* Lists */
-    .list { display:flex; flex-direction:column; gap:10px; }
-    .item { background:var(--glass); border:1px solid var(--border); padding:15px; border-radius:16px; display:flex; align-items:center; gap:15px; cursor:pointer; }
-    .avatar { width:40px; height:40px; border-radius:50%; background:#1e293b; display:flex; align-items:center; justify-content:center; font-weight:bold; }
+    .card { background:var(--glass); border:1px solid var(--border); padding:15px; border-radius:16px; margin-bottom:10px; display:flex; align-items:center; gap:15px; cursor:pointer; transition:0.2s; backdrop-filter:blur(10px); }
+    .card:active { transform:scale(0.98); background:rgba(59,130,246,0.1); }
     
-    /* Permissions */
-    .perm-toggle { display:flex; justify-content:space-between; padding:12px; background:#0f172a; border-radius:12px; margin-bottom:8px; }
-    .switch { position:relative; display:inline-block; width:40px; height:24px; }
+    .avatar { width:45px; height:45px; background:#1e293b; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:1.1em; }
+    
+    /* Toggle Switch iOS Style */
+    .toggle-row { display:flex; justify-content:space-between; align-items:center; padding:12px; background:rgba(0,0,0,0.2); margin-bottom:8px; border-radius:12px; }
+    .switch { position:relative; display:inline-block; width:46px; height:26px; }
     .switch input { opacity:0; width:0; height:0; }
-    .slider { position:absolute; inset:0; background:#334155; border-radius:24px; transition:.4s; }
-    .slider:before { position:absolute; content:""; height:18px; width:18px; left:3px; bottom:3px; background:white; border-radius:50%; transition:.4s; }
-    input:checked + .slider { background:var(--blue); }
-    input:checked + .slider:before { transform: translateX(16px); }
+    .slider { position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:#334155; transition:.4s; border-radius:34px; }
+    .slider:before { position:absolute; content:""; height:20px; width:20px; left:3px; bottom:3px; background-color:white; transition:.4s; border-radius:50%; }
+    input:checked + .slider { background-color:var(--blue); }
+    input:checked + .slider:before { transform:translateX(20px); }
 
-    /* Chart Box */
-    .chart-box { background:var(--glass); border:1px solid var(--border); border-radius:20px; padding:15px; margin-top:20px; }
+    .btn-action { width:100%; padding:15px; background:var(--blue); color:white; border:none; border-radius:16px; font-weight:bold; font-size:1em; margin-top:20px; cursor:pointer; }
   </style>
 </head>
 <body>
 
   <div id="viewChannels">
     <div class="nav">
-      <a href="admin.html" class="btn-icon">←</a>
-      <h2>Canales</h2>
-      <div style="width:40px"></div>
+      <a href="admin.html" class="btn-back" style="display:flex;align-items:center;justify-content:center;text-decoration:none;">←</a>
+      <h2>Selecciona un Canal</h2>
     </div>
-    <div class="list" id="channelList">Cargando...</div>
+    <div id="channelList">Cargando canales...</div>
   </div>
 
   <div id="viewAdmins" style="display:none;">
     <div class="nav">
-      <button class="btn-icon" onclick="switchView('viewChannels')">←</button>
+      <button class="btn-back" onclick="showView('viewChannels')">←</button>
       <h2 id="lblChannel">Admins</h2>
-      <div style="width:40px"></div>
     </div>
     
-    <div class="chart-box">
-      <h4 style="margin-bottom:10px; color:#94a3b8;">Top Actividad (Posts)</h4>
-      <div id="compareChart"></div>
+    <div style="background:var(--glass); border-radius:16px; padding:10px; margin-bottom:20px; border:1px solid var(--border);">
+      <h4 style="margin:5px 0 10px 5px; color:#94a3b8;">Posts por Admin</h4>
+      <div id="postsChart"></div>
     </div>
-    
-    <h4 style="margin:20px 0 10px; color:#94a3b8;">Equipo</h4>
-    <div class="list" id="adminList"></div>
+
+    <div id="adminList"></div>
   </div>
 
   <div id="viewEdit" style="display:none;">
     <div class="nav">
-      <button class="btn-icon" onclick="switchView('viewAdmins')">←</button>
+      <button class="btn-back" onclick="showView('viewAdmins')">←</button>
       <h2 id="lblAdmin">Editar</h2>
-      <button class="btn-icon" style="color:#ef4444;" onclick="alert('Función Demote')">🗑</button>
     </div>
-
-    <div class="list" id="permContainer">
-      </div>
     
-    <button onclick="savePerms()" style="width:100%; margin-top:20px; padding:15px; background:var(--blue); border:none; border-radius:16px; color:white; font-weight:bold; font-size:1em;">Guardar Cambios</button>
+    <div id="permContainer"></div>
+    <button class="btn-action" onclick="saveChanges()">Guardar Permisos</button>
   </div>
 
   <script>
-    // Configura TU Supabase aquí
+    // --- CONEXIÓN SUPABASE (IGUAL QUE ANALYTICS) ---
     const sbUrl = 'https://ndkupidhlauzroduvech.supabase.co';
     const sbKey = 'sb_publishable_fSQ9uBUx_YTfxr2QL2-kfQ_pdE2cqHv';
     const supabase = window.supabase.createClient(sbUrl, sbKey);
@@ -84,64 +75,86 @@
 
     let currentAdmin = null;
 
-    // 1. Cargar Canales
-    async function loadChannels() {
-      const { data } = await supabase.from('managed_channels').select('*'); // Filtra por user_id en prod
+    // 1. CARGAR CANALES (Lógica de analytics.html)
+    async function init() {
+      const user = tg.initDataUnsafe?.user;
+      const userId = user ? user.id : 1298554649; // Tu ID fallback
+
+      const { data: channels, error } = await supabase
+        .from('managed_channels')
+        .select('*')
+        .eq('user_id', userId);
+
       const list = document.getElementById('channelList');
+      
+      if(error || !channels.length) {
+        list.innerHTML = `<div style="text-align:center; color:#ef4444; padding:20px;">No se encontraron canales vinculados.<br><small>${error?.message || ''}</small></div>`;
+        return;
+      }
+
       list.innerHTML = '';
-      data.forEach(c => {
-        list.innerHTML += `<div class="item" onclick="loadAdmins(${c.telegram_chat_id}, '${c.chat_title}')">
-          <div class="avatar">📢</div> <b>${c.chat_title}</b>
+      channels.forEach(c => {
+        list.innerHTML += `
+        <div class="card" onclick="loadAdmins(${c.telegram_chat_id}, '${c.chat_title}')">
+          <div class="avatar">📢</div>
+          <div style="flex:1;">
+            <div style="font-weight:bold;">${c.chat_title}</div>
+            <div style="font-size:0.8em; color:#94a3b8;">ID: ${c.telegram_chat_id}</div>
+          </div>
+          <div style="color:var(--blue)">Gestionar ></div>
         </div>`;
       });
     }
 
-    // 2. Cargar Admins y Gráfica
+    // 2. CARGAR ADMINS DEL CANAL
     async function loadAdmins(chatId, title) {
-      switchView('viewAdmins');
+      showView('viewAdmins');
       document.getElementById('lblChannel').innerText = title;
-      const { data: admins } = await supabase.from('channel_admins').select('*').eq('channel_id', chatId);
-      
-      // Render Lista
+      document.getElementById('adminList').innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8;">Cargando admins...</div>';
+
+      const { data: admins } = await supabase
+        .from('channel_admins')
+        .select('*')
+        .eq('channel_id', chatId);
+
       const list = document.getElementById('adminList');
       list.innerHTML = '';
+
+      if(!admins || !admins.length) {
+        list.innerHTML = '<div style="text-align:center;">No hay admins sincronizados. Ejecuta /sync en el canal.</div>';
+        return;
+      }
+
+      // Render Lista
       admins.forEach(a => {
-        list.innerHTML += `<div class="item" onclick='editAdmin(${JSON.stringify(a)})'>
-          <div class="avatar">${a.first_name[0]}</div>
-          <div style="flex:1"><b>${a.first_name}</b><br><small style="color:#94a3b8">${a.role}</small></div>
-          <div>✏️</div>
+        list.innerHTML += `
+        <div class="card" onclick='editAdmin(${JSON.stringify(a)})'>
+          <div class="avatar">${(a.first_name||'U')[0]}</div>
+          <div style="flex:1;">
+            <div style="font-weight:bold;">${a.first_name}</div>
+            <div style="font-size:0.8em; color:#94a3b8;">${a.role || 'Admin'} • ${a.stats_posts} Posts</div>
+          </div>
+          <div>⚙️</div>
         </div>`;
       });
 
       // Render Gráfica Comparativa
-      const names = admins.map(a => a.first_name);
-      const posts = admins.map(a => a.stats_posts || 0);
-      
-      new ApexCharts(document.querySelector("#compareChart"), {
-        series: [{ name: 'Posts', data: posts }],
-        chart: { type: 'bar', height: 200, toolbar:{show:false}, background:'transparent' },
-        colors: ['#3b82f6'],
-        plotOptions: { bar: { borderRadius: 4, horizontal: true } },
-        dataLabels: { enabled: false },
-        xaxis: { categories: names, labels:{style:{colors:'#94a3b8'}} },
-        yaxis: { labels:{style:{colors:'white'}} },
-        theme: { mode: 'dark' },
-        grid: { borderColor: '#334155' }
-      }).render();
+      renderChart(admins);
     }
 
-    // 3. Editar Permisos
+    // 3. EDITAR ADMIN
     function editAdmin(admin) {
       currentAdmin = admin;
-      switchView('viewEdit');
+      showView('viewEdit');
       document.getElementById('lblAdmin').innerText = admin.first_name;
-      
+
       const perms = [
         {k:'can_post_messages', l:'Publicar Mensajes'},
         {k:'can_edit_messages', l:'Editar Mensajes'},
         {k:'can_delete_messages', l:'Borrar Mensajes'},
         {k:'can_restrict_members', l:'Banear Usuarios'},
-        {k:'can_invite_users', l:'Añadir Usuarios'}
+        {k:'can_invite_users', l:'Añadir Usuarios'},
+        {k:'can_change_info', l:'Cambiar Info del Canal'}
       ];
 
       const cont = document.getElementById('permContainer');
@@ -149,31 +162,61 @@
       perms.forEach(p => {
         const checked = admin[p.k] ? 'checked' : '';
         cont.innerHTML += `
-          <label class="perm-toggle">
-            <span>${p.l}</span>
-            <div class="switch"><input type="checkbox" id="${p.k}" ${checked}><span class="slider"></span></div>
-          </label>`;
+        <label class="toggle-row">
+          <span>${p.l}</span>
+          <label class="switch">
+            <input type="checkbox" id="${p.k}" ${checked}>
+            <span class="slider"></span>
+          </label>
+        </label>`;
       });
     }
 
-    async function savePerms() {
-      // Recoger valores
+    // 4. GUARDAR CAMBIOS
+    async function saveChanges() {
       const updates = {};
-      ['can_post_messages','can_edit_messages','can_delete_messages','can_restrict_members','can_invite_users'].forEach(k => {
+      const perms = ['can_post_messages','can_edit_messages','can_delete_messages','can_restrict_members','can_invite_users','can_change_info'];
+      
+      perms.forEach(k => {
         updates[k] = document.getElementById(k).checked;
       });
 
-      await supabase.from('channel_admins').update(updates).eq('id', currentAdmin.id);
-      tg.showAlert("Permisos actualizados");
-      switchView('viewAdmins');
+      const { error } = await supabase
+        .from('channel_admins')
+        .update(updates)
+        .eq('id', currentAdmin.id);
+
+      if(!error) {
+        tg.showAlert("Permisos guardados correctamente.");
+        showView('viewAdmins');
+      } else {
+        tg.showAlert("Error: " + error.message);
+      }
     }
 
-    function switchView(id) {
+    function renderChart(admins) {
+      const names = admins.map(a => a.first_name);
+      const posts = admins.map(a => a.stats_posts || 0);
+
+      new ApexCharts(document.querySelector("#postsChart"), {
+        series: [{ name: 'Posts', data: posts }],
+        chart: { type: 'bar', height: 200, toolbar:{show:false}, background:'transparent' },
+        plotOptions: { bar: { borderRadius: 4, horizontal: true, distributed: true } },
+        dataLabels: { enabled: true },
+        xaxis: { categories: names, labels:{style:{colors:'#94a3b8'}} },
+        theme: { mode: 'dark' },
+        colors: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'],
+        grid: { show:false }
+      }).render();
+    }
+
+    function showView(id) {
       ['viewChannels', 'viewAdmins', 'viewEdit'].forEach(v => document.getElementById(v).style.display = 'none');
       document.getElementById(id).style.display = 'block';
     }
 
-    loadChannels();
+    // Iniciar al cargar
+    init();
   </script>
 </body>
 </html>
