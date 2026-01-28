@@ -9,25 +9,38 @@
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
   <style>
-    /* Estilos idénticos a admin-panel para consistencia */
-    :root { --bg:#020617; --glass:rgba(30,41,59,0.7); --border:rgba(255,255,255,0.1); --green:#10b981; --text:#f8fafc; --blue:#3b82f6; }
+    /* Estilos base */
+    :root { --bg:#020617; --glass:rgba(30,41,59,0.7); --border:rgba(255,255,255,0.1); --green:#10b981; --red:#ef4444; --text:#f8fafc; --blue:#3b82f6; }
     body { background:var(--bg); color:var(--text); font-family:system-ui, sans-serif; padding:20px; }
 
     .nav { display:flex; gap:15px; align-items:center; margin-bottom:20px; }
     .btn-back { background:rgba(255,255,255,0.1); border:none; color:white; width:40px; height:40px; border-radius:12px; font-size:1.2em; cursor:pointer; }
 
-    .card { background:var(--glass); border:1px solid var(--border); padding:15px; border-radius:16px; margin-bottom:10px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; transition:0.2s; backdrop-filter:blur(10px); }
-    .card:active { transform:scale(0.98); background:rgba(16,185,129,0.1); }
+    .card { background:var(--glass); border:1px solid var(--border); padding:15px; border-radius:16px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; transition:0.2s; backdrop-filter:blur(10px); }
+    
+    /* Estilos específicos para la tarjeta de enlace */
+    .link-card { display: flex; flex-direction: row; align-items: center; width: 100%; }
+    .link-info { flex: 1; }
+    .link-stats { text-align: right; margin-right: 15px; }
+    
+    /* Botón de Borrar (Papelera) */
+    .btn-delete {
+        background: rgba(239, 68, 68, 0.2); 
+        color: var(--red);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        width: 36px; height: 36px;
+        border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer; font-size: 1.1em;
+    }
+    .btn-delete:active { background: var(--red); color: white; }
 
     .input-group { margin-bottom:15px; }
     .input-group label { display:block; color:#94a3b8; font-size:0.85em; margin-bottom:5px; }
     .input-field { width:100%; background:#0f172a; border:1px solid #334155; padding:12px; border-radius:10px; color:white; outline:none; font-size:1em; }
 
     .fab { position:fixed; bottom:30px; right:30px; width:56px; height:56px; background:var(--green); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.8em; color:white; box-shadow:0 10px 25px rgba(16,185,129,0.3); border:none; cursor:pointer; z-index:100; }
-    .fab:active { transform:scale(0.9); }
-
     .btn-create { width:100%; padding:15px; background:var(--green); border:none; border-radius:16px; color:black; font-weight:bold; font-size:1em; margin-top:10px; cursor:pointer; }
-
     #userInfo { font-size: 0.8em; color: #64748b; margin-bottom: 15px; text-align: center; }
   </style>
 </head>
@@ -38,9 +51,9 @@
   <div id="viewChannels">
     <div class="nav">
       <a href="admin.html" class="btn-back" style="display:flex;align-items:center;justify-content:center;text-decoration:none;">←</a>
-      <h2>Selecciona Canal</h2>
+      <h2>Canales</h2>
     </div>
-    <div id="channelList">Cargando canales...</div>
+    <div id="channelList">Cargando...</div>
   </div>
 
   <div id="viewLinks" style="display:none;">
@@ -48,12 +61,10 @@
       <button class="btn-back" onclick="showView('viewChannels')">←</button>
       <h2 id="lblChannel">Enlaces</h2>
     </div>
-
     <div style="background:var(--glass); border-radius:16px; padding:10px; margin-bottom:20px; border:1px solid var(--border);">
-      <h4 style="margin:5px 0 10px 5px; color:#94a3b8;">Rendimiento de Enlaces</h4>
+      <h4 style="margin:5px 0 10px 5px; color:#94a3b8;">Rendimiento</h4>
       <div id="trafficChart"></div>
     </div>
-
     <div id="linksContainer"></div>
     <button class="fab" onclick="showView('viewCreate')">+</button>
   </div>
@@ -63,25 +74,21 @@
       <button class="btn-back" onclick="showView('viewLinks')">✕</button>
       <h2>Nuevo Enlace</h2>
     </div>
-
     <div class="input-group">
-      <label>Nombre del enlace (Etiqueta)</label>
-      <input type="text" id="lnkName" class="input-field" placeholder="Ej: Campaña Twitter">
+      <label>Nombre (Etiqueta)</label>
+      <input type="text" id="lnkName" class="input-field" placeholder="Ej: Campaña TikTok">
     </div>
-
     <div class="input-group">
-      <label>Tipo de acceso</label>
+      <label>Tipo</label>
       <select id="lnkType" class="input-field">
-        <option value="direct">⚡️ Directo (Unión automática)</option>
+        <option value="direct">⚡️ Directo</option>
         <option value="approve">🔒 Requiere Aprobación</option>
       </select>
     </div>
-
     <div class="input-group">
-      <label>Límite de usuarios (0 = Infinito)</label>
+      <label>Límite (0 = Infinito)</label>
       <input type="number" id="lnkLimit" class="input-field" value="0">
     </div>
-
     <button class="btn-create" onclick="createLink()">Generar Enlace</button>
   </div>
 
@@ -93,71 +100,44 @@
     const tg = window.Telegram.WebApp;
     tg.expand();
 
-    // Estado Global
     let currentChatId = null; 
     let chartInstance = null;
 
-    // API Wrapper (Conexión Directa)
     async function apiRequest(endpoint, method = 'GET', body = null) {
-      const headers = {
-        'apikey': SB_KEY,
-        'Authorization': `Bearer ${SB_KEY}`,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=representation'
-      };
+      const headers = { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
       const options = { method, headers };
       if (body) options.body = JSON.stringify(body);
-
       const response = await fetch(`${SB_URL}/rest/v1/${endpoint}`, options);
-      if (!response.ok) {
-        // Intentar leer el error detallado del servidor
-        const errorText = await response.text();
-        throw new Error(`Error API: ${response.status} - ${errorText}`);
-      }
+      if (!response.ok) { const txt = await response.text(); throw new Error(txt); }
       return await response.json();
     }
 
-    // --- PASO 1: CARGAR CANALES ---
+    // 1. CARGAR CANALES
     async function loadChannels() {
       const user = tg.initDataUnsafe?.user;
       const infoDiv = document.getElementById('userInfo');
-      const list = document.getElementById('channelList');
-
-      if (!user) {
-        infoDiv.innerText = "Modo Navegador (Sin ID)";
-      } else {
-        infoDiv.innerText = `👤 ${user.first_name} (ID: ${user.id})`;
-      }
-
+      if (user) infoDiv.innerText = `👤 ${user.first_name}`;
+      
       try {
-        // Usamos el mismo método que en admin-panel.html
-        // Si necesitas filtrar por seguridad, descomenta el filtro de user_id en el futuro
+        // Obtenemos todos los canales para asegurar que funcione
         const channels = await apiRequest('managed_channels?select=*');
-
-        if (channels.length === 0) {
-          list.innerHTML = `<div style="text-align:center; padding:20px; color:#94a3b8;">
-            No hay canales sincronizados.<br>
-            Añade el bot a un canal y escribe <code>/sync</code>
-          </div>`;
-          return;
-        }
-
+        const list = document.getElementById('channelList');
+        
+        if (channels.length === 0) { list.innerHTML = '<div style="text-align:center;padding:20px;color:#94a3b8">Sin canales. Usa /sync</div>'; return; }
+        
         list.innerHTML = '';
         channels.forEach(c => {
           const safeTitle = c.chat_title.replace(/'/g, "\\'");
           list.innerHTML += `
-          <div class="card" onclick="openChannel(${c.telegram_chat_id}, '${safeTitle}')">
-            <div style="font-weight:bold; font-size:1.1em;">📢 ${c.chat_title}</div>
+          <div class="card" onclick="openChannel(${c.telegram_chat_id}, '${safeTitle}')" style="cursor:pointer">
+            <div style="font-weight:bold;">📢 ${c.chat_title}</div>
             <div style="color:var(--green)">Abrir ></div>
           </div>`;
         });
-
-      } catch (e) {
-        list.innerHTML = `<div style="color:red; text-align:center">Error de conexión:<br>${e.message}</div>`;
-      }
+      } catch (e) { alert(e.message); }
     }
 
-    // --- PASO 2: ABRIR CANAL Y CARGAR ENLACES ---
+    // 2. CARGAR ENLACES
     async function openChannel(chatId, title) {
       currentChatId = chatId;
       document.getElementById('lblChannel').innerText = title;
@@ -167,13 +147,14 @@
 
     async function loadLinks() {
       const list = document.getElementById('linksContainer');
-      list.innerHTML = '<div style="text-align:center; color:#94a3b8">Cargando enlaces...</div>';
-
+      list.innerHTML = '<div style="text-align:center;color:#94a3b8">Cargando...</div>';
+      
       try {
-        const links = await apiRequest(`invite_links?select=*&channel_id=eq.${currentChatId}`);
-
+        // Solo mostramos los activos o pendientes de generación (No mostramos los que se están borrando)
+        const links = await apiRequest(`invite_links?select=*&channel_id=eq.${currentChatId}&status=neq.pending_revoke`);
+        
         if (links.length === 0) {
-          list.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8">No hay enlaces creados aún.</div>';
+          list.innerHTML = '<div style="text-align:center;padding:20px;color:#94a3b8">No hay enlaces activos.</div>';
           renderChart([], []);
           return;
         }
@@ -182,41 +163,40 @@
         links.forEach(l => {
           const typeIcon = l.creates_join_request ? '🔒' : '⚡️';
           const limitText = l.member_limit > 0 ? `/ ${l.member_limit}` : '';
+          const isPending = l.invite_link === 'PENDING_GENERATION';
+          const linkColor = isPending ? '#f59e0b' : '#94a3b8';
+          const linkText = isPending ? '⏳ Generando...' : 'Enlace Activo';
 
           list.innerHTML += `
-          <div class="card">
-            <div>
+          <div class="card link-card">
+            <div class="link-info">
               <div style="font-weight:bold; font-size:1.1em;">${l.name || 'Sin Etiqueta'}</div>
-              <div style="font-size:0.85em; color:#94a3b8; margin-top:4px;">${typeIcon} Creado por: ${l.creator_id}</div>
+              <div style="font-size:0.85em; color:${linkColor}; margin-top:4px;">${typeIcon} ${linkText}</div>
             </div>
-            <div style="text-align:right;">
+            
+            <div class="link-stats">
               <div style="font-weight:bold; color:var(--green); font-size:1.2em;">${l.joins || 0}</div>
-              <div style="font-size:0.7em; color:#94a3b8;">UNIONES${limitText}</div>
+              <div style="font-size:0.6em; color:#94a3b8;">UNIONES${limitText}</div>
             </div>
+
+            <button class="btn-delete" onclick="deleteLink('${l.id}', '${l.name}')">🗑️</button>
           </div>`;
         });
-
-        const series = links.map(l => l.joins);
-        const labels = links.map(l => l.name || 'Link');
-        renderChart(series, labels);
-
-      } catch (e) {
-        list.innerHTML = `<div style="color:#ef4444">Error: ${e.message}</div>`;
-      }
+        
+        renderChart(links.map(l=>l.joins), links.map(l=>l.name));
+      } catch (e) { list.innerHTML = `<div style="color:red">Error: ${e.message}</div>`; }
     }
 
-    // --- PASO 3: CREAR ENLACE (CORREGIDO) ---
+    // 3. CREAR ENLACE
     async function createLink() {
       const btn = document.querySelector('.btn-create');
       btn.innerText = "Procesando...";
-
       const name = document.getElementById('lnkName').value;
-      const type = document.getElementById('lnkType').value === 'approve'; 
+      const type = document.getElementById('lnkType').value === 'approve';
       const limit = parseInt(document.getElementById('lnkLimit').value) || 0;
       const user = tg.initDataUnsafe?.user;
-
+      
       try {
-        // CORRECCIÓN: Enviamos 'invite_link' como texto pendiente para evitar Error 400
         await apiRequest('invite_links', 'POST', {
           channel_id: currentChatId,
           name: name,
@@ -224,28 +204,38 @@
           member_limit: limit,
           creator_id: user ? user.id : 0,
           joins: 0,
-          invite_link: "PENDING_GENERATION" // <--- CRUCIAL PARA EVITAR ERROR 400
+          invite_link: "PENDING_GENERATION",
+          status: "active"
         });
-
-        if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-        tg.showAlert("Solicitud enviada. El bot creará el enlace en Telegram.");
-
-        // Reset
-        showView('viewLinks');
-        loadLinks(); 
+        tg.showAlert("Solicitud enviada.");
+        showView('viewLinks'); loadLinks();
         document.getElementById('lnkName').value = '';
-        document.getElementById('lnkLimit').value = '0';
-
-      } catch (e) {
-        tg.showAlert("Error: " + e.message);
-      }
+      } catch (e) { tg.showAlert("Error: " + e.message); }
       btn.innerText = "Generar Enlace";
     }
 
-    // --- UTILIDADES ---
+    // 4. BORRAR ENLACE (NUEVO)
+    async function deleteLink(id, name) {
+      if(!confirm(`¿Estás seguro de eliminar el enlace "${name}"?\nDejará de funcionar inmediatamente.`)) return;
+      
+      // Feedback visual optimista: ocultar tarjeta
+      // (En realidad recargamos la lista, pero esto da sensación de rapidez)
+      tg.HapticFeedback.notificationOccurred('warning');
+      
+      try {
+        // Marcamos como 'pending_revoke' para que el worker lo procese
+        await apiRequest(`invite_links?id=eq.${id}`, 'PATCH', { status: 'pending_revoke' });
+        
+        // Recargamos la lista (ya no aparecerá porque filtramos status != pending_revoke)
+        loadLinks();
+      } catch (e) {
+        tg.showAlert("Error al borrar: " + e.message);
+      }
+    }
+
+    // Utilidades
     function renderChart(series, labels) {
       if(chartInstance) chartInstance.destroy();
-
       const options = {
         series: [{ name: 'Uniones', data: series }],
         chart: { type: 'bar', height: 150, toolbar:{show:false}, background:'transparent' },
@@ -256,7 +246,6 @@
         theme: { mode: 'dark' },
         grid: { show: false }
       };
-
       chartInstance = new ApexCharts(document.querySelector("#trafficChart"), options);
       chartInstance.render();
     }
@@ -265,7 +254,6 @@
       ['viewChannels', 'viewLinks', 'viewCreate'].forEach(v => document.getElementById(v).style.display = 'none');
       document.getElementById(id).style.display = 'block';
     }
-
     loadChannels();
   </script>
 </body>
