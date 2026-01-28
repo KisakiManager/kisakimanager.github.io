@@ -4,40 +4,44 @@
   <meta charset="UTF-8">
   <title>Admin Rating</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-  
+
   <style>
-    /* Estilos base consistentes (Deep Blue & Glass) */
+    /* Estilos consistentes (Deep Blue & Glass) */
     :root { --bg:#020617; --glass:rgba(30,41,59,0.7); --border:rgba(255,255,255,0.1); --gold:#f59e0b; --text:#f8fafc; --blue:#3b82f6; }
     body { background:var(--bg); color:var(--text); font-family:system-ui, sans-serif; padding:20px; }
-    
+
     .nav { display:flex; gap:15px; align-items:center; margin-bottom:20px; }
     .btn-back { background:rgba(255,255,255,0.1); border:none; color:white; width:40px; height:40px; border-radius:12px; font-size:1.2em; cursor:pointer; }
 
     .card { background:var(--glass); border:1px solid var(--border); padding:15px; border-radius:16px; margin-bottom:10px; cursor:pointer; display:flex; align-items:center; gap:15px; transition:0.2s; backdrop-filter:blur(10px); }
     .card:active { transform:scale(0.98); background:rgba(245,158,11,0.1); }
-    
+
     .avatar { width:45px; height:45px; background:#1e293b; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:1.1em; }
 
     /* Contenedor de Estrellas */
     .rating-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
     .rating-box { background:var(--glass); padding:12px; border-radius:16px; border:1px solid var(--border); display:flex; flex-direction:column; align-items:center; }
-    .rating-label { font-size: 0.8em; color: #94a3b8; margin-bottom: 5px; }
-    
-    .stars { display:flex; gap:5px; font-size:1.2em; cursor:pointer; }
-    .star { color:#334155; transition:0.2s; }
-    .star.active { color:var(--gold); transform: scale(1.1); }
+    .rating-label { font-size: 0.75em; color: #94a3b8; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
 
-    textarea { width:100%; background:#0f172a; border:1px solid #334155; color:white; padding:15px; border-radius:12px; min-height:80px; font-family:inherit; outline:none; }
+    .stars { display:flex; gap:5px; font-size:1.4em; cursor:pointer; }
+    .star { color:#334155; transition:0.2s; }
+    .star.active { color:var(--gold); transform: scale(1.1); text-shadow: 0 0 10px rgba(245, 158, 11, 0.5); }
+
+    textarea { width:100%; background:#0f172a; border:1px solid #334155; color:white; padding:15px; border-radius:12px; min-height:80px; font-family:inherit; outline:none; font-size: 0.9em; box-sizing: border-box; }
+    textarea:focus { border-color: var(--gold); }
+
+    .btn-submit { width:100%; padding:15px; background:linear-gradient(135deg, #f59e0b, #d97706); border:none; border-radius:16px; color:white; font-weight:bold; font-size:1em; margin-top:15px; cursor:pointer; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3); }
+    .btn-submit:active { opacity: 0.9; transform: scale(0.98); }
     
-    .btn-submit { width:100%; padding:15px; background:linear-gradient(135deg, #f59e0b, #d97706); border:none; border-radius:16px; color:white; font-weight:bold; font-size:1em; margin-top:15px; cursor:pointer; }
-    .btn-submit:active { opacity: 0.9; }
+    #userInfo { font-size: 0.8em; color: #64748b; margin-bottom: 15px; text-align: center; }
   </style>
 </head>
 <body>
+
+  <div id="userInfo">Cargando identidad...</div>
 
   <div id="viewChannels">
     <div class="nav"><a href="admin.html" class="btn-back" style="display:flex;align-items:center;justify-content:center;text-decoration:none;">←</a> <h2>Evaluar Equipo</h2></div>
@@ -51,107 +55,118 @@
 
   <div id="viewRate" style="display:none;">
     <div class="nav"><button class="btn-back" onclick="showView('viewAdmins')">←</button> <h2 id="lblAdmin">Evaluar</h2></div>
-    
+
     <div style="background:var(--glass); border-radius:20px; padding:10px; margin-bottom:15px; border:1px solid var(--border);">
       <div id="radarChart"></div>
     </div>
 
     <div class="rating-container">
-      
       <div class="rating-box">
         <span class="rating-label">Publicaciones</span>
         <div class="stars" id="s_posts">
-          <span onclick="rate('posts',1)">★</span><span onclick="rate('posts',2)">★</span><span onclick="rate('posts',3)">★</span><span onclick="rate('posts',4)">★</span><span onclick="rate('posts',5)">★</span>
+          <span class="star" onclick="rate('posts',1)">★</span><span class="star" onclick="rate('posts',2)">★</span><span class="star" onclick="rate('posts',3)">★</span><span class="star" onclick="rate('posts',4)">★</span><span class="star" onclick="rate('posts',5)">★</span>
         </div>
       </div>
-
       <div class="rating-box">
-        <span class="rating-label">Actividad Diaria</span>
+        <span class="rating-label">Actividad</span>
         <div class="stars" id="s_activity">
-          <span onclick="rate('activity',1)">★</span><span onclick="rate('activity',2)">★</span><span onclick="rate('activity',3)">★</span><span onclick="rate('activity',4)">★</span><span onclick="rate('activity',5)">★</span>
+          <span class="star" onclick="rate('activity',1)">★</span><span class="star" onclick="rate('activity',2)">★</span><span class="star" onclick="rate('activity',3)">★</span><span class="star" onclick="rate('activity',4)">★</span><span class="star" onclick="rate('activity',5)">★</span>
         </div>
       </div>
-
       <div class="rating-box">
-        <span class="rating-label">Diseño / Estructura</span>
+        <span class="rating-label">Diseño</span>
         <div class="stars" id="s_design">
-          <span onclick="rate('design',1)">★</span><span onclick="rate('design',2)">★</span><span onclick="rate('design',3)">★</span><span onclick="rate('design',4)">★</span><span onclick="rate('design',5)">★</span>
+          <span class="star" onclick="rate('design',1)">★</span><span class="star" onclick="rate('design',2)">★</span><span class="star" onclick="rate('design',3)">★</span><span class="star" onclick="rate('design',4)">★</span><span class="star" onclick="rate('design',5)">★</span>
         </div>
       </div>
-
       <div class="rating-box">
         <span class="rating-label">Originalidad</span>
         <div class="stars" id="s_originality">
-          <span onclick="rate('originality',1)">★</span><span onclick="rate('originality',2)">★</span><span onclick="rate('originality',3)">★</span><span onclick="rate('originality',4)">★</span><span onclick="rate('originality',5)">★</span>
+          <span class="star" onclick="rate('originality',1)">★</span><span class="star" onclick="rate('originality',2)">★</span><span class="star" onclick="rate('originality',3)">★</span><span class="star" onclick="rate('originality',4)">★</span><span class="star" onclick="rate('originality',5)">★</span>
         </div>
       </div>
-
       <div class="rating-box">
-        <span class="rating-label">Trabajo en Equipo</span>
+        <span class="rating-label">Equipo</span>
         <div class="stars" id="s_teamwork">
-          <span onclick="rate('teamwork',1)">★</span><span onclick="rate('teamwork',2)">★</span><span onclick="rate('teamwork',3)">★</span><span onclick="rate('teamwork',4)">★</span><span onclick="rate('teamwork',5)">★</span>
+          <span class="star" onclick="rate('teamwork',1)">★</span><span class="star" onclick="rate('teamwork',2)">★</span><span class="star" onclick="rate('teamwork',3)">★</span><span class="star" onclick="rate('teamwork',4)">★</span><span class="star" onclick="rate('teamwork',5)">★</span>
         </div>
       </div>
-
       <div class="rating-box">
         <span class="rating-label">Comunicación</span>
         <div class="stars" id="s_comms">
-          <span onclick="rate('comms',1)">★</span><span onclick="rate('comms',2)">★</span><span onclick="rate('comms',3)">★</span><span onclick="rate('comms',4)">★</span><span onclick="rate('comms',5)">★</span>
+          <span class="star" onclick="rate('comms',1)">★</span><span class="star" onclick="rate('comms',2)">★</span><span class="star" onclick="rate('comms',3)">★</span><span class="star" onclick="rate('comms',4)">★</span><span class="star" onclick="rate('comms',5)">★</span>
         </div>
       </div>
-
     </div>
 
-    <textarea id="feedback" placeholder="Escribe un feedback para el admin (se enviará por privado)..."></textarea>
+    <textarea id="feedback" placeholder="Escribe un feedback para el admin (se guardará en su perfil)..."></textarea>
     <button class="btn-submit" onclick="submitRating()">Enviar Evaluación</button>
   </div>
 
   <script>
-    // ⚠️ CREDENCIALES
-    const sbUrl = 'https://ndkupidhlauzroduvech.supabase.co';
-    const sbKey = 'sb_publishable_fSQ9uBUx_YTfxr2QL2-kfQ_pdE2cqHv';
-    
-    let supabase;
-    try { supabase = window.supabase.createClient(sbUrl, sbKey); } catch(e) { alert("Error Supabase"); }
+    // --- TUS CREDENCIALES ---
+    const SB_URL = 'https://ndkupidhlauzroduvech.supabase.co';
+    const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ka3VwaWRobGF1enJvZHV2ZWNoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkwMzY2NzMsImV4cCI6MjA4NDYxMjY3M30.k6OufxTVTfVimTcUjYJUpLursUGjVtiTgq68xauUKG0';
 
     const tg = window.Telegram.WebApp;
     tg.expand();
 
     // Estado
     let currentAdminId = 0;
-    // Valores por defecto
-    let scores = { posts:3, activity:3, design:3, originality:3, teamwork:3, comms:3 };
+    // Iniciamos con 1 para que la gráfica no salga vacía
+    let scores = { posts:1, activity:1, design:1, originality:1, teamwork:1, comms:1 };
     let chartInstance = null;
+
+    // API Wrapper
+    async function apiRequest(endpoint, method = 'GET', body = null) {
+      const headers = {
+        'apikey': SB_KEY,
+        'Authorization': `Bearer ${SB_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      };
+      const options = { method, headers };
+      if (body) options.body = JSON.stringify(body);
+
+      const response = await fetch(`${SB_URL}/rest/v1/${endpoint}`, options);
+      if (!response.ok) {
+        const err = await response.text();
+        throw new Error(`Error API: ${err}`);
+      }
+      return await response.json();
+    }
 
     // 1. CARGAR CANALES
     async function init() {
       const user = tg.initDataUnsafe?.user;
-      const userId = user ? user.id : 1298554649; // Fallback
-
+      const infoDiv = document.getElementById('userInfo');
       const list = document.getElementById('channelList');
-      
-      const { data: channels, error } = await supabase
-        .from('managed_channels')
-        .select('*')
-        .eq('user_id', userId);
 
-      if (error || !channels || channels.length === 0) {
-        list.innerHTML = `<div style="text-align:center; padding:20px; color:#94a3b8">
-          No hay canales.<br>Asegúrate de ejecutar <code>/sync</code> en tu grupo.
-        </div>`;
-        return;
-      }
-      
-      list.innerHTML = '';
-      channels.forEach(c => {
-        const safeTitle = c.chat_title.replace(/'/g, "\\'");
-        list.innerHTML += `
-        <div class="card" onclick="loadAdmins(${c.telegram_chat_id}, '${safeTitle}')">
-          <div class="avatar">📢</div> 
-          <div style="flex:1"><b>${c.chat_title}</b></div>
-          <div style="color:var(--gold)">Abrir ></div>
-        </div>`;
-      });
+      if (!user) infoDiv.innerText = "Modo Navegador (Sin ID)";
+      else infoDiv.innerText = `👤 ${user.first_name} (ID: ${user.id})`;
+
+      try {
+        // Obtenemos todos los canales para asegurar funcionamiento
+        const channels = await apiRequest('managed_channels?select=*');
+
+        if (channels.length === 0) {
+          list.innerHTML = `<div style="text-align:center; padding:20px; color:#94a3b8">
+            No hay canales.<br>Ejecuta <code>/sync</code> en tu grupo.
+          </div>`;
+          return;
+        }
+
+        list.innerHTML = '';
+        channels.forEach(c => {
+          const safeTitle = c.chat_title.replace(/'/g, "\\'");
+          list.innerHTML += `
+          <div class="card" onclick="loadAdmins(${c.telegram_chat_id}, '${safeTitle}')">
+            <div class="avatar">📢</div> 
+            <div style="flex:1"><b>${c.chat_title}</b></div>
+            <div style="color:var(--gold)">Abrir ></div>
+          </div>`;
+        });
+      } catch (e) { list.innerHTML = `<div style="color:red; text-align:center">${e.message}</div>`; }
     }
 
     // 2. CARGAR ADMINS
@@ -159,51 +174,58 @@
       showView('viewAdmins');
       document.getElementById('lblChannel').innerText = title;
       const list = document.getElementById('adminList');
-      list.innerHTML = 'Cargando...';
+      list.innerHTML = '<div style="text-align:center;color:#94a3b8">Cargando...</div>';
 
-      const { data: admins, error } = await supabase
-        .from('channel_admins')
-        .select('*')
-        .eq('channel_id', chatId);
-      
-      if (!admins || admins.length === 0) {
-        list.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8">No hay admins en este canal.</div>';
-        return;
-      }
+      try {
+        // Buscamos admins del canal seleccionado
+        const admins = await apiRequest(`channel_admins?select=*&channel_id=eq.${chatId}`);
 
-      list.innerHTML = '';
-      admins.forEach(a => {
-        // Escapar nombre
-        const safeName = (a.first_name || 'User').replace(/'/g, "\\'");
-        
-        list.innerHTML += `
-        <div class="card" onclick="openRate(${a.id}, '${safeName}')">
-          <div class="avatar">${safeName[0]}</div>
-          <div style="flex:1">
-            <b>${safeName}</b><br>
-            <small style="color:#94a3b8">${a.role || 'Admin'}</small>
-          </div>
-          <div style="color:var(--gold)">★ Evaluar</div>
-        </div>`;
-      });
+        if (!admins || admins.length === 0) {
+          list.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8">No hay admins en este canal.</div>';
+          return;
+        }
+
+        list.innerHTML = '';
+        admins.forEach(a => {
+          // Guardar ID y nombre en formato seguro
+          const safeName = (a.first_name || 'User').replace(/'/g, "\\'");
+          // Convertimos el ID (BigInt) a String para evitar problemas de JS
+          const safeId = String(a.user_id); 
+
+          list.innerHTML += `
+          <div class="card" onclick="openRate('${safeId}', '${safeName}')">
+            <div class="avatar">${safeName[0]}</div>
+            <div style="flex:1">
+              <b>${safeName}</b><br>
+              <small style="color:#94a3b8">${a.role || 'Admin'}</small>
+            </div>
+            <div style="color:var(--gold)">★ Evaluar</div>
+          </div>`;
+        });
+      } catch (e) { list.innerHTML = `<div style="color:red; text-align:center">${e.message}</div>`; }
     }
 
-    // 3. ABRIR FORMULARIO DE EVALUACIÓN
+    // 3. ABRIR FORMULARIO
     function openRate(id, name) {
       currentAdminId = id;
       showView('viewRate');
       document.getElementById('lblAdmin').innerText = name;
+
+      // Reset Scores a 0 visualmente, pero 1 interno para gráfica inicial
+      scores = { posts:1, activity:1, design:1, originality:1, teamwork:1, comms:1 };
+      resetStars();
       
-      // Reset Scores
-      scores = { posts:0, activity:0, design:0, originality:0, teamwork:0, comms:0 };
-      resetStars(); // Limpia visualmente las estrellas
-      updateChart(); // Dibuja la gráfica vacía o por defecto
+      // Limpiar textarea
+      document.getElementById('feedback').value = '';
+      
+      // Dibujar gráfica inicial (pequeña)
+      updateChart();
     }
 
     // 4. LÓGICA DE ESTRELLAS
     function rate(type, val) {
       scores[type] = val;
-      
+
       // Actualizar UI
       const container = document.getElementById('s_' + type);
       const stars = container.children;
@@ -212,7 +234,6 @@
         if(i < val) stars[i].classList.add('active');
       }
 
-      // Actualizar Gráfica en tiempo real
       updateChart();
       if(tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
     }
@@ -226,31 +247,29 @@
       const btn = document.querySelector('.btn-submit');
       btn.innerText = "Enviando...";
 
-      // Validar que haya votado
-      if(Object.values(scores).some(v => v === 0)) {
-        tg.showAlert("Por favor, califica todas las categorías.");
-        btn.innerText = "Enviar Evaluación";
-        return;
-      }
+      // Validar (opcional, dejamos enviar incompleto si se quiere)
+      
+      const user = tg.initDataUnsafe?.user;
+      
+      try {
+        await apiRequest('admin_ratings', 'POST', {
+          admin_id: currentAdminId, // ID del admin evaluado
+          rated_by: user ? user.id : 0, // ID del evaluador
+          score_posts: scores.posts,
+          score_activity: scores.activity,
+          score_design: scores.design,
+          score_originality: scores.originality,
+          score_teamwork: scores.teamwork,
+          score_comms: scores.comms,
+          feedback_text: document.getElementById('feedback').value
+        });
 
-      const { error } = await supabase.from('admin_ratings').insert({
-        admin_id: currentAdminId,
-        rated_by: tg.initDataUnsafe?.user?.id, // ID de quien evalúa
-        score_posts: scores.posts,
-        score_activity: scores.activity,
-        score_design: scores.design,
-        score_originality: scores.originality,
-        score_teamwork: scores.teamwork,
-        score_comms: scores.comms,
-        feedback_text: document.getElementById('feedback').value
-      });
-
-      if(!error) {
         if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
         tg.showAlert("¡Evaluación guardada correctamente!");
         showView('viewAdmins');
-      } else {
-        alert("Error al guardar: " + error.message);
+
+      } catch (e) {
+        tg.showAlert("Error al guardar: " + e.message);
       }
       btn.innerText = "Enviar Evaluación";
     }
@@ -266,27 +285,33 @@
         scores.comms
       ];
 
-      // Datos dummy para comparación (Promedio del canal)
-      const avgData = [3, 4, 3, 2, 4, 3]; 
+      // Datos de ejemplo para comparación (Promedio ideal)
+      const idealData = [5, 5, 5, 5, 5, 5]; 
 
       const options = {
         series: [
-          { name: 'Tu Evaluación', data: dataValues },
-          { name: 'Promedio Global', data: avgData }
+          { name: 'Evaluación Actual', data: dataValues }
         ],
-        chart: { type: 'radar', height: 250, toolbar:{show:false}, background:'transparent' },
+        chart: { 
+            type: 'radar', 
+            height: 250, 
+            toolbar:{show:false}, 
+            background:'transparent',
+            animations: { enabled: true, easing: 'easeinout', speed: 300 }
+        },
         labels: ['Posts', 'Actividad', 'Diseño', 'Originalidad', 'Equipo', 'Comms'],
-        colors: ['#f59e0b', '#334155'], // Dorado vs Gris
-        stroke: { width: 2, colors: ['#f59e0b', '#475569'] },
-        fill: { opacity: 0.2 },
-        markers: { size: 3 },
+        colors: ['#f59e0b'],
+        stroke: { width: 2, colors: ['#f59e0b'] },
+        fill: { opacity: 0.2, colors: ['#f59e0b'] },
+        markers: { size: 3, colors: ['#f59e0b'], strokeColors: '#fff', strokeWidth: 1 },
         theme: { mode: 'dark' },
-        yaxis: { show: false, max: 5 },
+        yaxis: { show: false, min: 0, max: 5 },
         xaxis: { 
           labels: { 
             style: { 
               colors: ['#94a3b8', '#94a3b8', '#94a3b8', '#94a3b8', '#94a3b8', '#94a3b8'],
-              fontSize: '11px'
+              fontSize: '11px',
+              fontFamily: 'system-ui'
             } 
           } 
         }
@@ -303,7 +328,6 @@
       document.getElementById(id).style.display = 'block';
     }
 
-    // Arrancar
     init();
   </script>
 </body>
