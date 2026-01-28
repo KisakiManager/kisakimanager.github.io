@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>KISAKI DEBUGGER</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>body{background:#000; color:#0f0; font-family:monospace; padding:20px; word-break:break-all;}</style>
+</head>
+<body>
+  <h2>🕵️‍♂️ KISAKI DIAGNÓSTICO</h2>
+  <div id="log">Iniciando...</div>
+
+  <script>
+    // --- PON TUS CLAVES AQUÍ ---
+    const SB_URL = 'https://TU_URL.supabase.co';
+    const SB_KEY = 'TU_ANON_KEY_PUBLICA'; 
+
+    const logDiv = document.getElementById('log');
+    function print(msg) { logDiv.innerHTML += `<br>> ${msg}`; }
+
+    async function runTest() {
+      // 1. Verificar Telegram
+      const tg = window.Telegram.WebApp;
+      const user = tg.initDataUnsafe?.user;
+      
+      print(`1. TELEGRAM: ${user ? 'Detectado ✅' : 'No detectado (Navegador) ⚠️'}`);
+      if(user) print(`   ID Usuario: ${user.id}`);
+      else print(`   Usando ID Fallback...`);
+
+      // 2. Probar conexión Supabase
+      print(`2. CONECTANDO SUPABASE...`);
+      const supabase = window.supabase.createClient(SB_URL, SB_KEY);
+      
+      // 3. Consultar TODO (Sin filtros)
+      print(`3. LEYENDO TABLA 'managed_channels' (RAW)...`);
+      const { data, error } = await supabase.from('managed_channels').select('*');
+
+      if (error) {
+        print(`❌ ERROR SQL: ${error.message}`);
+        print(`   Código: ${error.code}`);
+        return;
+      }
+
+      print(`✅ CONEXIÓN EXITOSA. Resultados encontrados: ${data.length}`);
+      
+      if (data.length === 0) {
+        print(`⚠️ LA TABLA ESTÁ VACÍA. El bot no ha guardado nada aún.`);
+      } else {
+        print(`--- DATOS ENCONTRADOS ---`);
+        data.forEach(row => {
+          print(`📢 Canal: ${row.chat_title}`);
+          print(`   ID Canal: ${row.telegram_chat_id}`);
+          print(`   Dueño (user_id): ${row.user_id}`); // <--- ESTO ES LO QUE IMPORTA
+          
+          // Comparación
+          if (user && row.user_id == user.id) {
+            print(`   ✅ MATCH: Este canal es tuyo.`);
+          } else {
+            print(`   ❌ MISMATCH: Este canal pertenece al ID ${row.user_id}, pero tú eres ${user ? user.id : 'Desconocido'}.`);
+          }
+          print(`-------------------------`);
+        });
+      }
+    }
+
+    runTest();
+  </script>
+</body>
+</html>
