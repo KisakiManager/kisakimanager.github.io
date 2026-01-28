@@ -4,23 +4,19 @@
   <meta charset="UTF-8">
   <title>Admin Panel</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
   <style>
     :root { --bg:#020617; --glass:rgba(30,41,59,0.7); --border:rgba(255,255,255,0.1); --blue:#3b82f6; --text:#f8fafc; }
     body { background:var(--bg); color:var(--text); font-family:system-ui, sans-serif; padding:20px; }
-
+    
     .nav { display:flex; gap:15px; align-items:center; margin-bottom:20px; }
     .btn-back { background:rgba(255,255,255,0.1); border:none; color:white; width:40px; height:40px; border-radius:12px; font-size:1.2em; cursor:pointer; }
-
     .card { background:var(--glass); border:1px solid var(--border); padding:15px; border-radius:16px; margin-bottom:10px; display:flex; align-items:center; gap:15px; cursor:pointer; transition:0.2s; backdrop-filter:blur(10px); }
     .card:active { transform:scale(0.98); background:rgba(59,130,246,0.1); }
-    
     .avatar { width:45px; height:45px; background:#1e293b; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:1.1em; }
     
-    /* Toggle Switch */
     .toggle-row { display:flex; justify-content:space-between; align-items:center; padding:12px; background:rgba(0,0,0,0.2); margin-bottom:8px; border-radius:12px; }
     .switch { position:relative; display:inline-block; width:46px; height:26px; }
     .switch input { opacity:0; width:0; height:0; }
@@ -28,21 +24,19 @@
     .slider:before { position:absolute; content:""; height:20px; width:20px; left:3px; bottom:3px; background-color:white; transition:.4s; border-radius:50%; }
     input:checked + .slider { background-color:var(--blue); }
     input:checked + .slider:before { transform:translateX(20px); }
-
     .btn-action { width:100%; padding:15px; background:var(--blue); color:white; border:none; border-radius:16px; font-weight:bold; font-size:1em; margin-top:20px; cursor:pointer; }
     
-    /* Logs para depuración en pantalla */
-    #debugLog { font-size: 0.7em; color: #facc15; margin-bottom: 10px; font-family: monospace; }
+    #userInfo { font-size: 0.8em; color: #64748b; margin-bottom: 15px; text-align: center; }
   </style>
 </head>
 <body>
 
-  <div id="debugLog">Iniciando sistema...</div>
+  <div id="userInfo">Verificando identidad...</div>
 
   <div id="viewChannels">
     <div class="nav">
       <a href="admin.html" class="btn-back" style="display:flex;align-items:center;justify-content:center;text-decoration:none;">←</a>
-      <h2>Selecciona un Canal</h2>
+      <h2>Mis Canales</h2>
     </div>
     <div id="channelList">Cargando...</div>
   </div>
@@ -69,7 +63,7 @@
   </div>
 
   <script>
-    // --- CREDENCIALES ---
+    // --- TUS CREDENCIALES (No las borres) ---
     const SB_URL = 'https://ndkupidhlauzroduvech.supabase.co'; 
     const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ka3VwaWRobGF1enJvZHV2ZWNoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkwMzY2NzMsImV4cCI6MjA4NDYxMjY3M30.k6OufxTVTfVimTcUjYJUpLursUGjVtiTgq68xauUKG0';
 
@@ -77,38 +71,52 @@
     tg.expand();
     let currentAdmin = null;
 
-    // Función auxiliar para hacer peticiones directas (Igual que debug.html)
+    // API Wrapper directo
     async function apiRequest(endpoint, method = 'GET', body = null) {
       const headers = {
         'apikey': SB_KEY,
         'Authorization': `Bearer ${SB_KEY}`,
         'Content-Type': 'application/json',
-        'Prefer': 'return=representation' // Para recibir respuesta al actualizar
+        'Prefer': 'return=representation'
       };
-
       const options = { method, headers };
       if (body) options.body = JSON.stringify(body);
 
+      // Fetch directo
       const response = await fetch(`${SB_URL}/rest/v1/${endpoint}`, options);
-      if (!response.ok) throw new Error(`Error API: ${response.status} ${response.statusText}`);
+      if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
       return await response.json();
     }
 
-    // 1. CARGAR CANALES
+    // 1. CARGAR CANALES (CON FILTRO DE SEGURIDAD RESTAURADO)
     async function init() {
-      const log = document.getElementById('debugLog');
+      const user = tg.initDataUnsafe?.user;
+      const infoDiv = document.getElementById('userInfo');
       const list = document.getElementById('channelList');
       
-      try {
-        log.innerText = "Conectando a base de datos...";
-        
-        // SIN FILTRO DE ID: Traemos todo para asegurar visualización
-        const channels = await apiRequest('managed_channels?select=*');
-        
-        log.innerText = `Conexión exitosa. Canales: ${channels.length}`;
+      // SEGURIDAD: Si no hay usuario (navegador), bloqueamos.
+      if (!user) {
+        infoDiv.innerText = "Modo: Navegador (Sin acceso)";
+        list.innerHTML = `<div style="text-align:center; padding:20px; color:#f87171;">
+          ⛔ <b>Acceso Denegado</b><br><br>
+          Esta app solo funciona dentro de Telegram para verificar tu identidad.
+        </div>`;
+        return;
+      }
 
+      infoDiv.innerText = `👤 ${user.first_name} (ID: ${user.id})`;
+
+      try {
+        // --- AQUÍ ESTÁ EL FILTRO DE SEGURIDAD ---
+        // Solicitamos canales donde user_id sea IGUAL al ID de Telegram
+        const channels = await apiRequest(`managed_channels?select=*&user_id=eq.${user.id}`);
+        
         if (channels.length === 0) {
-          list.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8">No hay canales sincronizados.</div>';
+          list.innerHTML = `<div style="text-align:center; padding:20px; color:#94a3b8">
+            No tienes canales vinculados.<br><br>
+            <b>Si eres dueño de un canal:</b><br>
+            Añade al bot y escribe <code>/sync</code> en el canal.
+          </div>`;
           return;
         }
 
@@ -122,17 +130,16 @@
               <div style="font-weight:bold;">${c.chat_title}</div>
               <div style="font-size:0.8em; color:#94a3b8;">ID: ${c.telegram_chat_id}</div>
             </div>
-            <div style="color:var(--blue)">Abrir ></div>
+            <div style="color:var(--blue)">Gestionar ></div>
           </div>`;
         });
 
       } catch (e) {
-        log.innerText = "Error Crítico";
-        list.innerHTML = `<div style="color:red; text-align:center">Falló la conexión:<br>${e.message}</div>`;
+        list.innerHTML = `<div style="color:red; text-align:center">Error de conexión:<br>${e.message}</div>`;
       }
     }
 
-    // 2. CARGAR ADMINS
+    // 2. CARGAR ADMINS (Solo del canal seleccionado)
     async function loadAdmins(chatId, title) {
       showView('viewAdmins');
       document.getElementById('lblChannel').innerText = title;
@@ -140,21 +147,17 @@
       list.innerHTML = 'Cargando...';
 
       try {
-        // Petición filtrando por channel_id
         const admins = await apiRequest(`channel_admins?select=*&channel_id=eq.${chatId}`);
 
         if (admins.length === 0) {
-          list.innerHTML = '<div style="padding:20px; text-align:center">No hay admins.</div>';
+          list.innerHTML = '<div style="padding:20px; text-align:center">No hay admins registrados.</div>';
           renderChart([]);
           return;
         }
 
         list.innerHTML = '';
         admins.forEach(a => {
-          // Guardamos el objeto completo en un atributo data para no romper el HTML
-          // Usamos encodeURIComponent para seguridad extra
           const jsonData = encodeURIComponent(JSON.stringify(a));
-          
           list.innerHTML += `
           <div class="card" onclick="preEditAdmin('${jsonData}')">
             <div class="avatar">${(a.first_name||'U')[0]}</div>
@@ -165,7 +168,6 @@
             <div>⚙️</div>
           </div>`;
         });
-
         renderChart(admins);
 
       } catch (e) {
@@ -173,7 +175,6 @@
       }
     }
 
-    // Wrapper para decodificar el JSON seguro
     function preEditAdmin(encodedJson) {
       const admin = JSON.parse(decodeURIComponent(encodedJson));
       editAdmin(admin);
@@ -209,11 +210,10 @@
       });
     }
 
-    // 4. GUARDAR CAMBIOS (PATCH)
+    // 4. GUARDAR CAMBIOS
     async function saveChanges() {
       const btn = document.querySelector('.btn-action');
       btn.innerText = "Guardando...";
-      
       const updates = {};
       ['can_post_messages','can_edit_messages','can_delete_messages','can_restrict_members','can_invite_users','can_change_info'].forEach(k => {
         updates[k] = document.getElementById(k).checked;
@@ -221,15 +221,11 @@
 
       try {
         await apiRequest(`channel_admins?id=eq.${currentAdmin.id}`, 'PATCH', updates);
-        
         if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-        tg.showAlert("Guardado correctamente");
-        
-        // Recargar la lista para ver cambios
+        tg.showAlert("Permisos actualizados.");
         loadAdmins(currentAdmin.channel_id, document.getElementById('lblChannel').innerText);
-        
       } catch (e) {
-        tg.showAlert("Error guardando: " + e.message);
+        tg.showAlert("Error: " + e.message);
       }
       btn.innerText = "Guardar Permisos";
     }
