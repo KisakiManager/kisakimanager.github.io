@@ -4,33 +4,36 @@
   <meta charset="UTF-8">
   <title>Link Manager</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-  
+
   <style>
     /* Estilos idénticos a admin-panel para consistencia */
-    :root { --bg:#020617; --glass:rgba(30,41,59,0.7); --border:rgba(255,255,255,0.1); --green:#10b981; --text:#f8fafc; }
+    :root { --bg:#020617; --glass:rgba(30,41,59,0.7); --border:rgba(255,255,255,0.1); --green:#10b981; --text:#f8fafc; --blue:#3b82f6; }
     body { background:var(--bg); color:var(--text); font-family:system-ui, sans-serif; padding:20px; }
-    
+
     .nav { display:flex; gap:15px; align-items:center; margin-bottom:20px; }
     .btn-back { background:rgba(255,255,255,0.1); border:none; color:white; width:40px; height:40px; border-radius:12px; font-size:1.2em; cursor:pointer; }
 
     .card { background:var(--glass); border:1px solid var(--border); padding:15px; border-radius:16px; margin-bottom:10px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; transition:0.2s; backdrop-filter:blur(10px); }
     .card:active { transform:scale(0.98); background:rgba(16,185,129,0.1); }
-    
+
     .input-group { margin-bottom:15px; }
     .input-group label { display:block; color:#94a3b8; font-size:0.85em; margin-bottom:5px; }
     .input-field { width:100%; background:#0f172a; border:1px solid #334155; padding:12px; border-radius:10px; color:white; outline:none; font-size:1em; }
-    
+
     .fab { position:fixed; bottom:30px; right:30px; width:56px; height:56px; background:var(--green); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.8em; color:white; box-shadow:0 10px 25px rgba(16,185,129,0.3); border:none; cursor:pointer; z-index:100; }
     .fab:active { transform:scale(0.9); }
 
     .btn-create { width:100%; padding:15px; background:var(--green); border:none; border-radius:16px; color:black; font-weight:bold; font-size:1em; margin-top:10px; cursor:pointer; }
+    
+    #userInfo { font-size: 0.8em; color: #64748b; margin-bottom: 15px; text-align: center; }
   </style>
 </head>
 <body>
+
+  <div id="userInfo">Cargando identidad...</div>
 
   <div id="viewChannels">
     <div class="nav">
@@ -45,7 +48,7 @@
       <button class="btn-back" onclick="showView('viewChannels')">←</button>
       <h2 id="lblChannel">Enlaces</h2>
     </div>
-    
+
     <div style="background:var(--glass); border-radius:16px; padding:10px; margin-bottom:20px; border:1px solid var(--border);">
       <h4 style="margin:5px 0 10px 5px; color:#94a3b8;">Rendimiento de Enlaces</h4>
       <div id="trafficChart"></div>
@@ -83,103 +86,120 @@
   </div>
 
   <script>
-    // 1. CONFIGURACIÓN SUPABASE
-    const sbUrl = 'https://ndkupidhlauzroduvech.supabase.co';
-    const sbKey = 'sb_publishable_fSQ9uBUx_YTfxr2QL2-kfQ_pdE2cqHv';
-    const supabase = window.supabase.createClient(sbUrl, sbKey);
-    
+    // --- TUS CREDENCIALES ---
+    const SB_URL = 'https://ndkupidhlauzroduvech.supabase.co'; 
+    const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ka3VwaWRobGF1enJvZHV2ZWNoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkwMzY2NzMsImV4cCI6MjA4NDYxMjY3M30.k6OufxTVTfVimTcUjYJUpLursUGjVtiTgq68xauUKG0';
+
     const tg = window.Telegram.WebApp;
     tg.expand();
 
-    // Estado
+    // Estado Global
     let currentChatId = null; 
     let chartInstance = null;
+
+    // API Wrapper (Conexión Directa)
+    async function apiRequest(endpoint, method = 'GET', body = null) {
+      const headers = {
+        'apikey': SB_KEY,
+        'Authorization': `Bearer ${SB_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      };
+      const options = { method, headers };
+      if (body) options.body = JSON.stringify(body);
+
+      const response = await fetch(`${SB_URL}/rest/v1/${endpoint}`, options);
+      if (!response.ok) throw new Error(`Error API: ${response.status} ${response.statusText}`);
+      return await response.json();
+    }
 
     // --- PASO 1: CARGAR CANALES ---
     async function loadChannels() {
       const user = tg.initDataUnsafe?.user;
-      const userId = user ? user.id : 1298554649; // Fallback
-
-      const { data: channels, error } = await supabase
-        .from('managed_channels')
-        .select('*')
-        .eq('user_id', userId);
-
+      const infoDiv = document.getElementById('userInfo');
       const list = document.getElementById('channelList');
 
-      if (error || !channels || channels.length === 0) {
-        list.innerHTML = `<div style="text-align:center; padding:20px; color:#94a3b8;">
-          No tienes canales gestionados.<br>
-          Añade el bot a un canal y escribe <code>/sync</code>
-        </div>`;
-        return;
+      if (!user) {
+        infoDiv.innerText = "Modo Navegador (Sin ID)";
+        // Para pruebas en navegador, permitimos intentar cargar sin ID
+      } else {
+        infoDiv.innerText = `👤 ${user.first_name} (ID: ${user.id})`;
       }
 
-      list.innerHTML = '';
-      channels.forEach(c => {
-        // Escapar comillas para evitar bugs en el onclick
-        const safeTitle = c.chat_title.replace(/'/g, "\\'");
-        
-        list.innerHTML += `
-        <div class="card" onclick="openChannel(${c.telegram_chat_id}, '${safeTitle}')">
-          <div style="font-weight:bold; font-size:1.1em;">📢 ${c.chat_title}</div>
-          <div style="color:var(--green)">Abrir ></div>
-        </div>`;
-      });
+      try {
+        // --- SIN FILTRO DE ID ---
+        // Traemos todos los canales para asegurar que veas datos
+        const channels = await apiRequest('managed_channels?select=*');
+
+        if (channels.length === 0) {
+          list.innerHTML = `<div style="text-align:center; padding:20px; color:#94a3b8;">
+            No hay canales sincronizados.<br>
+            Añade el bot a un canal y escribe <code>/sync</code>
+          </div>`;
+          return;
+        }
+
+        list.innerHTML = '';
+        channels.forEach(c => {
+          const safeTitle = c.chat_title.replace(/'/g, "\\'");
+          list.innerHTML += `
+          <div class="card" onclick="openChannel(${c.telegram_chat_id}, '${safeTitle}')">
+            <div style="font-weight:bold; font-size:1.1em;">📢 ${c.chat_title}</div>
+            <div style="color:var(--green)">Abrir ></div>
+          </div>`;
+        });
+
+      } catch (e) {
+        list.innerHTML = `<div style="color:red; text-align:center">Error de conexión:<br>${e.message}</div>`;
+      }
     }
 
     // --- PASO 2: ABRIR CANAL Y CARGAR ENLACES ---
     async function openChannel(chatId, title) {
-      currentChatId = chatId; // Guardamos el ID para usarlo al crear
+      currentChatId = chatId;
       document.getElementById('lblChannel').innerText = title;
       showView('viewLinks');
-      
       loadLinks();
     }
 
     async function loadLinks() {
       const list = document.getElementById('linksContainer');
-      list.innerHTML = '<div style="text-align:center; color:#94a3b8">Cargando datos...</div>';
+      list.innerHTML = '<div style="text-align:center; color:#94a3b8">Cargando enlaces...</div>';
 
-      const { data: links, error } = await supabase
-        .from('invite_links')
-        .select('*')
-        .eq('channel_id', currentChatId);
+      try {
+        const links = await apiRequest(`invite_links?select=*&channel_id=eq.${currentChatId}`);
 
-      if (error) {
-        list.innerHTML = `<div style="color:#ef4444">Error: ${error.message}</div>`;
-        return;
+        if (links.length === 0) {
+          list.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8">No hay enlaces creados aún.</div>';
+          renderChart([], []);
+          return;
+        }
+
+        list.innerHTML = '';
+        links.forEach(l => {
+          const typeIcon = l.creates_join_request ? '🔒' : '⚡️';
+          const limitText = l.member_limit > 0 ? `/ ${l.member_limit}` : '';
+
+          list.innerHTML += `
+          <div class="card">
+            <div>
+              <div style="font-weight:bold; font-size:1.1em;">${l.name || 'Sin Etiqueta'}</div>
+              <div style="font-size:0.85em; color:#94a3b8; margin-top:4px;">${typeIcon} Creado por: ${l.creator_id}</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-weight:bold; color:var(--green); font-size:1.2em;">${l.joins || 0}</div>
+              <div style="font-size:0.7em; color:#94a3b8;">UNIONES${limitText}</div>
+            </div>
+          </div>`;
+        });
+
+        const series = links.map(l => l.joins);
+        const labels = links.map(l => l.name || 'Link');
+        renderChart(series, labels);
+
+      } catch (e) {
+        list.innerHTML = `<div style="color:#ef4444">Error: ${e.message}</div>`;
       }
-
-      if (!links || links.length === 0) {
-        list.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8">No hay enlaces creados aún.</div>';
-        renderChart([], []);
-        return;
-      }
-
-      // Render Lista
-      list.innerHTML = '';
-      links.forEach(l => {
-        const typeIcon = l.creates_join_request ? '🔒' : '⚡️';
-        const limitText = l.member_limit > 0 ? `/ ${l.member_limit}` : '';
-        
-        list.innerHTML += `
-        <div class="card">
-          <div>
-            <div style="font-weight:bold; font-size:1.1em;">${l.name || 'Sin Etiqueta'}</div>
-            <div style="font-size:0.85em; color:#94a3b8; margin-top:4px;">${typeIcon} Creado por: ${l.creator_id}</div>
-          </div>
-          <div style="text-align:right;">
-            <div style="font-weight:bold; color:var(--green); font-size:1.2em;">${l.joins}</div>
-            <div style="font-size:0.7em; color:#94a3b8;">UNIONES${limitText}</div>
-          </div>
-        </div>`;
-      });
-
-      // Render Gráfica Real
-      const series = links.map(l => l.joins);
-      const labels = links.map(l => l.name || 'Link');
-      renderChart(series, labels);
     }
 
     // --- PASO 3: CREAR ENLACE ---
@@ -188,43 +208,39 @@
       btn.innerText = "Procesando...";
 
       const name = document.getElementById('lnkName').value;
-      const type = document.getElementById('lnkType').value === 'approve'; // true/false
+      const type = document.getElementById('lnkType').value === 'approve'; 
       const limit = parseInt(document.getElementById('lnkLimit').value) || 0;
-      
       const user = tg.initDataUnsafe?.user;
 
-      // Insertar en Supabase
-      const { error } = await supabase.from('invite_links').insert({
-        channel_id: currentChatId, // ID Real del canal seleccionado
-        name: name,
-        creates_join_request: type,
-        member_limit: limit,
-        creator_id: user ? user.id : 0,
-        joins: 0 // Inicia en 0
-      });
+      try {
+        await apiRequest('invite_links', 'POST', {
+          channel_id: currentChatId,
+          name: name,
+          creates_join_request: type,
+          member_limit: limit,
+          creator_id: user ? user.id : 0,
+          joins: 0
+        });
 
-      if (error) {
-        tg.showAlert("Error: " + error.message);
-        btn.innerText = "Error ❌";
-      } else {
         if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
         tg.showAlert("Solicitud enviada. El bot creará el enlace en Telegram.");
-        
-        // Volver y recargar
+
+        // Reset
         showView('viewLinks');
         loadLinks(); 
-        btn.innerText = "Generar Enlace";
-        
-        // Limpiar inputs
         document.getElementById('lnkName').value = '';
         document.getElementById('lnkLimit').value = '0';
+
+      } catch (e) {
+        tg.showAlert("Error: " + e.message);
       }
+      btn.innerText = "Generar Enlace";
     }
 
     // --- UTILIDADES ---
     function renderChart(series, labels) {
       if(chartInstance) chartInstance.destroy();
-      
+
       const options = {
         series: [{ name: 'Uniones', data: series }],
         chart: { type: 'bar', height: 150, toolbar:{show:false}, background:'transparent' },
@@ -235,7 +251,7 @@
         theme: { mode: 'dark' },
         grid: { show: false }
       };
-      
+
       chartInstance = new ApexCharts(document.querySelector("#trafficChart"), options);
       chartInstance.render();
     }
@@ -245,7 +261,6 @@
       document.getElementById(id).style.display = 'block';
     }
 
-    // Iniciar
     loadChannels();
   </script>
 </body>
