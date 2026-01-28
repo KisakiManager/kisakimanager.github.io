@@ -4,23 +4,23 @@
   <meta charset="UTF-8">
   <title>Admin Panel</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-  
+
   <style>
     :root { --bg:#020617; --glass:rgba(30,41,59,0.7); --border:rgba(255,255,255,0.1); --blue:#3b82f6; --text:#f8fafc; }
     body { background:var(--bg); color:var(--text); font-family:system-ui, sans-serif; padding:20px; }
-    
+
     .nav { display:flex; gap:15px; align-items:center; margin-bottom:20px; }
     .btn-back { background:rgba(255,255,255,0.1); border:none; color:white; width:40px; height:40px; border-radius:12px; font-size:1.2em; cursor:pointer; }
-    
+
     .card { background:var(--glass); border:1px solid var(--border); padding:15px; border-radius:16px; margin-bottom:10px; display:flex; align-items:center; gap:15px; cursor:pointer; transition:0.2s; backdrop-filter:blur(10px); }
     .card:active { transform:scale(0.98); background:rgba(59,130,246,0.1); }
-    
+
     .avatar { width:45px; height:45px; background:#1e293b; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:1.1em; }
-    
+
     /* Toggle Switch iOS Style */
     .toggle-row { display:flex; justify-content:space-between; align-items:center; padding:12px; background:rgba(0,0,0,0.2); margin-bottom:8px; border-radius:12px; }
     .switch { position:relative; display:inline-block; width:46px; height:26px; }
@@ -48,7 +48,7 @@
       <button class="btn-back" onclick="showView('viewChannels')">←</button>
       <h2 id="lblChannel">Admins</h2>
     </div>
-    
+
     <div style="background:var(--glass); border-radius:16px; padding:10px; margin-bottom:20px; border:1px solid var(--border);">
       <h4 style="margin:5px 0 10px 5px; color:#94a3b8;">Posts por Admin</h4>
       <div id="postsChart"></div>
@@ -62,16 +62,16 @@
       <button class="btn-back" onclick="showView('viewAdmins')">←</button>
       <h2 id="lblAdmin">Editar</h2>
     </div>
-    
+
     <div id="permContainer"></div>
     <button class="btn-action" onclick="saveChanges()">Guardar Permisos</button>
   </div>
 
   <script>
-    // --- ⚠️ IMPORTANTE: PON TUS CREDENCIALES REALES AQUÍ ---
-    const sbUrl = 'https://ndkupidhlauzroduvech.supabase.co'; // <--- CAMBIA ESTO
-    const sbKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ka3VwaWRobGF1enJvZHV2ZWNoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkwMzY2NzMsImV4cCI6MjA4NDYxMjY3M30.k6OufxTVTfVimTcUjYJUpLursUGjVtiTgq68xauUKG0'; // <--- CAMBIA ESTO
-    
+    // --- TUS CREDENCIALES ---
+    const sbUrl = 'https://ndkupidhlauzroduvech.supabase.co'; 
+    const sbKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ka3VwaWRobGF1enJvZHV2ZWNoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkwMzY2NzMsImV4cCI6MjA4NDYxMjY3M30.k6OufxTVTfVimTcUjYJUpLursUGjVtiTgq68xauUKG0'; 
+
     // Inicialización segura
     let supabase;
     try {
@@ -85,42 +85,44 @@
 
     let currentAdmin = null;
 
-    // 1. CARGAR CANALES
+    // 1. CARGAR CANALES (MODIFICADO PARA MOSTRAR TODO)
     async function init() {
       const user = tg.initDataUnsafe?.user;
-      // IMPORTANTE: Si estás probando en navegador, usa un ID que SEPAS que tiene canales en la DB
       const userId = user ? user.id : 1298554649; 
-
-      console.log("Buscando canales para usuario:", userId);
 
       const list = document.getElementById('channelList');
       
+      // MODO DEBUG VISUAL: Te dirá quién cree la web que eres
+      list.innerHTML = `<div style="text-align:center; color:#facc15; font-size:0.8em; padding:10px; border:1px dashed #facc15; margin-bottom:10px;">
+        👤 Usuario Detectado: ${user ? user.first_name : 'Navegador/Anónimo'}<br>
+        🆔 ID: ${userId}<br>
+        📡 Buscando canales sin filtro...
+      </div>`;
+
+      // --- CAMBIO: SIN FILTRO DE ID ---
       const { data: channels, error } = await supabase
         .from('managed_channels')
-        .select('*')
-        .eq('user_id', userId);
+        .select('*'); 
+        // .eq('user_id', userId); <--- ESTA LÍNEA SE QUITÓ PARA QUE VEAS LOS DATOS
 
       if(error) {
-        list.innerHTML = `<div style="text-align:center; color:#ef4444; padding:20px;">Error de conexión:<br>${error.message}</div>`;
+        list.innerHTML += `<div style="text-align:center; color:#ef4444; padding:20px;">Error de conexión:<br>${error.message}</div>`;
         return;
       }
 
       if(!channels || channels.length === 0) {
-        list.innerHTML = `<div style="text-align:center; color:#94a3b8; padding:20px;">
-          No se encontraron canales.<br><br>
+        list.innerHTML += `<div style="text-align:center; color:#94a3b8; padding:20px;">
+          No se encontraron canales en la base de datos.<br><br>
           <b>Solución:</b><br>
-          1. Añade al bot a tu canal.<br>
-          2. Hazlo admin.<br>
-          3. Escribe <code>/sync</code> en el canal.
+          1. Asegúrate de que el bot ejecutó /sync y dijo "Éxito".
         </div>`;
         return;
       }
 
-      list.innerHTML = '';
+      // Si hay canales, los mostramos
       channels.forEach(c => {
-        // CORRECCIÓN CLAVE: Escapar comillas en el título para no romper el HTML
         const safeTitle = c.chat_title.replace(/'/g, "\\'");
-        
+
         list.innerHTML += `
         <div class="card" onclick="loadAdmins(${c.telegram_chat_id}, '${safeTitle}')">
           <div class="avatar">📢</div>
@@ -153,7 +155,6 @@
 
       if(!admins || !admins.length) {
         list.innerHTML = '<div style="text-align:center; padding:20px;">⚠️ No hay administradores registrados.<br>Ejecuta /sync en el canal.</div>';
-        // Renderizar gráfica vacía para que no se vea feo
         renderChart([]);
         return;
       }
@@ -161,9 +162,8 @@
       // Render Lista
       list.innerHTML = '';
       admins.forEach(a => {
-        // Convertir objeto a string seguro para pasarlo en onclick
         const adminData = JSON.stringify(a).replace(/"/g, '&quot;');
-        
+
         list.innerHTML += `
         <div class="card" onclick="editAdmin(${adminData})">
           <div class="avatar">${(a.first_name||'U')[0]}</div>
@@ -175,13 +175,11 @@
         </div>`;
       });
 
-      // Render Gráfica Comparativa
       renderChart(admins);
     }
 
     // 3. EDITAR ADMIN
     function editAdmin(admin) {
-      console.log("Editando admin:", admin);
       currentAdmin = admin;
       showView('viewEdit');
       document.getElementById('lblAdmin').innerText = admin.first_name;
@@ -214,10 +212,10 @@
     async function saveChanges() {
       const btn = document.querySelector('.btn-action');
       btn.innerText = "Guardando...";
-      
+
       const updates = {};
       const perms = ['can_post_messages','can_edit_messages','can_delete_messages','can_restrict_members','can_invite_users','can_change_info'];
-      
+
       perms.forEach(k => {
         updates[k] = document.getElementById(k).checked;
       });
@@ -253,7 +251,7 @@
       };
 
       const chartDiv = document.querySelector("#postsChart");
-      chartDiv.innerHTML = ""; // Limpiar gráfica anterior
+      chartDiv.innerHTML = "";
       new ApexCharts(chartDiv, options).render();
     }
 
