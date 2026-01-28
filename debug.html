@@ -1,70 +1,55 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>KISAKI DEBUGGER</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>body{background:#000; color:#0f0; font-family:monospace; padding:20px; word-break:break-all;}</style>
-</head>
-<body>
-  <h2>🕵️‍♂️ KISAKI DIAGNÓSTICO</h2>
-  <div id="log">Iniciando...</div>
+<div id="status" style="padding:20px; font-family:monospace; color:white; background:#111;">
+  Probando conexión...
+</div>
 
-  <script>
-    // --- PON TUS CLAVES AQUÍ ---
-    const SB_URL = 'https://TU_URL.supabase.co';
-    const SB_KEY = 'TU_ANON_KEY_PUBLICA'; 
+<script>
+  // --- TUS DATOS REALES ---
+  const PROJECT_URL = 'https://ndkupidhlauzroduvech.supabase.co'; // Sin barra al final
+  const ANON_KEY = 'PON_AQUI_LA_LLAVE_QUE_EMPIEZA_POR_eyJ...'; 
 
-    const logDiv = document.getElementById('log');
-    function print(msg) { logDiv.innerHTML += `<br>> ${msg}`; }
+  const consoleDiv = document.getElementById('status');
+  function log(msg, color='#0f0') { 
+    consoleDiv.innerHTML += `<br><span style="color:${color}">${msg}</span>`; 
+  }
 
-    async function runTest() {
-      // 1. Verificar Telegram
-      const tg = window.Telegram.WebApp;
-      const user = tg.initDataUnsafe?.user;
-      
-      print(`1. TELEGRAM: ${user ? 'Detectado ✅' : 'No detectado (Navegador) ⚠️'}`);
-      if(user) print(`   ID Usuario: ${user.id}`);
-      else print(`   Usando ID Fallback...`);
-
-      // 2. Probar conexión Supabase
-      print(`2. CONECTANDO SUPABASE...`);
-      const supabase = window.supabase.createClient(SB_URL, SB_KEY);
-      
-      // 3. Consultar TODO (Sin filtros)
-      print(`3. LEYENDO TABLA 'managed_channels' (RAW)...`);
-      const { data, error } = await supabase.from('managed_channels').select('*');
-
-      if (error) {
-        print(`❌ ERROR SQL: ${error.message}`);
-        print(`   Código: ${error.code}`);
-        return;
-      }
-
-      print(`✅ CONEXIÓN EXITOSA. Resultados encontrados: ${data.length}`);
-      
-      if (data.length === 0) {
-        print(`⚠️ LA TABLA ESTÁ VACÍA. El bot no ha guardado nada aún.`);
-      } else {
-        print(`--- DATOS ENCONTRADOS ---`);
-        data.forEach(row => {
-          print(`📢 Canal: ${row.chat_title}`);
-          print(`   ID Canal: ${row.telegram_chat_id}`);
-          print(`   Dueño (user_id): ${row.user_id}`); // <--- ESTO ES LO QUE IMPORTA
-          
-          // Comparación
-          if (user && row.user_id == user.id) {
-            print(`   ✅ MATCH: Este canal es tuyo.`);
-          } else {
-            print(`   ❌ MISMATCH: Este canal pertenece al ID ${row.user_id}, pero tú eres ${user ? user.id : 'Desconocido'}.`);
-          }
-          print(`-------------------------`);
-        });
-      }
+  async function testConnection() {
+    log(`1. Validando configuración...`);
+    
+    if (!ANON_KEY.startsWith('eyJ')) {
+      log(`❌ ERROR FATAL: La llave NO parece ser de Supabase. Debe empezar por 'eyJ'.`, 'red');
+      return;
     }
 
-    runTest();
-  </script>
-</body>
-</html>
+    log(`2. Intentando conexión DIRECTA (Fetch)...`, 'yellow');
+
+    try {
+      // Petición directa REST (sin librería JS) para descartar errores de versión
+      const response = await fetch(`${PROJECT_URL}/rest/v1/managed_channels?select=count`, {
+        method: 'GET',
+        headers: {
+          'apikey': ANON_KEY,
+          'Authorization': `Bearer ${ANON_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        log(`✅ ¡ÉXITO! Conexión establecida.`, '#4ade80');
+        const data = await response.json();
+        log(`   Respuesta del servidor: ${JSON.stringify(data)}`);
+        log(`👉 Si ves esto, tus credenciales son CORRECTAS. El problema anterior era cómo abrías el archivo.`);
+      } else {
+        log(`❌ Error del Servidor: ${response.status} ${response.statusText}`, 'red');
+        const errorDetail = await response.text();
+        log(`   Detalle: ${errorDetail}`, 'orange');
+      }
+
+    } catch (err) {
+      log(`❌ FALLO DE RED (Failed to fetch)`, 'red');
+      log(`   Causa probable: Estás abriendo el archivo localmente (file://) o no tienes internet.`, 'white');
+      log(`   Error técnico: ${err.message}`, 'gray');
+    }
+  }
+
+  testConnection();
+</script>
