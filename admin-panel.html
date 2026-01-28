@@ -6,7 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
   <style>
@@ -18,10 +17,10 @@
 
     .card { background:var(--glass); border:1px solid var(--border); padding:15px; border-radius:16px; margin-bottom:10px; display:flex; align-items:center; gap:15px; cursor:pointer; transition:0.2s; backdrop-filter:blur(10px); }
     .card:active { transform:scale(0.98); background:rgba(59,130,246,0.1); }
-
+    
     .avatar { width:45px; height:45px; background:#1e293b; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:1.1em; }
-
-    /* Toggle Switch iOS Style */
+    
+    /* Toggle Switch */
     .toggle-row { display:flex; justify-content:space-between; align-items:center; padding:12px; background:rgba(0,0,0,0.2); margin-bottom:8px; border-radius:12px; }
     .switch { position:relative; display:inline-block; width:46px; height:26px; }
     .switch input { opacity:0; width:0; height:0; }
@@ -31,16 +30,21 @@
     input:checked + .slider:before { transform:translateX(20px); }
 
     .btn-action { width:100%; padding:15px; background:var(--blue); color:white; border:none; border-radius:16px; font-weight:bold; font-size:1em; margin-top:20px; cursor:pointer; }
+    
+    /* Logs para depuración en pantalla */
+    #debugLog { font-size: 0.7em; color: #facc15; margin-bottom: 10px; font-family: monospace; }
   </style>
 </head>
 <body>
+
+  <div id="debugLog">Iniciando sistema...</div>
 
   <div id="viewChannels">
     <div class="nav">
       <a href="admin.html" class="btn-back" style="display:flex;align-items:center;justify-content:center;text-decoration:none;">←</a>
       <h2>Selecciona un Canal</h2>
     </div>
-    <div id="channelList">Cargando canales...</div>
+    <div id="channelList">Cargando...</div>
   </div>
 
   <div id="viewAdmins" style="display:none;">
@@ -48,12 +52,10 @@
       <button class="btn-back" onclick="showView('viewChannels')">←</button>
       <h2 id="lblChannel">Admins</h2>
     </div>
-
     <div style="background:var(--glass); border-radius:16px; padding:10px; margin-bottom:20px; border:1px solid var(--border);">
       <h4 style="margin:5px 0 10px 5px; color:#94a3b8;">Posts por Admin</h4>
       <div id="postsChart"></div>
     </div>
-
     <div id="adminList"></div>
   </div>
 
@@ -62,120 +64,119 @@
       <button class="btn-back" onclick="showView('viewAdmins')">←</button>
       <h2 id="lblAdmin">Editar</h2>
     </div>
-
     <div id="permContainer"></div>
     <button class="btn-action" onclick="saveChanges()">Guardar Permisos</button>
   </div>
 
   <script>
-    // --- TUS CREDENCIALES ---
-    const sbUrl = 'https://ndkupidhlauzroduvech.supabase.co'; 
-    const sbKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ka3VwaWRobGF1enJvZHV2ZWNoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkwMzY2NzMsImV4cCI6MjA4NDYxMjY3M30.k6OufxTVTfVimTcUjYJUpLursUGjVtiTgq68xauUKG0'; 
-
-    // Inicialización segura
-    let supabase;
-    try {
-      supabase = window.supabase.createClient(sbUrl, sbKey);
-    } catch (e) {
-      alert("Error iniciando Supabase. Revisa las credenciales en el código.");
-    }
+    // --- CREDENCIALES ---
+    const SB_URL = 'https://ndkupidhlauzroduvech.supabase.co'; 
+    const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ka3VwaWRobGF1enJvZHV2ZWNoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkwMzY2NzMsImV4cCI6MjA4NDYxMjY3M30.k6OufxTVTfVimTcUjYJUpLursUGjVtiTgq68xauUKG0';
 
     const tg = window.Telegram.WebApp;
     tg.expand();
-
     let currentAdmin = null;
 
-    // 1. CARGAR CANALES (MODIFICADO PARA MOSTRAR TODO)
-    async function init() {
-      const user = tg.initDataUnsafe?.user;
-      const userId = user ? user.id : 1298554649; 
+    // Función auxiliar para hacer peticiones directas (Igual que debug.html)
+    async function apiRequest(endpoint, method = 'GET', body = null) {
+      const headers = {
+        'apikey': SB_KEY,
+        'Authorization': `Bearer ${SB_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation' // Para recibir respuesta al actualizar
+      };
 
-      const list = document.getElementById('channelList');
-      
-      // MODO DEBUG VISUAL: Te dirá quién cree la web que eres
-      list.innerHTML = `<div style="text-align:center; color:#facc15; font-size:0.8em; padding:10px; border:1px dashed #facc15; margin-bottom:10px;">
-        👤 Usuario Detectado: ${user ? user.first_name : 'Navegador/Anónimo'}<br>
-        🆔 ID: ${userId}<br>
-        📡 Buscando canales sin filtro...
-      </div>`;
+      const options = { method, headers };
+      if (body) options.body = JSON.stringify(body);
 
-      // --- CAMBIO: SIN FILTRO DE ID ---
-      const { data: channels, error } = await supabase
-        .from('managed_channels')
-        .select('*'); 
-        // .eq('user_id', userId); <--- ESTA LÍNEA SE QUITÓ PARA QUE VEAS LOS DATOS
-
-      if(error) {
-        list.innerHTML += `<div style="text-align:center; color:#ef4444; padding:20px;">Error de conexión:<br>${error.message}</div>`;
-        return;
-      }
-
-      if(!channels || channels.length === 0) {
-        list.innerHTML += `<div style="text-align:center; color:#94a3b8; padding:20px;">
-          No se encontraron canales en la base de datos.<br><br>
-          <b>Solución:</b><br>
-          1. Asegúrate de que el bot ejecutó /sync y dijo "Éxito".
-        </div>`;
-        return;
-      }
-
-      // Si hay canales, los mostramos
-      channels.forEach(c => {
-        const safeTitle = c.chat_title.replace(/'/g, "\\'");
-
-        list.innerHTML += `
-        <div class="card" onclick="loadAdmins(${c.telegram_chat_id}, '${safeTitle}')">
-          <div class="avatar">📢</div>
-          <div style="flex:1;">
-            <div style="font-weight:bold;">${c.chat_title}</div>
-            <div style="font-size:0.8em; color:#94a3b8;">ID: ${c.telegram_chat_id}</div>
-          </div>
-          <div style="color:var(--blue)">Gestionar ></div>
-        </div>`;
-      });
+      const response = await fetch(`${SB_URL}/rest/v1/${endpoint}`, options);
+      if (!response.ok) throw new Error(`Error API: ${response.status} ${response.statusText}`);
+      return await response.json();
     }
 
-    // 2. CARGAR ADMINS DEL CANAL
+    // 1. CARGAR CANALES
+    async function init() {
+      const log = document.getElementById('debugLog');
+      const list = document.getElementById('channelList');
+      
+      try {
+        log.innerText = "Conectando a base de datos...";
+        
+        // SIN FILTRO DE ID: Traemos todo para asegurar visualización
+        const channels = await apiRequest('managed_channels?select=*');
+        
+        log.innerText = `Conexión exitosa. Canales: ${channels.length}`;
+
+        if (channels.length === 0) {
+          list.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8">No hay canales sincronizados.</div>';
+          return;
+        }
+
+        list.innerHTML = '';
+        channels.forEach(c => {
+          const safeTitle = c.chat_title.replace(/'/g, "\\'");
+          list.innerHTML += `
+          <div class="card" onclick="loadAdmins(${c.telegram_chat_id}, '${safeTitle}')">
+            <div class="avatar">📢</div>
+            <div style="flex:1;">
+              <div style="font-weight:bold;">${c.chat_title}</div>
+              <div style="font-size:0.8em; color:#94a3b8;">ID: ${c.telegram_chat_id}</div>
+            </div>
+            <div style="color:var(--blue)">Abrir ></div>
+          </div>`;
+        });
+
+      } catch (e) {
+        log.innerText = "Error Crítico";
+        list.innerHTML = `<div style="color:red; text-align:center">Falló la conexión:<br>${e.message}</div>`;
+      }
+    }
+
+    // 2. CARGAR ADMINS
     async function loadAdmins(chatId, title) {
-      console.log("Cargando admins para:", chatId);
       showView('viewAdmins');
       document.getElementById('lblChannel').innerText = title;
       const list = document.getElementById('adminList');
-      list.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8;">Consultando base de datos...</div>';
+      list.innerHTML = 'Cargando...';
 
-      const { data: admins, error } = await supabase
-        .from('channel_admins')
-        .select('*')
-        .eq('channel_id', chatId);
+      try {
+        // Petición filtrando por channel_id
+        const admins = await apiRequest(`channel_admins?select=*&channel_id=eq.${chatId}`);
 
-      if (error) {
-        list.innerHTML = `<div style="color:red; text-align:center">Error: ${error.message}</div>`;
-        return;
+        if (admins.length === 0) {
+          list.innerHTML = '<div style="padding:20px; text-align:center">No hay admins.</div>';
+          renderChart([]);
+          return;
+        }
+
+        list.innerHTML = '';
+        admins.forEach(a => {
+          // Guardamos el objeto completo en un atributo data para no romper el HTML
+          // Usamos encodeURIComponent para seguridad extra
+          const jsonData = encodeURIComponent(JSON.stringify(a));
+          
+          list.innerHTML += `
+          <div class="card" onclick="preEditAdmin('${jsonData}')">
+            <div class="avatar">${(a.first_name||'U')[0]}</div>
+            <div style="flex:1;">
+              <div style="font-weight:bold;">${a.first_name}</div>
+              <div style="font-size:0.8em; color:#94a3b8;">${a.role || 'Admin'} • ${a.stats_posts || 0} Posts</div>
+            </div>
+            <div>⚙️</div>
+          </div>`;
+        });
+
+        renderChart(admins);
+
+      } catch (e) {
+        list.innerHTML = `<div style="color:red">Error: ${e.message}</div>`;
       }
+    }
 
-      if(!admins || !admins.length) {
-        list.innerHTML = '<div style="text-align:center; padding:20px;">⚠️ No hay administradores registrados.<br>Ejecuta /sync en el canal.</div>';
-        renderChart([]);
-        return;
-      }
-
-      // Render Lista
-      list.innerHTML = '';
-      admins.forEach(a => {
-        const adminData = JSON.stringify(a).replace(/"/g, '&quot;');
-
-        list.innerHTML += `
-        <div class="card" onclick="editAdmin(${adminData})">
-          <div class="avatar">${(a.first_name||'U')[0]}</div>
-          <div style="flex:1;">
-            <div style="font-weight:bold;">${a.first_name}</div>
-            <div style="font-size:0.8em; color:#94a3b8;">${a.role || 'Admin'} • ${a.stats_posts || 0} Posts</div>
-          </div>
-          <div>⚙️</div>
-        </div>`;
-      });
-
-      renderChart(admins);
+    // Wrapper para decodificar el JSON seguro
+    function preEditAdmin(encodedJson) {
+      const admin = JSON.parse(decodeURIComponent(encodedJson));
+      editAdmin(admin);
     }
 
     // 3. EDITAR ADMIN
@@ -190,7 +191,7 @@
         {k:'can_delete_messages', l:'Borrar Mensajes'},
         {k:'can_restrict_members', l:'Banear Usuarios'},
         {k:'can_invite_users', l:'Añadir Usuarios'},
-        {k:'can_change_info', l:'Cambiar Info del Canal'}
+        {k:'can_change_info', l:'Cambiar Info'}
       ];
 
       const cont = document.getElementById('permContainer');
@@ -208,29 +209,27 @@
       });
     }
 
-    // 4. GUARDAR CAMBIOS
+    // 4. GUARDAR CAMBIOS (PATCH)
     async function saveChanges() {
       const btn = document.querySelector('.btn-action');
       btn.innerText = "Guardando...";
-
+      
       const updates = {};
-      const perms = ['can_post_messages','can_edit_messages','can_delete_messages','can_restrict_members','can_invite_users','can_change_info'];
-
-      perms.forEach(k => {
+      ['can_post_messages','can_edit_messages','can_delete_messages','can_restrict_members','can_invite_users','can_change_info'].forEach(k => {
         updates[k] = document.getElementById(k).checked;
       });
 
-      const { error } = await supabase
-        .from('channel_admins')
-        .update(updates)
-        .eq('id', currentAdmin.id);
-
-      if(!error) {
+      try {
+        await apiRequest(`channel_admins?id=eq.${currentAdmin.id}`, 'PATCH', updates);
+        
         if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-        tg.showAlert("Permisos guardados correctamente.");
-        showView('viewAdmins');
-      } else {
-        tg.showAlert("Error: " + error.message);
+        tg.showAlert("Guardado correctamente");
+        
+        // Recargar la lista para ver cambios
+        loadAdmins(currentAdmin.channel_id, document.getElementById('lblChannel').innerText);
+        
+      } catch (e) {
+        tg.showAlert("Error guardando: " + e.message);
       }
       btn.innerText = "Guardar Permisos";
     }
@@ -260,7 +259,6 @@
       document.getElementById(id).style.display = 'block';
     }
 
-    // Iniciar al cargar
     init();
   </script>
 </body>
