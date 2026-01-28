@@ -27,7 +27,7 @@
     .fab:active { transform:scale(0.9); }
 
     .btn-create { width:100%; padding:15px; background:var(--green); border:none; border-radius:16px; color:black; font-weight:bold; font-size:1em; margin-top:10px; cursor:pointer; }
-    
+
     #userInfo { font-size: 0.8em; color: #64748b; margin-bottom: 15px; text-align: center; }
   </style>
 </head>
@@ -109,7 +109,11 @@
       if (body) options.body = JSON.stringify(body);
 
       const response = await fetch(`${SB_URL}/rest/v1/${endpoint}`, options);
-      if (!response.ok) throw new Error(`Error API: ${response.status} ${response.statusText}`);
+      if (!response.ok) {
+        // Intentar leer el error detallado del servidor
+        const errorText = await response.text();
+        throw new Error(`Error API: ${response.status} - ${errorText}`);
+      }
       return await response.json();
     }
 
@@ -121,14 +125,13 @@
 
       if (!user) {
         infoDiv.innerText = "Modo Navegador (Sin ID)";
-        // Para pruebas en navegador, permitimos intentar cargar sin ID
       } else {
         infoDiv.innerText = `👤 ${user.first_name} (ID: ${user.id})`;
       }
 
       try {
-        // --- SIN FILTRO DE ID ---
-        // Traemos todos los canales para asegurar que veas datos
+        // Usamos el mismo método que en admin-panel.html
+        // Si necesitas filtrar por seguridad, descomenta el filtro de user_id en el futuro
         const channels = await apiRequest('managed_channels?select=*');
 
         if (channels.length === 0) {
@@ -202,7 +205,7 @@
       }
     }
 
-    // --- PASO 3: CREAR ENLACE ---
+    // --- PASO 3: CREAR ENLACE (CORREGIDO) ---
     async function createLink() {
       const btn = document.querySelector('.btn-create');
       btn.innerText = "Procesando...";
@@ -213,13 +216,15 @@
       const user = tg.initDataUnsafe?.user;
 
       try {
+        // CORRECCIÓN: Enviamos 'invite_link' como texto pendiente para evitar Error 400
         await apiRequest('invite_links', 'POST', {
           channel_id: currentChatId,
           name: name,
           creates_join_request: type,
           member_limit: limit,
           creator_id: user ? user.id : 0,
-          joins: 0
+          joins: 0,
+          invite_link: "PENDING_GENERATION" // <--- CRUCIAL PARA EVITAR ERROR 400
         });
 
         if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
