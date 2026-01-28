@@ -4,15 +4,13 @@
   <meta charset="UTF-8">
   <title>Kisaki Analytics V5.0</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
   <style>
     /* --- ESTILOS GENERALES --- */
-    body { background-color: #0b1120; color: #e2e8f0; font-family: sans-serif; padding-bottom: 80px; }
+    body { background-color: #0b1120; color: #e2e8f0; font-family: sans-serif; padding-bottom: 80px; margin: 0; }
     .dashboard-header { padding: 20px; background: linear-gradient(to bottom, #1e293b, transparent); border-bottom: 1px solid rgba(255,255,255,0.05); }
 
     .channel-select {
@@ -31,54 +29,31 @@
     .chart-box { margin: 15px; padding: 15px; background: #162032; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); }
     .ai-box { margin: 15px; padding: 15px; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.3); border-radius: 12px; font-size: 0.9em; line-height: 1.4; color: #cbd5e1; }
 
-    /* --- NUEVO: ESTILOS CALENDARIO (Spline Dark Replica) --- */
+    /* --- ESTILOS CALENDARIO (Spline Dark Replica) --- */
     .calendar-container {
       margin: 15px;
       padding: 20px;
-      background: #162032; /* Fondo oscuro igual a las gráficas */
+      background: #162032; 
       border-radius: 20px;
       border: 1px solid rgba(255,255,255,0.05);
       box-shadow: 0 10px 30px rgba(0,0,0,0.3);
     }
-
-    .cal-header {
-      display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
-    }
+    .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
     .cal-title { font-weight: 600; font-size: 1.1em; color: white; }
-    
-    .cal-badge {
-      background: #1e293b; padding: 5px 12px; border-radius: 10px; 
-      font-size: 0.85em; color: #94a3b8; border: 1px solid #334155;
-    }
-
-    .cal-grid {
-      display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center;
-    }
-    
-    .cal-day-name {
-      font-size: 0.75em; color: #64748b; font-weight: bold; margin-bottom: 5px;
-    }
-    
-    .cal-day {
-      height: 36px; width: 100%; display: flex; align-items: center; justify-content: center;
-      border-radius: 10px; font-size: 0.9em; color: #cbd5e1; 
-      transition: background 0.2s;
-    }
-    
-    .cal-day.active {
-      background: #3b82f6; /* Azul brillante (Estilo de la imagen) */
-      color: white; font-weight: bold;
-      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
-    }
-
+    .cal-badge { background: #1e293b; padding: 5px 12px; border-radius: 10px; font-size: 0.85em; color: #94a3b8; border: 1px solid #334155; }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; }
+    .cal-day-name { font-size: 0.75em; color: #64748b; font-weight: bold; margin-bottom: 5px; }
+    .cal-day { height: 36px; width: 100%; display: flex; align-items: center; justify-content: center; border-radius: 10px; font-size: 0.9em; color: #cbd5e1; transition: background 0.2s; }
+    .cal-day.active { background: #3b82f6; color: white; font-weight: bold; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4); }
     .cal-day:hover:not(.active):not(.empty) { background: rgba(255,255,255,0.05); }
     .cal-day.empty { pointer-events: none; }
-
-    /* Botones decorativos del calendario */
     .cal-actions { display: flex; gap: 10px; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; }
     .btn-cal { flex: 1; padding: 10px; border-radius: 10px; border: none; font-size: 0.85em; cursor: pointer; font-weight: 600;}
     .btn-cal-primary { background: #3b82f6; color: white; }
     .btn-cal-secondary { background: transparent; color: #94a3b8; }
+    
+    /* Botón flotante para volver */
+    .fab-back { position: fixed; top: 20px; right: 20px; color: white; text-decoration: none; font-size: 1.5em; z-index: 100; }
   </style>
 </head>
 <body>
@@ -86,7 +61,7 @@
   <div class="dashboard-header">
     <div style="display:flex; justify-content:space-between; align-items:center;">
       <h2 style="margin:0;">Estadísticas</h2>
-      <a href="index.html" style="color:white; text-decoration:none; font-size:1.2em;">✕</a>
+      <a href="admin.html" class="fab-back">✕</a>
     </div>
 
     <div id="appStatus">Iniciando sistema...</div>
@@ -126,9 +101,8 @@
       <div class="cal-title">Calendario</div>
       <div class="cal-badge" id="currentMonthYear">Cargando...</div>
     </div>
-    
-    <div class="cal-grid" id="calendarGrid">
-      </div>
+
+    <div class="cal-grid" id="calendarGrid"></div>
 
     <div class="cal-actions">
       <button class="btn-cal btn-cal-primary">Ver Reporte</button>
@@ -137,58 +111,70 @@
   </div>
 
   <script>
-    // Función segura para actualizar estado en pantalla
+    // --- CREDENCIALES (Las Correctas / Igual que Admin Panel) ---
+    const SB_URL = 'https://ndkupidhlauzroduvech.supabase.co'; 
+    const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ka3VwaWRobGF1enJvZHV2ZWNoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkwMzY2NzMsImV4cCI6MjA4NDYxMjY3M30.k6OufxTVTfVimTcUjYJUpLursUGjVtiTgq68xauUKG0';
+
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+
+    // Función segura para actualizar estado
     const statusEl = document.getElementById('appStatus');
     function setStatus(msg, color = '#94a3b8') {
         statusEl.innerHTML = msg;
         statusEl.style.color = color;
     }
 
+    // API WRAPPER (El secreto del éxito)
+    async function apiRequest(endpoint) {
+      const headers = { 
+        'apikey': SB_KEY, 
+        'Authorization': `Bearer ${SB_KEY}`, 
+        'Content-Type': 'application/json' 
+      };
+      const response = await fetch(`${SB_URL}/rest/v1/${endpoint}`, { method: 'GET', headers });
+      if (!response.ok) throw new Error(await response.text());
+      return await response.json();
+    }
+
     async function init() {
       try {
-        setStatus("🚀 Cargando librerías...");
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-
-        // 0. INICIAR CALENDARIO (Independiente)
+        setStatus("🚀 Iniciando...");
         initCalendar();
 
-        // 1. CREDENCIALES
-        const SUPABASE_URL = 'https://ndkupidhlauzroduvech.supabase.co'; 
-        const SUPABASE_KEY = 'sb_publishable_fSQ9uBUx_YTfxr2QL2-kfQ_pdE2cqHv'; 
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        // 2. OBTENER ID USUARIO
+        // 1. DETECTAR USUARIO
         const user = tg.initDataUnsafe?.user;
-        const USER_ID = user ? user.id : 1298554649; 
+        
+        // Si no hay usuario (Navegador), no podemos filtrar por seguridad.
+        if (!user) {
+            setStatus("⚠️ Modo Navegador (Sin ID)");
+        } else {
+            setStatus(`👤 ID: ${user.id}`);
+        }
 
-        setStatus(`👤 Usuario ID: ${USER_ID}`);
-
-        // 3. CARGAR CANALES
+        // 2. CARGAR CANALES (Conexión Directa)
         setStatus("📡 Buscando canales...");
         const select = document.getElementById('channelSelector');
 
-        const { data: channels, error } = await supabase
-            .from('managed_channels')
-            .select('*')
-            .eq('user_id', USER_ID);
-
-        if (error) {
-            throw new Error(`Error DB: ${error.message}`);
+        // Aquí usamos user_id si existe, si no traemos todo (para debug)
+        let query = 'managed_channels?select=*';
+        if (user) {
+            query += `&user_id=eq.${user.id}`;
         }
 
+        const channels = await apiRequest(query);
+
         if (!channels || channels.length === 0) {
-            setStatus("⚠️ No tienes canales vinculados", "#f87171");
+            setStatus("⚠️ No hay canales vinculados", "#f87171");
             select.innerHTML = '<option>Sin canales</option>';
             document.getElementById('aiText').innerText = "Añade al bot como admin a un canal para empezar.";
             return;
         }
 
-        // 4. POBLAR SELECTOR
+        // 3. POBLAR SELECTOR
         setStatus(`✅ ${channels.length} canales encontrados`, "#4ade80");
-        select.innerHTML = ''; // Limpiar "Cargando..."
+        select.innerHTML = ''; 
 
-        // Opción por defecto
         const defaultOpt = document.createElement('option');
         defaultOpt.text = "👇 Selecciona un canal";
         defaultOpt.value = "";
@@ -201,71 +187,46 @@
             select.appendChild(opt);
         });
 
-        // 5. CARGAR EL PRIMERO AUTOMÁTICAMENTE
+        // 4. CARGAR EL PRIMERO AUTOMÁTICAMENTE
         if(channels.length > 0) {
-           select.value = channels[0].telegram_chat_id; // Forzar selección visual
+           select.value = channels[0].telegram_chat_id; 
            loadStats(channels[0].telegram_chat_id);
         }
 
       } catch (e) {
-        setStatus(`❌ ERROR CRÍTICO: ${e.message}`, "#ef4444");
-        alert("Error: " + e.message); // Alerta visual para ti
+        setStatus(`❌ ERROR: ${e.message}`, "#ef4444");
       }
     }
 
-    // --- LÓGICA DEL CALENDARIO (SIN INTERFERIR) ---
+    // --- LÓGICA DEL CALENDARIO (Visual) ---
     function initCalendar() {
         const date = new Date();
         const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-        const currentMonth = date.getMonth();
-        const currentYear = date.getFullYear();
-        
-        // Actualizar título
-        document.getElementById('currentMonthYear').innerText = `${monthNames[currentMonth]} ${currentYear}`;
-        
+        document.getElementById('currentMonthYear').innerText = `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
+
         const grid = document.getElementById('calendarGrid');
-        grid.innerHTML = ''; // Limpiar
+        grid.innerHTML = '';
+        ["DO", "LU", "MA", "MI", "JU", "VI", "SA"].forEach(d => grid.innerHTML += `<div class="cal-day-name">${d}</div>`);
 
-        // Nombres de días
-        const days = ["DO", "LU", "MA", "MI", "JU", "VI", "SA"];
-        days.forEach(d => {
-            grid.innerHTML += `<div class="cal-day-name">${d}</div>`;
-        });
+        const firstDayIndex = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+        const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
 
-        // Calcular días
-        const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
-        const lastDay = new Date(currentYear, currentMonth + 1, 0).getDate();
-
-        // Días vacíos previos
-        for (let i = 0; i < firstDayIndex; i++) {
-            grid.innerHTML += `<div class="cal-day empty"></div>`;
-        }
-
-        // Días reales
+        for (let i = 0; i < firstDayIndex; i++) grid.innerHTML += `<div class="cal-day empty"></div>`;
         for (let i = 1; i <= lastDay; i++) {
             let className = "cal-day";
-            if (i === date.getDate()) {
-                className += " active"; // Hoy
-            }
+            if (i === date.getDate()) className += " active";
             grid.innerHTML += `<div class="${className}">${i}</div>`;
         }
     }
 
+    // --- CARGAR ESTADÍSTICAS ---
     async function loadStats(chatId) {
         if(!chatId) return;
-        setStatus("🔄 Cargando estadísticas...");
+        setStatus("🔄 Cargando datos...");
 
         try {
-            const supabase = window.supabase.createClient('https://ndkupidhlauzroduvech.supabase.co', 'sb_publishable_fSQ9uBUx_YTfxr2QL2-kfQ_pdE2cqHv');
-
-            const { data: stats, error } = await supabase
-                .from('daily_channel_stats')
-                .select('*')
-                .eq('channel_id', chatId)
-                .order('recorded_at', { ascending: true })
-                .limit(14);
-
-            if(error) throw error;
+            // Consulta: Últimos 14 días ordenados por fecha
+            const stats = await apiRequest(`daily_channel_stats?select=*&channel_id=eq.${chatId}&order=recorded_at.asc&limit=14`);
 
             if (!stats || stats.length === 0) {
                 setStatus("ℹ️ Sin datos recientes", "#facc15");
@@ -273,7 +234,7 @@
                 return;
             }
 
-            setStatus("✅ Estadísticas actualizadas", "#4ade80");
+            setStatus("✅ Datos actualizados", "#4ade80");
             updateUI(stats);
 
         } catch (e) {
@@ -282,7 +243,7 @@
     }
 
     function updateUI(stats) {
-        const latest = stats[stats.length - 1];
+        const latest = stats[stats.length - 1]; // El último día registrado
 
         document.getElementById('kpiSubs').innerText = latest.total_subs.toLocaleString();
         document.getElementById('joined').innerText = latest.joined_today || 0;
@@ -295,7 +256,6 @@
 
         document.getElementById('netGrowth').innerText = net >= 0 ? "▲ Creciendo" : "▼ Decreciendo";
 
-        // IA Texto
         let iaMsg = "📊 Flujo estable.";
         if(net > 0) iaMsg = `🚀 <b>Bien hecho:</b> +${net} usuarios hoy.`;
         if(net < 0) iaMsg = `⚠️ <b>Atención:</b> -${Math.abs(net)} usuarios hoy.`;
@@ -306,7 +266,7 @@
 
     function updateUIEmpty() {
         document.getElementById('kpiSubs').innerText = "0";
-        document.getElementById('aiText').innerText = "El bot está conectado pero aún no hay actividad hoy.";
+        document.getElementById('aiText').innerText = "El bot está conectado pero aún no hay actividad registrada.";
         document.getElementById('growthChart').innerHTML = "<div style='text-align:center; padding:20px; color:#64748b'>Esperando datos...</div>";
     }
 
